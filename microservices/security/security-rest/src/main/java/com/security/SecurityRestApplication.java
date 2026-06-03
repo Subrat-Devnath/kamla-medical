@@ -5,13 +5,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.ComponentScan;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.security", "com.user.mgmt.client"})
 @EnableEurekaClient
-@ComponentScan(basePackages = {"com.security", "com.user.mgmt.client"})
 public class SecurityRestApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SecurityRestApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SecurityRestApplication.class, args);
+    }
 
 }

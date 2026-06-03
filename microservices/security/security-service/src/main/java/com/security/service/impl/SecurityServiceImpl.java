@@ -1,22 +1,20 @@
 package com.security.service.impl;
 
+import com.common.service.dtos.LoginRequest;
 import com.security.client.dtos.LoginResponse;
+import com.security.config.service.JwtService;
 import com.security.config.service.impl.CookieServiceImpl;
 import com.security.repository.RefreshTokenRepository;
 import com.security.repository.entity.RefreshTokenEntity;
+import com.security.service.SecurityService;
+import com.user.mgmt.client.UserClient;
+import com.user.mgmt.client.dtos.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.common.service.dtos.LoginRequest;
-import com.security.config.service.JwtService;
-import com.security.service.SecurityService;
-import com.user.mgmt.client.UserClient;
-import com.user.mgmt.client.dtos.UserDTO;
-
 import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
-import java.util.Map;
 import java.util.UUID;
 
 @Service

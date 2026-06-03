@@ -2,8 +2,11 @@ package com.security.repository.entity;
 
 import lombok.Builder;
 import lombok.Data;
-import javax.persistence.*;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.UUID;
 
 @Builder
