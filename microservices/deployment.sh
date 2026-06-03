@@ -24,6 +24,12 @@ NC='\033[0m' # No Color
 #echo -e "${BLUE}🚀 Starting all containers...${NC}"
 #docker compose -f docker-compose.yml up -d
 
+echo "${RED}Stopping containers...${NC}"
+docker compose down
+
+echo "${YELLOW}Removing old containers...${NC}"
+docker container prune -f
+
 
 echo -e "${GREEN}🚀 Starting Deployment${NC}"
 
