@@ -105,4 +105,4 @@ eureka:
     secret: bXlTdXBlclNlY3VyZUhTNTEyS2V5VGhhdElzQXRMZWFzdDY0Qnl0ZXNMb25nRm9yU2VjdXJlSldUVG9rZW5TaWduaW5nMTIzNDU2
     access-ttl-seconds: 36000
     refresh-ttl-seconds: 86400
-    issuer: saurabh.com
+    issuer: kamlamedical.com

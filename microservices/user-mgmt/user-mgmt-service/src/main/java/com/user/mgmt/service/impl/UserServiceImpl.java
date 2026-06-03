@@ -395,11 +395,11 @@ public class UserServiceImpl implements UserService {
                 "<h1 style='color: #0066cc;'>" + otp + "</h1>" +
                 "<p>This OTP is valid for 3 minutes.</p>" +
                 "<p>If you did not request this, please ignore this email.</p>" +
-                "<p>Best regards,<br>Saurabh Medical Team</p>" +
+                "<p>Best regards,<br>Kamla Medical Team</p>" +
                 "</body></html>"
         );
         notificationDTO.setHtml(true);
-        notificationDTO.setFrom("noreply@saurabh-medical.com");
+        notificationDTO.setFrom("noreply@kamla-medical.com");
 
         emailClient.sendEmailWithAttachment(notificationDTO);
     }

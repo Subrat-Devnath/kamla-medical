@@ -55,7 +55,7 @@ security:
     refresh-ttl-seconds: 86400
     # Issuer of the JWT token (who created the token)
     # Used for validation and tracking
-    issuer: saurabh.com
+    issuer: kamlamedical.com
     # Cookie name where access token will be stored in browser
     access-token-cookie-name: accessToken
     # Cookie name where refresh token will be stored
