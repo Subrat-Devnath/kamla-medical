@@ -1,13 +1,14 @@
 package com.security.repository.dao;
 
 import com.security.repository.entity.RefreshTokenEntity;
-import org.springframework.data.cassandra.repository.CassandraRepository;
-import org.springframework.data.cassandra.repository.Query;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.UUID;
 
-public interface RefreshTokenDAO extends CassandraRepository<RefreshTokenEntity, UUID> {
+public interface RefreshTokenDAO extends JpaRepository<RefreshTokenEntity, UUID> {
 
-    @Query("select * from refresh_token where token_id = ?0")
-    RefreshTokenEntity getRefreshToken(UUID tokenId);
+    @Query("SELECT r FROM RefreshTokenEntity r WHERE r.tokenId = :tokenId")
+    RefreshTokenEntity getRefreshToken(@Param("tokenId") UUID tokenId);
 }

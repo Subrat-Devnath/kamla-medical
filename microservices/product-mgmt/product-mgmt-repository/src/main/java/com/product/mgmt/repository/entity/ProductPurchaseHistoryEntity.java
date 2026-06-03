@@ -1,78 +1,81 @@
 package com.product.mgmt.repository.entity;
 
 import lombok.Data;
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
-import org.springframework.data.cassandra.core.mapping.Table;
 
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 
+
+@Table(name = "product_purchase_history")
+@Entity
 @Data
-@Table("product_purchase_history")
 public class ProductPurchaseHistoryEntity implements Serializable {
 
-    @PrimaryKey
+    @EmbeddedId
     private ProductPurchaseHistoryEntityId productPurchaseHistoryEntityId;
 
-    @Column("unit_list_price")
+    @Column(name = "unit_list_price")
     private Double unitListPrice;
 
-    @Column("total_list_price")
+    @Column(name = "total_list_price")
     private Double totalListPrice;
 
-    @Column("unit_buy_price")
+    @Column(name = "unit_buy_price")
     private Double unitBuyPrice;
 
-    @Column("total_buy_price")
+    @Column(name = "total_buy_price")
     private Double totalBuyPrice;
 
-    @Column("buy_discount")
+    @Column(name = "buy_discount")
     private Double unitBuyDiscount;
 
-    @Column("unit_sell_price")
+    @Column(name = "unit_sell_price")
     private Double unitSellPrice;
 
-    @Column("total_sell_price")
+    @Column(name = "total_sell_price")
     private Double totalSellPrice;
 
-    @Column("sell_discount")
+    @Column(name = "sell_discount")
     private Double unitSellDiscount;
 
-    @Column("purchased_quantity")
+    @Column(name = "purchased_quantity")
     private Long purchasedQuantity;
 
-    @Column("remaining_quantity")
+    @Column(name = "remaining_quantity")
     private Long remainingQuantity;
 
-    @Column("sold_quantity")
+    @Column(name = "sold_quantity")
     private Long soldQuantity;
 
     /// --------- Base entity fields ---------
-    @Column("is_deleted")
+    @Column(name = "is_deleted")
     private boolean isDeleted;
 
-    @Column("expiry_date")
+    @Column(name = "expiry_date")
     private Long expiryDate;
 
-    @Column("is_expired")
+    @Column(name = "is_expired")
     private boolean isExpired;
 
-    @Column("created_date")
+    @Column(name = "created_date")
     private Long createdDate;
 
-    @Column("created_user_id")
+    @Column(name = "created_user_id", length = 255)
     private String createdUserId;
 
-    @Column("created_user_name")
+    @Column(name = "created_user_name", length = 255)
     private String createdUserName;
 
-    @Column("updated_date")
+    @Column(name = "updated_date")
     private Long updatedDate;
 
-    @Column("updated_user_id")
+    @Column(name = "updated_user_id", length = 255)
     private String updatedUserId;
 
-    @Column("updated_user_name")
+    @Column(name = "updated_user_name", length = 255)
     private String updatedUserName;
 }

@@ -1,27 +1,25 @@
 package com.product.mgmt.repository.entity;
 
 import lombok.Data;
-import org.springframework.data.cassandra.core.cql.Ordering;
-import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
-import org.springframework.data.cassandra.core.mapping.PrimaryKeyClass;
-import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
 import java.io.Serializable;
 
 @Data
-@PrimaryKeyClass
+@Embeddable
 public class ProductPurchaseHistoryEntityId implements Serializable {
 
-    @PrimaryKeyColumn(name = "organization_id", type = PrimaryKeyType.PARTITIONED)
+    @Column(name = "organization_id", nullable = false, length = 255)
     private String organizationId;
 
-    @PrimaryKeyColumn(name = "product_name", type = PrimaryKeyType.PARTITIONED)
+    @Column(name = "product_name", nullable = false, length = 255)
     private String productName;
 
-    @PrimaryKeyColumn(name = "supplier_name", ordinal = 0, ordering = Ordering.DESCENDING, type = PrimaryKeyType.CLUSTERED)
+    @Column(name = "supplier_name", nullable = false, length = 255)
     private String supplierName;
 
-    @PrimaryKeyColumn(name = "purchase_date", ordinal = 1, ordering = Ordering.DESCENDING, type = PrimaryKeyType.CLUSTERED)
+    @Column(name = "purchase_date", nullable = false)
     private Long purchaseDate;
 }
 

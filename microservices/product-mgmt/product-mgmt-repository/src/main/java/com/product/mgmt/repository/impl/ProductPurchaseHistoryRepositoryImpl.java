@@ -16,10 +16,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Repository
-public class ProductPurchaceHistoryRepositoryImpl implements ProductPurchaseHistoryRepository {
+public class ProductPurchaseHistoryRepositoryImpl implements ProductPurchaseHistoryRepository {
 
     @Autowired
-    private ProductPurchaseHistoryDAO productPurchaceHistoryDAO;
+    private ProductPurchaseHistoryDAO productPurchaseHistoryDAO;
 
     @Override
     public List<ProductPurchaseHistoryDTO> getProductPurchaseHistory(String productName) {
@@ -28,7 +28,7 @@ public class ProductPurchaceHistoryRepositoryImpl implements ProductPurchaseHist
             return List.of();
         }
 
-        List<ProductPurchaseHistoryEntity> productPrices = productPurchaceHistoryDAO.getProductPrices(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), productName.toUpperCase());
+        List<ProductPurchaseHistoryEntity> productPrices = productPurchaseHistoryDAO.getProductPrices(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), productName.toUpperCase());
 
         if (CollectionUtils.isEmpty(productPrices)) {
             return List.of();
@@ -39,7 +39,7 @@ public class ProductPurchaceHistoryRepositoryImpl implements ProductPurchaseHist
 
     @Override
     public List<ProductPurchaseHistoryDTO> getProductQuantities(List<String> productNames) {
-        List<ProductPurchaseHistoryEntity> productPrices = productPurchaceHistoryDAO.getProductQuantities(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), productNames);
+        List<ProductPurchaseHistoryEntity> productPrices = productPurchaseHistoryDAO.getProductQuantities(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), productNames);
 
         if (CollectionUtils.isEmpty(productPrices)) {
             return List.of();
@@ -48,3 +48,5 @@ public class ProductPurchaceHistoryRepositoryImpl implements ProductPurchaseHist
         return productPrices.stream().filter(entity -> !entity.isDeleted()).map(entity -> ObjectBuilder.buildDtoFromEntity(entity, entity.getProductPurchaseHistoryEntityId(), ProductPurchaseHistoryDTO.class)).collect(Collectors.toList());
     }
 }
+
+

@@ -7,15 +7,16 @@ spring:
   application:
     name: product-mgmt
 
-  data:
-    cassandra:
-      contact-points: ${CASSANDRA_CONTACTPOINTS}
-      port: 9042
-      keyspace-name: ${CASSANDRA_KEYSPACE}
-      local-datacenter: ${CASSANDRA_LOCALDATACENTER}
-      username: ${CASSANDRA_USER}
-      password: ${CASSANDRA_PASSWORD}
-      schema-action: create_if_not_exists
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  jpa:
+    hibernate.ddl-auto: update
+    generate-ddl: true
+    show-sql: true
 
 eureka:
   client:

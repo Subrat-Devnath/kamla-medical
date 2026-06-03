@@ -12,14 +12,13 @@ import com.product.mgmt.repository.entity.ProductPurchaseHistoryEntity;
 import com.product.mgmt.repository.entity.ProductPurchaseHistoryEntityId;
 import com.security.config.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.cassandra.core.query.CassandraPageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -132,21 +131,24 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
     @Override
     public ProductPageResponse getProductsByOrganizationId(String organizationId, Integer pageSize, String pageState) {
 
-        CassandraPageRequest pageRequest = (!StringUtils.hasLength(pageState) ? CassandraPageRequest.first(pageSize) : CassandraPageRequest.of(
-                PageRequest.of(0, pageSize),
-                ByteBuffer.wrap(
-                        Base64.getDecoder().decode(pageState)
-                )));
+        // Parse pageNumber from pageState (if null, default to 0)
+        int pageNumber = 0;
+        if (StringUtils.hasLength(pageState)) {
+            try {
+                pageNumber = Integer.parseInt(pageState);
+            } catch (NumberFormatException e) {
+                pageNumber = 0;
+            }
+        }
 
-        Slice<ProductEntity> allProducts = productDao.findByProductEntityIdOrganizationId(organizationId, pageRequest);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<ProductEntity> allProducts = productDao.findByProductEntityIdOrganizationId(organizationId, pageable);
 
         ProductPageResponse response = new ProductPageResponse();
 
         if (allProducts == null || !allProducts.hasContent()) {
-
             response.setProducts(Collections.emptyList());
             response.setHasNext(false);
-
             return response;
         }
 
@@ -163,29 +165,14 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
 
         response.setProducts(products);
 
-        // Next page not present
+        // Check if next page exists
         if (!allProducts.hasNext()) {
             response.setHasNext(false);
             return response;
         }
 
-        CassandraPageRequest nextPageable =
-                (CassandraPageRequest) allProducts.nextPageable();
-
-        ByteBuffer nextPagingState =
-                nextPageable.getPagingState();
-
-        if (nextPagingState == null) {
-            response.setHasNext(false);
-            return response;
-        }
-
-        byte[] bytes = new byte[nextPagingState.remaining()];
-
-        nextPagingState.duplicate().get(bytes);
-
-        response.setNextPageState(Base64.getEncoder().encodeToString(bytes));
-
+        // Set next page state as the next page number
+        response.setNextPageState(String.valueOf(pageNumber + 1));
         response.setHasNext(true);
 
         return response;
@@ -201,13 +188,18 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
         String start = productName.toUpperCase();
         String end = start + Character.MAX_VALUE;
 
-        CassandraPageRequest pageRequest = (!StringUtils.hasLength(pageState) ? CassandraPageRequest.first(pageSize) : CassandraPageRequest.of(
-                PageRequest.of(0, pageSize),
-                ByteBuffer.wrap(
-                        Base64.getDecoder().decode(pageState)
-                )));
+        // Parse pageNumber from pageState (if null, default to 0)
+        int pageNumber = 0;
+        if (StringUtils.hasLength(pageState)) {
+            try {
+                pageNumber = Integer.parseInt(pageState);
+            } catch (NumberFormatException e) {
+                pageNumber = 0;
+            }
+        }
 
-        Slice<ProductEntity> searchResults = productDao.searchProductsWithPagination(organizationId, start, end, pageRequest);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<ProductEntity> searchResults = productDao.searchProductsWithPagination(organizationId, start, end, pageable);
 
         ProductPageResponse response = new ProductPageResponse();
 
@@ -230,29 +222,14 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
 
         response.setProducts(products);
 
-        // Next page not present
+        // Check if next page exists
         if (!searchResults.hasNext()) {
             response.setHasNext(false);
             return response;
         }
 
-        CassandraPageRequest nextPageable =
-                (CassandraPageRequest) searchResults.nextPageable();
-
-        ByteBuffer nextPagingState =
-                nextPageable.getPagingState();
-
-        if (nextPagingState == null) {
-            response.setHasNext(false);
-            return response;
-        }
-
-        byte[] bytes = new byte[nextPagingState.remaining()];
-
-        nextPagingState.duplicate().get(bytes);
-
-        response.setNextPageState(Base64.getEncoder().encodeToString(bytes));
-
+        // Set next page state as the next page number
+        response.setNextPageState(String.valueOf(pageNumber + 1));
         response.setHasNext(true);
 
         return response;

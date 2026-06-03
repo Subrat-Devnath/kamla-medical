@@ -1,44 +1,43 @@
-CREATE TABLE product_purchase_history
-(
+-- MySQL Migration for Product Purchase History Table
+-- This replaces the Cassandra product_purchase_history table with MySQL equivalent
 
-    organization_id    text,
-    product_name       text,
-    supplier_name      text,
-    purchase_date      bigint,
+CREATE TABLE IF NOT EXISTS `product_purchase_history` (
+    `organization_id` VARCHAR(255) NOT NULL,
+    `product_name` VARCHAR(255) NOT NULL,
+    `supplier_name` VARCHAR(255) NOT NULL,
+    `purchase_date` BIGINT NOT NULL,
 
-    unit_list_price    double,
-    total_list_price   double,
+    `unit_list_price` DOUBLE,
+    `total_list_price` DOUBLE,
 
-    unit_buy_price     double,
-    total_buy_price    double,
+    `unit_buy_price` DOUBLE,
+    `total_buy_price` DOUBLE,
 
-    buy_discount       double,
+    `buy_discount` DOUBLE,
 
-    unit_sell_price    double,
-    total_sell_price   double,
+    `unit_sell_price` DOUBLE,
+    `total_sell_price` DOUBLE,
 
-    sell_discount      double,
+    `sell_discount` DOUBLE,
 
-    purchased_quantity bigint,
-    remaining_quantity bigint,
-    sold_quantity      bigint,
+    `purchased_quantity` BIGINT,
+    `remaining_quantity` BIGINT,
+    `sold_quantity` BIGINT,
 
-    is_deleted         boolean,
+    `is_deleted` BOOLEAN DEFAULT FALSE,
+    `expiry_date` BIGINT,
+    `is_expired` BOOLEAN DEFAULT FALSE,
 
-    expiry_date        bigint,
-    is_expired         boolean,
+    `created_date` BIGINT NOT NULL,
+    `created_user_id` VARCHAR(255),
+    `created_user_name` VARCHAR(255),
 
-    created_date       bigint,
-    created_user_id    text,
-    created_user_name  text,
+    `updated_date` BIGINT,
+    `updated_user_id` VARCHAR(255),
+    `updated_user_name` VARCHAR(255),
 
-    updated_date       bigint,
-    updated_user_id    text,
-    updated_user_name  text,
-
-    PRIMARY KEY (
-        (organization_id, product_name),
-         supplier_name,
-         purchase_date
-        )
-);
+    PRIMARY KEY (`organization_id`, `product_name`, `supplier_name`, `purchase_date`),
+    INDEX idx_org_product (`organization_id`, `product_name`),
+    INDEX idx_purchase_date (`purchase_date`),
+    INDEX idx_is_deleted (`is_deleted`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

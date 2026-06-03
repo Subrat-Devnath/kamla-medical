@@ -8,13 +8,20 @@ spring:
   application:
     name: product-mgmt
 
-  data:
-    cassandra:
-      contact-points: localhost
-      port: 9042
-      keyspace-name: main_db
-      local-datacenter: datacenter1
-      schema-action: none
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    #(For local laptop)
+    url: jdbc:mysql://localhost:3307/main_db
+    #(for point mysql in host machine (laptop) host.docker.internal)
+    #url: jdbc:mysql://host.docker.internal:3307/microservice
+    username: root
+    password: root
+
+  jpa:
+    hibernate.ddl-auto: update
+    generate-ddl: true
+    show-sql: true
+
 
 eureka:
   client:
@@ -72,4 +79,4 @@ security:
     # Domain for which cookie is valid
     # 'localhost' works for local dev, in prod use your actual domain (e.g., example.com)
     cookie-domain: localhost
-  
+

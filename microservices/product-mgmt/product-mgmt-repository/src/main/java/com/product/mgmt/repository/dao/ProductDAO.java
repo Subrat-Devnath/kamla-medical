@@ -1,29 +1,30 @@
 package com.product.mgmt.repository.dao;
 
-import java.util.List;
-
-import org.springframework.data.cassandra.core.query.CassandraPageRequest;
-import org.springframework.data.cassandra.repository.CassandraRepository;
-import org.springframework.data.cassandra.repository.Query;
-
 import com.product.mgmt.repository.entity.ProductEntity;
 import com.product.mgmt.repository.entity.ProductEntityId;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-public interface ProductDAO extends CassandraRepository<ProductEntity, ProductEntityId> {
+import java.util.List;
 
-    @Query("select * from product where organization_id = ?0 and product_name = ?1")
-    ProductEntity getProduct(String organizationID, String productName);
+@Repository
+public interface ProductDAO extends JpaRepository<ProductEntity, ProductEntityId> {
 
-    @Query("SELECT * FROM product WHERE organization_id = ?0 AND product_name >= ?1 AND product_name < ?2")
-    List<ProductEntity> searchProducts(String organizationId, String start, String end);
+    @Query("SELECT p FROM ProductEntity p WHERE p.productEntityId.organizationId = :organizationId AND p.productEntityId.productName = :productName")
+    ProductEntity getProduct(@Param("organizationId") String organizationID, @Param("productName") String productName);
 
-    Slice<ProductEntity> findByProductEntityIdOrganizationId(String organizationId, CassandraPageRequest pageRequest);
+    @Query("SELECT p FROM ProductEntity p WHERE p.productEntityId.organizationId = :organizationId AND p.productEntityId.productName >= :start AND p.productEntityId.productName < :end")
+    List<ProductEntity> searchProducts(@Param("organizationId") String organizationId, @Param("start") String start, @Param("end") String end);
 
-    @Query("SELECT * FROM product WHERE organization_id = ?0 AND product_name >= ?1 AND product_name < ?2")
-    Slice<ProductEntity> searchProductsWithPagination(String organizationId, String start, String end, CassandraPageRequest cassandraPageRequest);
+    Page<ProductEntity> findByProductEntityIdOrganizationId(String organizationId, Pageable pageable);
 
-    @Query("select product_quantity from product where organization_id = ?0 and product_name = ?1")
-    Long getProductQuantity(String organizationId, String productName);
+    @Query("SELECT p FROM ProductEntity p WHERE p.productEntityId.organizationId = :organizationId AND p.productEntityId.productName >= :start AND p.productEntityId.productName < :end")
+    Page<ProductEntity> searchProductsWithPagination(@Param("organizationId") String organizationId, @Param("start") String start, @Param("end") String end, Pageable pageable);
+
+    @Query("SELECT p.productQuantity FROM ProductEntity p WHERE p.productEntityId.organizationId = :organizationId AND p.productEntityId.productName = :productName")
+    Long getProductQuantity(@Param("organizationId") String organizationId, @Param("productName") String productName);
 }

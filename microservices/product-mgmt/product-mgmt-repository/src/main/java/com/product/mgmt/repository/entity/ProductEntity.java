@@ -1,49 +1,52 @@
 package com.product.mgmt.repository.entity;
 
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
-import org.springframework.data.cassandra.core.mapping.Table;
 
 import lombok.Data;
 
-@Table("product")
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+@Table(name = "product")
+@Entity
 @Data
 public class ProductEntity {
 
-    @PrimaryKey
+    @EmbeddedId
     private ProductEntityId productEntityId;
 
-    @Column("category")
+    @Column(name = "category", length = 255)
     private String category;
 
-    @Column("product_quantity")
+    @Column(name = "product_quantity")
     private Long productQuantity;
 
     /// --------- Base entity fields ---------
-    @Column("is_deleted")
+    @Column(name = "is_deleted")
     private boolean isDeleted;
 
-    @Column("expiry_date")
+    @Column(name = "expiry_date")
     private Long expiryDate;
 
-    @Column("is_expired")
+    @Column(name = "is_expired")
     private boolean isExpired;
 
-    @Column("created_date")
+    @Column(name = "created_date")
     private Long createdDate;
 
-    @Column("created_user_id")
+    @Column(name = "created_user_id", length = 255)
     private String createdUserId;
 
-    @Column("created_user_name")
+    @Column(name = "created_user_name", length = 255)
     private String createdUserName;
 
-    @Column("updated_date")
+    @Column(name = "updated_date")
     private Long updatedDate;
 
-    @Column("updated_user_id")
+    @Column(name = "updated_user_id", length = 255)
     private String updatedUserId;
 
-    @Column("updated_user_name")
+    @Column(name = "updated_user_name", length = 255)
     private String updatedUserName;
 }
