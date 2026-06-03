@@ -1,0 +1,108 @@
+server:
+  port: 8079
+
+spring:
+  application:
+    name: api-gateway
+    
+  cloud:
+    gateway:
+      routes:
+
+        ###---------- user --------------
+
+        - id: user-mgmt-public-api
+          uri: lb://user-mgmt
+          predicates:
+            - Path=/user-mgmt/api/v1/validate/user,/user-mgmt/api/v1/register-normal-user,/user-mgmt/api/v1/reset-password-with-otp,/user-mgmt/api/v1/send-forgot-password-otp,/user-mgmt/api/v1/verify-otp
+          filters:
+            - PreserveHostHeader
+
+        ###---------- USER AUTH --------------
+
+        - id: user-mgmt-authenticated
+          uri: lb://user-mgmt
+          predicates:
+            - Path=/user-mgmt/api/v1/**
+          filters:
+            - GlobalAuthHeaderFilter
+            - PreserveHostHeader
+
+        ###---------- PRODUCT --------------
+
+        - id: product-mgmt-authenticated
+          uri: lb://product-mgmt
+          predicates:
+            - Path=/product-mgmt/api/v1/**
+          filters:
+            - GlobalAuthHeaderFilter
+            - PreserveHostHeader
+
+        ###---------- SECURITY PUBLIC --------------
+
+        - id: security-public-api
+          uri: lb://security
+          predicates:
+            - Path=/security/api/v1/login
+          filters:
+            - PreserveHostHeader
+
+        ###---------- SECURITY AUTH --------------
+
+        - id: security-authenticated
+          uri: lb://security
+          predicates:
+            - Path=/security/api/v1/**
+          filters:
+            - GlobalAuthHeaderFilter
+            - PreserveHostHeader
+
+        ###---------- EMAIL PUBLIC --------------
+
+        - id: email-public-api
+          uri: lb://email
+          predicates:
+            - Path=/email/api/v1/send-email
+          filters:
+            - PreserveHostHeader
+
+        ###---------- EMAIL AUTH --------------
+
+        - id: email-authenticated
+          uri: lb://email
+          predicates:
+            - Path=/email/api/v1/**
+          filters:
+            - GlobalAuthHeaderFilter
+            - PreserveHostHeader
+
+## For frontend development, allow CORS from localhost:5173 (Vite dev server)
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
+
+eureka:
+  client:
+    register-with-eureka: true       # register to eureka
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/ 
+      #defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}    
+    
+  ## ----------- SECURITY PROPERTIES -------
+  jwt:
+    secret: bXlTdXBlclNlY3VyZUhTNTEyS2V5VGhhdElzQXRMZWFzdDY0Qnl0ZXNMb25nRm9yU2VjdXJlSldUVG9rZW5TaWduaW5nMTIzNDU2
+    access-ttl-seconds: 36000
+    refresh-ttl-seconds: 86400
+    issuer: saurabh.com

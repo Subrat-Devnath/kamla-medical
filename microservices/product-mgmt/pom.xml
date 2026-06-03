@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>subrat-code-base</groupId>
+		<artifactId>microservices</artifactId>
+		<version>1.0</version>
+	</parent>
+
+	<artifactId>product-mgmt</artifactId>
+	<name>product-mgmt</name>
+	<description>Project for manage products</description>
+	<packaging>pom</packaging>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>subrat-code-base</groupId>
+			<artifactId>common-service</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>subrat-code-base</groupId>
+			<artifactId>security-config</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+	</dependencies>
+
+	<modules>
+		<module>product-mgmt-rest</module>
+		<module>product-mgmt-client</module>
+		<module>product-mgmt-service</module>
+		<module>product-mgmt-repository</module>
+	</modules>
+
+
+</project>

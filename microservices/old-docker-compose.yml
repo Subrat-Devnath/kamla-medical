@@ -1,0 +1,202 @@
+services:
+
+##-----------my sql inbuild ---------------
+
+##------ docker exec -it mysql-container mysql -u root -p rootpassword
+  mysql:
+    image: mysql:8
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_USER: root  #--- use root user and rootpassword for connect mysql
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: main_db
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: appuserpassword
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 10
+      timeout: 5s
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - microservices-net
+    
+###---------- cassandra inbuild -----------------
+
+##--------- docker exec -it cassandra-container cqlsh -u cassandra -p cassandra -
+
+  cassandra:
+    image: cassandra:4.1
+    container_name: cassandra-container
+    environment:
+      CASSANDRA_KEYSPACE: main_db
+      CASSANDRA_AUTHENTICATOR: PasswordAuthenticator
+      CASSANDRA_RACK: RAC1
+      CASSANDRA_DC: datacenter1
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 10s
+      retries: 10
+      timeout: 10s
+    networks:
+      - microservices-net
+      
+##----------- service configuration --------------------
+
+  service-registry:
+    build: ./service-registry
+    container_name: service-registry-container
+    ports:
+      - "8761:8761"
+    environment:
+       SERVICE_NAME: service-registry
+       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+    networks:
+      - microservices-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  product-mgmt:
+    build: ./product-mgmt
+    container_name: product-mgmt-container
+    ports:
+      - "8082:8082"
+    depends_on:
+      service-registry:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
+    environment:
+      CASSANDRA_CONTACTPOINTS: cassandra
+      CASSANDRA_KEYSPACE: main_db
+      CASSANDRA_LOCALDATACENTER: datacenter1
+      CASSANDRA_USER: cassandra
+      CASSANDRA_PASSWORD: cassandra
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+      SPRING_PROFILES_ACTIVE: prod
+    networks:
+      - microservices-net
+
+
+  user-mgmt:
+    build: ./user-mgmt
+    container_name: user-mgmt-container
+    ports:
+      - "8081:8081"
+    depends_on:
+      service-registry:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_URL: jdbc:mysql://mysql:3306/main_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      MYSQL_USERNAME: appuser
+      MYSQL_PASSWORD: appuserpassword
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+      SPRING_PROFILES_ACTIVE: prod
+    networks:
+      - microservices-net
+
+
+  security:
+    build: ./security
+    container_name: security-container
+    ports:
+      - "8084:8084"
+    depends_on:
+      service-registry:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
+    environment:
+      MYSQL_URL: jdbc:mysql://mysql:3306/main_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      MYSQL_USERNAME: appuser
+      MYSQL_PASSWORD: appuserpassword
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+      SPRING_PROFILES_ACTIVE: prod
+      CASSANDRA_CONTACTPOINTS: cassandra
+      CASSANDRA_KEYSPACE: main_db
+      CASSANDRA_LOCALDATACENTER: datacenter1
+      CASSANDRA_USER: cassandra
+      CASSANDRA_PASSWORD: cassandra
+      JWT_COOKIE_DOMAIN: localhost
+    networks:
+      - microservices-net
+
+  email:
+    build: ./email
+    container_name: email-container
+    ports:
+      - "8085:8085"
+    depends_on:
+      service-registry:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+    networks:
+      - microservices-net
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway-container
+    ports:
+      - "8079:8079"
+    depends_on:
+      service-registry:
+        condition: service_healthy
+      user-mgmt:
+        condition: service_started
+      product-mgmt:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+    networks:
+      - microservices-net
+
+
+  frontend:
+    build:
+      context: ../frontend
+      args:
+        VITE_API_BASE_URL: ""
+    container_name: frontend-container
+    depends_on:
+      - api-gateway
+    networks:
+      - microservices-net
+
+  nginx:
+    build: ./nginx
+    container_name: nginx-container
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - api-gateway
+    networks:
+      - microservices-net
+
+volumes:
+  mysql_data:
+  cassandra_data:
+
+networks:
+  microservices-net:
+    driver: bridge

@@ -1,0 +1,75 @@
+server:
+  port: 8084
+
+  servlet:
+    context-path: /security
+    
+spring:
+  application:
+    name: security
+
+  data:
+    cassandra:
+      contact-points: localhost
+      port: 9042
+      keyspace-name: main_db
+      local-datacenter: datacenter1
+      schema-action: none
+
+eureka:
+  client:
+    register-with-eureka: true       # register to eureka
+    fetch-registry: true    
+    service-url:
+      defaultZone: http://localhost:8761/eureka/ 
+      #defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}   
+
+##--------- fien properties ---------
+
+user:
+  contextPath: "/user-mgmt"
+  url: "http://127.0.0.1:8081"
+
+product:
+  contextPath: "/product-mgmt"
+  url: "http://127.0.0.1:8082"
+
+
+email:
+  contextPath: "/email"
+  url: "http://127.0.0.1:8085"
+
+security:
+  contextPath: "/security"
+  url: "http://127.0.0.1:8084"
+
+## ----------- SECURITY PROPERTIES -------
+  jwt:
+    # Secret key used to sign JWT tokens (Base64 encoded string recommended)
+    # Must be strong & long (at least 256-bit for HS256, 512-bit for HS512)
+    secret: bXlTdXBlclNlY3VyZUhTNTEyS2V5VGhhdElzQXRMZWFzdDY0Qnl0ZXNMb25nRm9yU2VjdXJlSldUVG9rZW5TaWduaW5nMTIzNDU2
+    # Access token validity time (in seconds)
+    # 36000 sec = 10 hours
+    access-ttl-seconds: 36000
+    # Refresh token validity time (in seconds)
+    # 86400 sec = 24 hours
+    refresh-ttl-seconds: 86400
+    # Issuer of the JWT token (who created the token)
+    # Used for validation and tracking
+    issuer: saurabh.com
+    # Cookie name where access token will be stored in browser
+    access-token-cookie-name: accessToken
+    # Cookie name where refresh token will be stored
+    refresh-token-cookie-name: refreshToken
+    # If true → cookie will only be sent over HTTPS (recommended for production)
+    cookie-secure: true
+    # If true → cookie cannot be accessed via JavaScript (protects from XSS attacks)
+    cookie-http-only: true
+    # SameSite policy for cookies:
+    # lax → allows cookies in same-site + top-level navigation
+    # strict → only same-site
+    # none → cross-site allowed (requires secure=true)
+    cookie-same-site: lax
+    # Domain for which cookie is valid
+    # 'localhost' works for local dev, in prod use your actual domain (e.g., example.com)
+    cookie-domain: localhost

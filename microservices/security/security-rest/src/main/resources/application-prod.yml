@@ -1,0 +1,59 @@
+server:
+  port: 8084
+
+  servlet:
+    context-path: /security
+    
+spring:
+  application:
+    name: security
+
+  data:
+    cassandra:
+      contact-points: ${CASSANDRA_CONTACTPOINTS}
+      port: 9042
+      keyspace-name: ${CASSANDRA_KEYSPACE}
+      local-datacenter: ${CASSANDRA_LOCALDATACENTER}
+      username: ${CASSANDRA_USER}
+      password: ${CASSANDRA_PASSWORD}
+      schema-action: create_if_not_exists
+
+eureka:
+  client:
+    register-with-eureka: true       # register to eureka
+    fetch-registry: true    
+    service-url:
+      defaultZone: http://localhost:8761/eureka/ 
+      #defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}   
+
+##--------- fien properties ---------
+
+user:
+  contextPath: "/user-mgmt"
+  url: "http://user-mgmt:8081"
+
+product:
+  contextPath: "/product-mgmt"
+  url: "http://product-mgmt:8082"
+
+email:
+  contextPath: "/email"
+  url: "http://email:8085"
+
+security:
+  contextPath: "/security"
+  url: "http://security:8084"
+
+## ----------- SECURITY PROPERTIES -------
+  jwt: 
+    secret: bXlTdXBlclNlY3VyZUhTNTEyS2V5VGhhdElzQXRMZWFzdDY0Qnl0ZXNMb25nRm9yU2VjdXJlSldUVG9rZW5TaWduaW5nMTIzNDU2
+    access-ttl-seconds: 36000 
+    refresh-ttl-seconds: 86400
+    issuer: kamlamedical.com
+    access-token-cookie-name: accessToken
+    refresh-token-cookie-name: refreshToken
+    cookie-secure: true
+    cookie-http-only: true
+    cookie-same-site: lax
+    cookie-domain: ${JWT_COOKIE_DOMAIN}
+  
