@@ -216,21 +216,23 @@ function ForgotPassword() {
                     {/* STEP 1 */}
                     {step === 1 && (
                         <form onSubmit={handleSendOtp} className="space-y-5">
-                            <input
-                                type="email"
-                                placeholder="Enter Email"
-                                value={emailId}
-                                onChange={(e) => setEmailId(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10"
-                            />
 
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition"
+                            <div className="relative">
+                                <input type="email" placeholder="Enter Email Address" value={emailId} onChange={(e) => setEmailId(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
+                                />
+                            </div>
+
+                            <button type="submit" disabled={loading}
+                                className=" w-full bg-cyan-600 hover:bg-cyan-700 transition py-4 rounded-2xl font-semibold disabled:opacity-60  disabled:cursor-not-allowed "
                             >
-                                {loading ? <Loader2 className="animate-spin mx-auto" /> : "Send OTP"}
+                                {loading ? (
+                                    <Loader2 className="animate-spin mx-auto" />
+                                ) : (
+                                    "Send OTP"
+                                )}
                             </button>
+
                         </form>
                     )}
 
