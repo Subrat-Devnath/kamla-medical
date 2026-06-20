@@ -1,6 +1,8 @@
 package com.security.config.service.impl;
 
 import com.security.config.authentication.JWTAuthenticationFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +30,8 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
+
+    private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
 
     @Autowired
     private JWTAuthenticationFilter jwtAuthenticationFilter;
@@ -91,7 +95,9 @@ public class WebSecurityConfig extends SecurityConfigurerAdapter<DefaultSecurity
 
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "https://kamlamedical.com",
+                "https://www.kamlamedical.com"
         ));
 
         configuration.setAllowedMethods(Arrays.asList(

@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.security.config.service.JwtService;
@@ -44,9 +45,10 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        logger.info("Incoming request: method={}, uri={}, Content-Type={}", method, uri, contentType);
+        logger.info("Incoming request: method: {}, uri: {}, Content-Type: {}", method, uri, contentType);
 
-        if (header == null) {
+        if (!StringUtils.hasText(header)) {
+            logger.error("Header is null or empty");
             filterChain.doFilter(request, response);
             return;
         }

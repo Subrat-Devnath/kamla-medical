@@ -5,4 +5,4 @@ JAR_NAME="$1"
 
 echo "Attempting to run JAR: ${JAR_NAME}"
 
-java -jar "$JAR_NAME"
+java -Xms32m -Xmx96m -XX:MaxMetaspaceSize=64m -XX:+UseSerialGC -jar "$JAR_NAME"

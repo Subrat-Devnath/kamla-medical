@@ -1,6 +1,8 @@
 server:
   port: 8079
-  
+  ### ---- added below configuration to fix the 403 error when using Spring Cloud Gateway with Spring Security ----
+  forward-headers-strategy: framework
+
 spring:
   application:
     name: api-gateway
