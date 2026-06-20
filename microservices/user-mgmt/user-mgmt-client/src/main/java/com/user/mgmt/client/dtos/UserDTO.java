@@ -12,6 +12,8 @@ public class UserDTO implements Serializable {
     // fixed constant name to match serialization convention
     private static final long serialVersionUID = 1984390565274472623L;
 
+    private String companyName;
+
     private String id;
 
     private String name;
@@ -27,6 +29,8 @@ public class UserDTO implements Serializable {
     private String passwordSecret;
 
     private boolean isActive;
+
+    private boolean isDeleted;
 
     private int retryCount;
 

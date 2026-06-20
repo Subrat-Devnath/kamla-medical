@@ -44,6 +44,9 @@ public class UserEntity extends RootOrgContained implements Serializable {
     @Column(name = "is_active")
     private boolean isActive;
 
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
+
     @Column(name = "retry_count")
     private int retryCount;
 

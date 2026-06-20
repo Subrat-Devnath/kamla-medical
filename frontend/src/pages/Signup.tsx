@@ -14,6 +14,7 @@ function Signup() {
 
     const [showPassword, setShowPassword] = useState(false);
 
+    const [companyName, setCompanyname] = useState("");
     const [emailId, setEmailId] = useState("");
     const [password, setPassword] = useState("");
 
@@ -49,6 +50,7 @@ function Signup() {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
+                        companyName,
                         emailId,
                         password,
                         name: emailId
@@ -64,6 +66,7 @@ function Signup() {
 
                 setSuccessMessage("Account created successfully!");
 
+                setCompanyname("");
                 setEmailId("");
                 setPassword("");
 
@@ -142,9 +145,25 @@ function Signup() {
                             </div>
                         )}
 
-                       
+
                         {/* FORM */}
                         <form className="space-y-6" onSubmit={handleSignup}>
+
+                            {/* COMPANY NAME */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Company Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    placeholder="Enter your company name"
+                                    value={companyName}
+                                    onChange={(e) => setCompanyname(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
+                                    required
+                                />
+                            </div>
 
                             {/* EMAIL */}
                             <div>

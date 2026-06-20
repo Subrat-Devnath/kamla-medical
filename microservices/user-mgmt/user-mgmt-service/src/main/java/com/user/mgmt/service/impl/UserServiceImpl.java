@@ -8,11 +8,7 @@ import com.email.client.dtos.NotificationDTO;
 import com.security.client.dtos.SourceIdentity;
 import com.security.config.service.impl.WebSecurityConfig;
 import com.security.config.utils.SecurityUtil;
-import com.user.mgmt.client.dtos.ForgotPasswordOtpRequest;
-import com.user.mgmt.client.dtos.ResetPasswordWithOtpRequest;
-import com.user.mgmt.client.dtos.UpdatePasswordRequest;
-import com.user.mgmt.client.dtos.VerifyOtpRequest;
-import com.user.mgmt.client.dtos.UserDTO;
+import com.user.mgmt.client.dtos.*;
 import com.user.mgmt.client.enums.RoleType;
 import com.user.mgmt.repository.OrganizationRepository;
 import com.user.mgmt.repository.PasswordResetOtpRepository;
@@ -24,6 +20,8 @@ import com.user.mgmt.repository.entity.RolesEntity;
 import com.user.mgmt.repository.entity.UserEntity;
 import com.user.mgmt.repository.enums.OrgProfile;
 import com.user.mgmt.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -35,6 +33,8 @@ import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -71,14 +71,16 @@ public class UserServiceImpl implements UserService {
 
             userDto.setPassword(encryptedPassword);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseDTO(false, null, e.getMessage());
         }
 
+        userDto.setActive(true);
+        userDto.setDeleted(false);
+        userDto.setRetryCount(0);
+
         UserEntity userEntity = ObjectBuilder.buildDtoFromEntity(userDto, null, UserEntity.class);
 
-        RolesEntity rolesEntity = rolesRepository
-                .getRoleByName(RoleType.USER.name());
+        RolesEntity rolesEntity = rolesRepository.getRoleByName(RoleType.USER.name());
 
         if (rolesEntity == null) {
             return new ResponseDTO(false, null, "Role not found for user");
@@ -86,10 +88,7 @@ public class UserServiceImpl implements UserService {
 
         userEntity.setRoles(Set.of(rolesEntity));
 
-        OrganizationEntity organizationEntity =
-                organizationRepository.getOrganizationByName(
-                        userEntity.getEmailId().split("@")[1]
-                );
+        OrganizationEntity organizationEntity = organizationRepository.getOrganizationByName(userDto.getCompanyName().trim().toUpperCase());
 
         if (organizationEntity != null) {
 
@@ -100,7 +99,7 @@ public class UserServiceImpl implements UserService {
 
         OrganizationEntity newOrganizationEntity = new OrganizationEntity();
         newOrganizationEntity.setId(UUID.randomUUID().toString());
-        newOrganizationEntity.setName(userEntity.getEmailId().split("@")[1]);
+        newOrganizationEntity.setName(userDto.getCompanyName().trim().toUpperCase());
         newOrganizationEntity.setCity(userEntity.getCity());
         newOrganizationEntity.setDeleted(false);
         newOrganizationEntity.setEnabled(true);
@@ -143,10 +142,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
-        OrganizationEntity organizationEntity =
-                organizationRepository.getOrganizationByName(
-                        userEntity.getEmailId().split("@")[1]
-                );
+        OrganizationEntity organizationEntity = organizationRepository.getOrganizationByName(userEntity.getEmailId().split("@")[1]);
 
         userEntity.setOrganization(organizationEntity);
 
@@ -159,19 +155,26 @@ public class UserServiceImpl implements UserService {
         UserDTO userByUserName = getUserByUserName(loginRequest.getUserName());
 
         if (userByUserName == null) {
-            throw new IllegalArgumentException("User not found");
+            logger.info("User not found for username: {}", loginRequest.getUserName());
+            return null;
+        }
+
+        if (!userByUserName.isActive()) {
+            logger.info("User is active for username: {}", loginRequest.getUserName());
+            return null;
         }
 
         // Stored hashed password from DB
         String storedPasswordHash = userByUserName.getPassword();
 
         // Correct comparison
-        boolean match = webSecurityConfig.passwordEncoder()
-                .matches(loginRequest.getPassword(), storedPasswordHash);
+        boolean match = webSecurityConfig.passwordEncoder().matches(loginRequest.getPassword(), storedPasswordHash);
 
         if (match) {
             return userByUserName;
         }
+
+        logger.info("Password mismatch for username: {}", loginRequest.getUserName());
 
         return null;
     }
@@ -200,30 +203,26 @@ public class UserServiceImpl implements UserService {
             }
 
             // Verify old password matches
-            boolean passwordMatch = webSecurityConfig.passwordEncoder()
-                    .matches(updatePasswordRequest.getOldPassword(), userEntity.getPassword());
+            boolean passwordMatch = webSecurityConfig.passwordEncoder().matches(updatePasswordRequest.getOldPassword(), userEntity.getPassword());
 
             if (!passwordMatch) {
                 return new ResponseDTO(false, null, "Old password is incorrect");
             }
 
             // Check if new password is same as old password
-            boolean isSamePassword = webSecurityConfig.passwordEncoder()
-                    .matches(updatePasswordRequest.getNewPassword(), userEntity.getPassword());
+            boolean isSamePassword = webSecurityConfig.passwordEncoder().matches(updatePasswordRequest.getNewPassword(), userEntity.getPassword());
 
             if (isSamePassword) {
                 return new ResponseDTO(false, null, "New password cannot be same as old password");
             }
 
             // Encrypt and update new password
-            String encryptedPassword = webSecurityConfig.passwordEncoder()
-                    .encode(updatePasswordRequest.getNewPassword());
+            String encryptedPassword = webSecurityConfig.passwordEncoder().encode(updatePasswordRequest.getNewPassword());
             userEntity.setPassword(encryptedPassword);
             userRepository.addUser(userEntity);
 
             return new ResponseDTO(true, null, "Password updated successfully");
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseDTO(false, null, "Error updating password: " + e.getMessage());
         }
     }
@@ -246,11 +245,7 @@ public class UserServiceImpl implements UserService {
             String otp = generateOtp();
 
             // Create OTP entity with expiry (10 minutes)
-            PasswordResetOtpEntity otpEntity = new PasswordResetOtpEntity(
-                    userEntity,
-                    otp,
-                    LocalDateTime.now().plusMinutes(3)
-            );
+            PasswordResetOtpEntity otpEntity = new PasswordResetOtpEntity(userEntity, otp, LocalDateTime.now().plusMinutes(3));
 
             // Save OTP to database
             passwordResetOtpRepository.saveOtp(otpEntity);
@@ -259,14 +254,12 @@ public class UserServiceImpl implements UserService {
             try {
                 sendOtpEmail(userEntity.getEmailId(), userEntity.getName(), otp);
             } catch (Exception e) {
-                e.printStackTrace();
                 // OTP is saved but email failed
                 return new ResponseDTO(false, null, "OTP generated but failed to send email: " + e.getMessage());
             }
 
             return new ResponseDTO(true, null, "OTP sent successfully to your email");
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseDTO(false, null, "Error sending OTP: " + e.getMessage());
         }
     }
@@ -290,10 +283,7 @@ public class UserServiceImpl implements UserService {
             }
 
             // Get OTP from database
-            PasswordResetOtpEntity otpEntity = passwordResetOtpRepository.getOtpByOtpAndUserId(
-                    verifyOtpRequest.getOtp(),
-                    userEntity.getId()
-            );
+            PasswordResetOtpEntity otpEntity = passwordResetOtpRepository.getOtpByOtpAndUserId(verifyOtpRequest.getOtp(), userEntity.getId());
 
             if (otpEntity == null) {
                 return new ResponseDTO(false, null, "Invalid OTP");
@@ -315,7 +305,6 @@ public class UserServiceImpl implements UserService {
 
             return new ResponseDTO(true, null, "OTP verified successfully");
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseDTO(false, null, "Error verifying OTP: " + e.getMessage());
         }
     }
@@ -343,10 +332,7 @@ public class UserServiceImpl implements UserService {
             }
 
             // Verify OTP
-            PasswordResetOtpEntity otpEntity = passwordResetOtpRepository.getOtpByOtpAndUserId(
-                    resetPasswordWithOtpRequest.getOtp(),
-                    userEntity.getId()
-            );
+            PasswordResetOtpEntity otpEntity = passwordResetOtpRepository.getOtpByOtpAndUserId(resetPasswordWithOtpRequest.getOtp(), userEntity.getId());
 
             if (otpEntity == null) {
                 return new ResponseDTO(false, null, "Invalid OTP");
@@ -363,14 +349,12 @@ public class UserServiceImpl implements UserService {
             }
 
             // Update password
-            String encryptedPassword = webSecurityConfig.passwordEncoder()
-                    .encode(resetPasswordWithOtpRequest.getNewPassword());
+            String encryptedPassword = webSecurityConfig.passwordEncoder().encode(resetPasswordWithOtpRequest.getNewPassword());
             userEntity.setPassword(encryptedPassword);
             userRepository.addUser(userEntity);
 
             return new ResponseDTO(true, null, "Password reset successfully");
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseDTO(false, null, "Error resetting password: " + e.getMessage());
         }
     }
@@ -387,17 +371,7 @@ public class UserServiceImpl implements UserService {
         NotificationDTO notificationDTO = new NotificationDTO();
         notificationDTO.setTo(toEmail);
         notificationDTO.setSubject("Password Reset OTP");
-        notificationDTO.setMessage(
-                "<html><body>" +
-                "<h2>Password Reset Request</h2>" +
-                "<p>Dear " + userName + ",</p>" +
-                "<p>You have requested to reset your password. Please use the following OTP to proceed:</p>" +
-                "<h1 style='color: #0066cc;'>" + otp + "</h1>" +
-                "<p>This OTP is valid for 3 minutes.</p>" +
-                "<p>If you did not request this, please ignore this email.</p>" +
-                "<p>Best regards,<br>Kamla Medical Team</p>" +
-                "</body></html>"
-        );
+        notificationDTO.setMessage("<html><body>" + "<h2>Password Reset Request</h2>" + "<p>Dear " + userName + ",</p>" + "<p>You have requested to reset your password. Please use the following OTP to proceed:</p>" + "<h1 style='color: #0066cc;'>" + otp + "</h1>" + "<p>This OTP is valid for 3 minutes.</p>" + "<p>If you did not request this, please ignore this email.</p>" + "<p>Best regards,<br>Kamla Medical Team</p>" + "</body></html>");
         notificationDTO.setHtml(true);
         notificationDTO.setFrom("noreply@kamla-medical.com");
 
