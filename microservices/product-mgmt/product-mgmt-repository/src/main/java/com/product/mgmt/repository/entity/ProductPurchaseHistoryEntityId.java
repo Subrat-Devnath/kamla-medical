@@ -5,13 +5,17 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @Embeddable
 public class ProductPurchaseHistoryEntityId implements Serializable {
 
-    @Column(name = "organization_id", nullable = false, length = 255)
+    @Column(name = "organization_id", nullable = false, length = 36)
     private String organizationId;
+
+    @Column(name = "user_id", nullable = false, length = 36)
+    private String userId;
 
     @Column(name = "product_name", nullable = false, length = 255)
     private String productName;

@@ -3,9 +3,12 @@ package com.product.mgmt.repository.dto;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 public class ProductPurchaseHistoryDTO implements Serializable {
+
+    private String userId;
 
     private String productName;
 

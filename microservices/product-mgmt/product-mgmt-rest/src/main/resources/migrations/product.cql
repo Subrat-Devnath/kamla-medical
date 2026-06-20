@@ -2,7 +2,8 @@
 -- This replaces the Cassandra product table with MySQL equivalent
 
 CREATE TABLE IF NOT EXISTS `product` (
-    `organization_id` VARCHAR(255) NOT NULL,
+    `organization_id` VARCHAR(36) NOT NULL,
+    `user_id` VARCHAR(36) NOT NULL,
     `product_name` VARCHAR(255) NOT NULL,
     `product_quantity` BIGINT,
     `category` VARCHAR(255),
@@ -15,8 +16,9 @@ CREATE TABLE IF NOT EXISTS `product` (
     `updated_date` BIGINT,
     `updated_user_name` VARCHAR(255),
     `updated_user_id` VARCHAR(255),
-    PRIMARY KEY (`organization_id`, `product_name`),
+    PRIMARY KEY (`organization_id`, `user_id`, `product_name`),
     INDEX idx_organization_id (`organization_id`),
+    INDEX idx_user_id (`user_id`),
     INDEX idx_product_name (`product_name`),
     INDEX idx_is_deleted (`is_deleted`),
     INDEX idx_expiry_date (`expiry_date`)

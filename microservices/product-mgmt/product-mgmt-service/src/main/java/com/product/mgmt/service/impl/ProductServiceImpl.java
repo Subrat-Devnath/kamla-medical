@@ -27,7 +27,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void addProduct(ProductDTO productDto) {
         productDto.setProductQuantity(productDto.getPurchasedQuantity());
-        Long productQuantity = productRepository.getProductQuantity(SecurityUtil.getPrincipal().getOrgId(), productDto.getProductName().toUpperCase());
+        Long productQuantity = productRepository.getProductQuantity(SecurityUtil.getPrincipal().getOrgId(), SecurityUtil.getPrincipal().getUserId(), productDto.getProductName().toUpperCase());
         if (productQuantity != null) {
             productDto.setProductQuantity(productDto.getProductQuantity() + productQuantity);
         }
@@ -63,12 +63,7 @@ public class ProductServiceImpl implements ProductService {
             return Collections.emptyMap();
         }
 
-        return productQuantities.stream()
-                .filter(p -> p.getRemainingQuantity() != null)
-                .collect(Collectors.groupingBy(
-                        p -> Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId() + "-" + p.getProductName(),
-                        Collectors.summingLong(ProductPurchaseHistoryDTO::getRemainingQuantity)
-                ));
+        return productQuantities.stream().filter(p -> p.getRemainingQuantity() != null).collect(Collectors.groupingBy(p -> Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId() + "-" + p.getProductName(), Collectors.summingLong(ProductPurchaseHistoryDTO::getRemainingQuantity)));
     }
 
     @Override
@@ -98,18 +93,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductPageResponse getProductsByOrganizationId(String organizationId, Integer pageSize, String pageState) {
-        return productRepository.getProductsByOrganizationId(organizationId, pageSize, pageState);
+    public ProductPageResponse getProductsByOrganizationId(Integer pageSize, String pageState) {
+        return productRepository.getProductsByOrganizationId(SecurityUtil.getPrincipal().getOrgId(), pageSize, pageState);
     }
 
     @Override
-    public ProductPageResponse searchProductWithPagination(String organizationId, String productName, Integer pageSize, String pageState) {
-        return productRepository.searchProductWithPagination(organizationId, productName, pageSize, pageState);
+    public ProductPageResponse searchProductWithPagination(String productName, Integer pageSize, String pageState) {
+        return productRepository.searchProductWithPagination(SecurityUtil.getPrincipal().getOrgId(), productName, pageSize, pageState);
     }
 
     @Override
-    public Long getProductQuantity(String organizationId, String productName) {
-        return productRepository.getProductQuantity(organizationId, productName);
+    public Long getProductQuantity(String productName) {
+        return productRepository.getProductQuantity(SecurityUtil.getPrincipal().getOrgId(), SecurityUtil.getPrincipal().getUserId(), productName);
     }
 
 }

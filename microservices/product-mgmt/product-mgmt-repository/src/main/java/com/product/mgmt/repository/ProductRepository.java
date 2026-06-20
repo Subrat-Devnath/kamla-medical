@@ -5,6 +5,7 @@ import com.product.mgmt.repository.dto.ProductDTO;
 import com.product.mgmt.repository.dto.ProductPageResponse;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ProductRepository {
 
@@ -26,5 +27,5 @@ public interface ProductRepository {
      * Get product quantity by product name
      * Returns only the product_quantity field
      */
-    Long getProductQuantity(String organizationId, String productName);
+    Long getProductQuantity(String organizationId, String userId, String productName);
 }

@@ -50,18 +50,18 @@ public class ProductController {
     @PostMapping(path = "/products-with-pagination", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ProductPageResponse getProductsByOrganization(
             @RequestBody PaginationCriteria paginationCriteria) {
-        return productService.getProductsByOrganizationId(SecurityUtil.getPrincipal().getOrgId(), paginationCriteria.getPageSize(), paginationCriteria.getPageState());
+        return productService.getProductsByOrganizationId(paginationCriteria.getPageSize(), paginationCriteria.getPageState());
     }
 
     @PostMapping(path = "/search-products-with-pagination", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ProductPageResponse searchProductsWithPagination(@RequestParam String productName,
                                                             @RequestBody PaginationCriteria paginationCriteria) {
-        return productService.searchProductWithPagination(SecurityUtil.getPrincipal().getOrgId(), productName, paginationCriteria.getPageSize(), paginationCriteria.getPageState());
+        return productService.searchProductWithPagination(productName, paginationCriteria.getPageSize(), paginationCriteria.getPageState());
     }
 
     @GetMapping(path = "/product-quantity/{productName}")
     public Long getProductQuantity(@PathVariable(name = "productName") String productName) {
-        return productService.getProductQuantity(SecurityUtil.getPrincipal().getOrgId(), productName);
+        return productService.getProductQuantity(productName);
     }
 
 }

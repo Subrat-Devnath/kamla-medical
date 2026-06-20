@@ -14,17 +14,17 @@ import java.util.List;
 @Repository
 public interface ProductDAO extends JpaRepository<ProductEntity, ProductEntityId> {
 
-    @Query("SELECT p FROM ProductEntity p WHERE p.productEntityId.organizationId = :organizationId AND p.productEntityId.productName = :productName")
-    ProductEntity getProduct(@Param("organizationId") String organizationID, @Param("productName") String productName);
+    @Query("SELECT productEntity FROM ProductEntity productEntity WHERE productEntity.productEntityId.organizationId = :organizationId AND productEntity.productEntityId.userId = :userId AND productEntity.productEntityId.productName = :productName")
+    ProductEntity getProduct(@Param("organizationId") String organizationID, @Param("userId") String userId, @Param("productName") String productName);
 
-    @Query("SELECT p FROM ProductEntity p WHERE p.productEntityId.organizationId = :organizationId AND p.productEntityId.productName >= :start AND p.productEntityId.productName < :end")
-    List<ProductEntity> searchProducts(@Param("organizationId") String organizationId, @Param("start") String start, @Param("end") String end);
+    @Query("SELECT productEntity FROM ProductEntity productEntity WHERE productEntity.productEntityId.organizationId = :organizationId AND  productEntity.productEntityId.userId = :userId AND productEntity.productEntityId.productName >= :start AND productEntity.productEntityId.productName < :end")
+    List<ProductEntity> searchProducts(@Param("organizationId") String organizationId, @Param("userId") String userId, @Param("start") String start, @Param("end") String end);
 
-    Page<ProductEntity> findByProductEntityIdOrganizationId(String organizationId, Pageable pageable);
+    Page<ProductEntity> findByProductEntityIdOrganizationIdAndProductEntityIdUserId(String organizationId, String userId, Pageable pageable);
 
-    @Query("SELECT p FROM ProductEntity p WHERE p.productEntityId.organizationId = :organizationId AND p.productEntityId.productName >= :start AND p.productEntityId.productName < :end")
-    Page<ProductEntity> searchProductsWithPagination(@Param("organizationId") String organizationId, @Param("start") String start, @Param("end") String end, Pageable pageable);
+    @Query("SELECT productEntity FROM ProductEntity productEntity WHERE productEntity.productEntityId.organizationId = :organizationId AND  productEntity.productEntityId.userId = :userId AND productEntity.productEntityId.productName >= :start AND productEntity.productEntityId.productName < :end")
+    Page<ProductEntity> searchProductsWithPagination(@Param("organizationId") String organizationId, @Param("userId") String userId, @Param("start") String start, @Param("end") String end, Pageable pageable);
 
-    @Query("SELECT p.productQuantity FROM ProductEntity p WHERE p.productEntityId.organizationId = :organizationId AND p.productEntityId.productName = :productName")
-    Long getProductQuantity(@Param("organizationId") String organizationId, @Param("productName") String productName);
+    @Query("SELECT productEntity.productQuantity FROM ProductEntity productEntity WHERE productEntity.productEntityId.organizationId = :organizationId AND productEntity.productEntityId.userId = :userId AND productEntity.productEntityId.productName = :productName")
+    Long getProductQuantity(@Param("organizationId") String organizationId, @Param("userId") String userId, @Param("productName") String productName);
 }

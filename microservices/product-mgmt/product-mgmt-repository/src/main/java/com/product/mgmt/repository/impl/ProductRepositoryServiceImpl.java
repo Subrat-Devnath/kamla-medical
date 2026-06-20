@@ -51,6 +51,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
         ProductEntity entity = ObjectBuilder.buildDtoFromEntity(productDto, null, ProductEntity.class);
         ProductEntityId productEntityId = new ProductEntityId();
         productEntityId.setOrganizationId(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId());
+        productEntityId.setUserId(SecurityUtil.getPrincipal().getUserId());
         productEntityId.setProductName(productDto.getProductName().toUpperCase());
         entity.setProductEntityId(productEntityId);
         productDao.save(entity);
@@ -67,6 +68,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
     private ProductPurchaseHistoryEntityId getProductPurchaseHistoryEntityId(ProductDTO productDto) {
         ProductPurchaseHistoryEntityId productPurchaseHistoryEntityId = new ProductPurchaseHistoryEntityId();
         productPurchaseHistoryEntityId.setOrganizationId(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId());
+        productPurchaseHistoryEntityId.setUserId(SecurityUtil.getPrincipal().getUserId());
         productPurchaseHistoryEntityId.setProductName(productDto.getProductName().toUpperCase());
         productPurchaseHistoryEntityId.setSupplierName(productDto.getSupplierName().toUpperCase());
         productPurchaseHistoryEntityId.setPurchaseDate(productDto.getPurchaseDate());
@@ -78,6 +80,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
 
         ProductEntityId productEntityId = new ProductEntityId();
         productEntityId.setOrganizationId(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId());
+        productEntityId.setUserId(Objects.requireNonNull(SecurityUtil.getPrincipal()).getUserId());
         productEntityId.setProductName(productName.toUpperCase());
 
         Optional<ProductEntity> entityOpt = productDao.findById(productEntityId);
@@ -98,7 +101,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
         String start = productName.toUpperCase();
         String end = start + Character.MAX_VALUE;
 
-        List<ProductEntity> products = productDao.searchProducts(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), start, end);
+        List<ProductEntity> products = productDao.searchProducts(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), SecurityUtil.getPrincipal().getUserId(), start, end);
 
         if (CollectionUtils.isEmpty(products)) {
             return List.of();
@@ -142,7 +145,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
         }
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<ProductEntity> allProducts = productDao.findByProductEntityIdOrganizationId(organizationId, pageable);
+        Page<ProductEntity> allProducts = productDao.findByProductEntityIdOrganizationIdAndProductEntityIdUserId(organizationId, SecurityUtil.getPrincipal().getUserId(), pageable);
 
         ProductPageResponse response = new ProductPageResponse();
 
@@ -199,7 +202,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
         }
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<ProductEntity> searchResults = productDao.searchProductsWithPagination(organizationId, start, end, pageable);
+        Page<ProductEntity> searchResults = productDao.searchProductsWithPagination(organizationId, SecurityUtil.getPrincipal().getUserId(), start, end, pageable);
 
         ProductPageResponse response = new ProductPageResponse();
 
@@ -236,10 +239,10 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
     }
 
     @Override
-    public Long getProductQuantity(String organizationId, String productName) {
+    public Long getProductQuantity(String organizationId, String userId, String productName) {
         if (!StringUtils.hasLength(productName)) {
             return null;
         }
-        return productDao.getProductQuantity(organizationId, productName.toUpperCase());
+        return productDao.getProductQuantity(organizationId, SecurityUtil.getPrincipal().getUserId(), productName.toUpperCase());
     }
 }

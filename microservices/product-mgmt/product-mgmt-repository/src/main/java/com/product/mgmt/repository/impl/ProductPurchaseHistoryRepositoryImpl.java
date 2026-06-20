@@ -28,7 +28,7 @@ public class ProductPurchaseHistoryRepositoryImpl implements ProductPurchaseHist
             return List.of();
         }
 
-        List<ProductPurchaseHistoryEntity> productPrices = productPurchaseHistoryDAO.getProductPrices(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), productName.toUpperCase());
+        List<ProductPurchaseHistoryEntity> productPrices = productPurchaseHistoryDAO.getProductPrices(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), SecurityUtil.getPrincipal().getUserId(), productName.toUpperCase());
 
         if (CollectionUtils.isEmpty(productPrices)) {
             return List.of();
@@ -39,7 +39,7 @@ public class ProductPurchaseHistoryRepositoryImpl implements ProductPurchaseHist
 
     @Override
     public List<ProductPurchaseHistoryDTO> getProductQuantities(List<String> productNames) {
-        List<ProductPurchaseHistoryEntity> productPrices = productPurchaseHistoryDAO.getProductQuantities(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), productNames);
+        List<ProductPurchaseHistoryEntity> productPrices = productPurchaseHistoryDAO.getProductQuantities(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), SecurityUtil.getPrincipal().getUserId(), productNames);
 
         if (CollectionUtils.isEmpty(productPrices)) {
             return List.of();
