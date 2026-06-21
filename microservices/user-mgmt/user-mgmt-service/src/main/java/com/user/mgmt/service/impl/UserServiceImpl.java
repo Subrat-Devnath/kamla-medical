@@ -132,10 +132,6 @@ public class UserServiceImpl implements UserService {
             return null;
         }
 
-        SourceIdentity principal = SecurityUtil.getPrincipal();
-
-        //String orgId = principal.getOrgId();
-
         UserEntity userEntity = userRepository.getUserByUserName(userName);
 
         if (userEntity == null) {
