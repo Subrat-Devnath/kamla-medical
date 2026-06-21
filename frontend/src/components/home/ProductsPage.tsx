@@ -36,7 +36,7 @@ function ProductsPage() {
     // pricing
     const [unitListPrice, setUnitListPrice] = useState("");
     const [unitBuyPrice, setUnitBuyPrice] = useState("");
-  
+
     // dates
     const [purchaseDate, setPurchaseDate] = useState("");
     const [expiryDate, setExpiryDate] = useState("");
@@ -386,64 +386,50 @@ function ProductsPage() {
             )}
 
             {/* PRODUCTS */}
-            <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
+            <div className="overflow-hidden rounded-2xl border border-white/10">
+                <table className="w-full">
+                    <thead className="bg-cyan-700">
+                        <tr>
+                            <th className="text-center p-4 w-[5%]"></th>
+                            <th className="text-left p-4 w-[30%]">Product Name</th>
+                            <th className="text-center p-4 w-[10%]">Quantity</th>
+                            <th className="text-center p-4 w-[25%]">Product Type</th>
+                            <th className="text-left p-4 w-[25%]">Formula</th>
+                        </tr>
+                    </thead>
 
-                {/* HEADER */}
-                <div className="grid grid-cols-3 bg-cyan-700 text-white font-semibold p-4">
+                    <tbody>
+                        {products.map((p, index) => (
+                            <tr
+                                key={index}
+                                className="border-t border-white/10 hover:bg-white/5"
+                            >
+                                <td className="p-4">
+                                    <button
+                                        onClick={() =>
+                                            navigate(`/purchase-history/${p.productName}`)
+                                        }
+                                        className="text-cyan-300 hover:text-cyan-400"
+                                    >
+                                        {p.productName}
+                                    </button>
+                                </td>
 
-                    <div>Product Name</div>
+                                <td className="p-4 text-center text-green-400">
+                                    {p.productQuantity}
+                                </td>
 
-                    <div className="text-center">
-                        Quantity
-                    </div>
+                                <td className="p-4 text-center text-purple-400">
+                                    {p.category}
+                                </td>
 
-                    <div className="text-right">
-                        Product Type
-                    </div>
-
-                </div>
-
-                {/* ROWS */}
-                {products.map((p, index) => (
-
-                    <div
-                        key={index}
-                        className="grid grid-cols-3 items-center p-4 border-t border-white/10 bg-white/5 hover:bg-white/10 transition"
-                    >
-
-                        {/* PRODUCT NAME */}
-                        <button
-                            onClick={() =>
-                                navigate(`/purchase-history/${p.productName}`)
-                            }
-                            className="text-left"
-                        >
-
-                            <span className="text-cyan-300 font-medium hover:text-cyan-400">
-                                {p.productName}
-                            </span>
-
-                        </button>
-
-                        {/* QUANTITY */}
-                        <div className="text-center text-green-400 font-medium">
-                            {p.productQuantity}
-                        </div>
-
-                        {/* CATEGORY */}
-                        <div className="text-right text-purple-400 font-medium">
-                            {p.category}
-                        </div>
-
-                        {/* FORMULA */}
-                        <div className="text-right text-purple-400 font-medium">
-                            {p.formula ? p.formula : "N/A"}
-                        </div>
-
-                    </div>
-
-                ))}
-
+                                <td className="p-4 text-purple-400">
+                                    {p.formula || "N/A"}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
 
             {/* PAGINATION */}
