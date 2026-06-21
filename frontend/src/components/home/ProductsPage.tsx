@@ -51,6 +51,9 @@ function ProductsPage() {
 
     const [isSearchMode, setIsSearchMode] = useState(false);
 
+    const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
     const pageSize = 5;
 
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -256,6 +259,50 @@ function ProductsPage() {
         }
     };
 
+    const deleteProducts = async () => {
+
+        try {
+
+            setLoading(true);
+            setError("");
+
+            const token = localStorage.getItem("accessToken");
+
+            const response = await fetch(
+                `${API}/delete-product-and-history`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(selectedProducts),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to delete products");
+            }
+
+            setSelectedProducts([]);
+            setShowDeleteConfirm(false);
+
+            if (isSearchMode) {
+                searchProduct(searchText, null, false);
+            } else {
+                fetchProducts(null, false);
+            }
+
+        } catch (err: any) {
+
+            setError(err.message || "Delete failed");
+
+        } finally {
+
+            setLoading(false);
+        }
+    };
+
     // ---------------- SEARCH HANDLER ----------------
     const handleSearch = () => {
 
@@ -386,15 +433,15 @@ function ProductsPage() {
             )}
 
             {/* PRODUCTS */}
-            <div className="overflow-hidden rounded-2xl border border-white/10">
-                <table className="w-full">
+            <div className="overflow-x-auto rounded-2xl border border-white/10">
+                <table className="w-full min-w-[700px]">
                     <thead className="bg-cyan-700">
                         <tr>
-                            <th className="text-center p-4 w-[5%]"></th>
-                            <th className="text-left p-4 w-[30%]">Product Name</th>
-                            <th className="text-center p-4 w-[10%]">Quantity</th>
-                            <th className="text-center p-4 w-[25%]">Product Type</th>
-                            <th className="text-left p-4 w-[25%]">Formula</th>
+                            <th className="text-center p-4 w-12"> Select </th>
+                            <th className="text-left p-4">Product Name</th>
+                            <th className="text-center p-4">Quantity</th>
+                            <th className="text-center p-4">Product Type</th>
+                            <th className="text-left p-4">Formula</th>
                         </tr>
                     </thead>
 
@@ -404,6 +451,22 @@ function ProductsPage() {
                                 key={index}
                                 className="border-t border-white/10 hover:bg-white/5"
                             >
+                                <td className="p-4 text-center w-12">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedProducts.includes(p.productName)}
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setSelectedProducts(prev => [...prev, p.productName]);
+                                            } else {
+                                                setSelectedProducts(prev =>
+                                                    prev.filter(name => name !== p.productName)
+                                                );
+                                            }
+                                        }}
+                                        className="h-4 w-4 cursor-pointer"
+                                    />
+                                </td>
                                 <td className="p-4">
                                     <button
                                         onClick={() =>
@@ -432,6 +495,21 @@ function ProductsPage() {
                 </table>
             </div>
 
+            {selectedProducts.length > 0 && (
+
+                <div className="mt-4 flex justify-end">
+
+                    <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500"
+                    >
+                        Delete Selected ({selectedProducts.length})
+                    </button>
+
+                </div>
+
+            )}
+
             {/* PAGINATION */}
             <div className="flex justify-center gap-4 mt-8">
 
@@ -452,6 +530,48 @@ function ProductsPage() {
                 </button>
 
             </div>
+
+            {showDeleteConfirm && (
+
+                <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
+
+                    <div className="bg-zinc-900 p-6 rounded-2xl w-[450px] border border-white/10">
+
+                        <h2 className="text-xl font-bold text-red-400 mb-4">
+                            Confirm Delete
+                        </h2>
+
+                        <p className="mb-6">
+                            Are you sure you want to delete
+                            {" "}
+                            {selectedProducts.length}
+                            {" "}
+                            selected product(s)?
+                        </p>
+
+                        <div className="flex justify-end gap-3">
+
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="px-4 py-2 rounded-xl bg-gray-700"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={deleteProducts}
+                                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500"
+                            >
+                                Delete
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            )}
 
             {/* ADD PRODUCT MODAL */}
             {showAddModal && (

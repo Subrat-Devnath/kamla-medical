@@ -14,11 +14,6 @@ type PurchaseHistory = {
 
     unitBuyDiscount: number;
 
-    unitSellPrice: number;
-    totalSellPrice: number;
-
-    unitSellDiscount: number;
-
     purchasedQuantity: number;
     remainingQuantity: number;
     soldQuantity: number;
@@ -231,39 +226,6 @@ function PurchaseHistoryPage() {
 
                                 <p className="text-pink-300 font-semibold">
                                     {formatValue(h.unitBuyDiscount)}%
-                                </p>
-                            </div>
-
-                            {/* UNIT SELL PRICE */}
-                            <div>
-                                <p className="text-gray-400">
-                                    Unit Sell Price
-                                </p>
-
-                                <p className="text-purple-300 font-semibold">
-                                    ₹{formatValue(h.unitSellPrice)}
-                                </p>
-                            </div>
-
-                            {/* TOTAL SELL PRICE */}
-                            <div>
-                                <p className="text-gray-400">
-                                    Total Sell Price
-                                </p>
-
-                                <p className="text-orange-300 font-semibold">
-                                    ₹{formatValue(h.totalSellPrice)}
-                                </p>
-                            </div>
-
-                            {/* UNIT SELL DISCOUNT */}
-                            <div>
-                                <p className="text-gray-400">
-                                    Unit Sell Discount
-                                </p>
-
-                                <p className="text-cyan-400 font-semibold">
-                                    {formatValue(h.unitSellDiscount)}%
                                 </p>
                             </div>
 
