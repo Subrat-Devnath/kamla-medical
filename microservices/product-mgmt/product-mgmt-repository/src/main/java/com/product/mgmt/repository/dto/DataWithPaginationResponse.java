@@ -9,9 +9,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductPageResponse {
+public class DataWithPaginationResponse {
 
-    private List<ProductDTO> products;
+    private Object data;
 
     // send this in next API request
     private String nextPageState;

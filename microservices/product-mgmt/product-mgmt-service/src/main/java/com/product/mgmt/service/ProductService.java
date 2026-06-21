@@ -1,8 +1,7 @@
 package com.product.mgmt.service;
 
-import com.common.service.dtos.PaginationCriteria;
 import com.product.mgmt.repository.dto.ProductDTO;
-import com.product.mgmt.repository.dto.ProductPageResponse;
+import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 
 import java.util.List;
 
@@ -18,9 +17,9 @@ public interface ProductService {
 
     List<ProductDTO> getAllProducts();
 
-    ProductPageResponse getProductsByOrganizationId(Integer pageSize, String pageState);
+    DataWithPaginationResponse getProductsByOrganizationId(Integer pageSize, String pageState);
 
-    ProductPageResponse searchProductWithPagination(String productName, Integer pageSize, String pageState);
+    DataWithPaginationResponse searchProductWithPagination(String productName, Integer pageSize, String pageState);
 
     /**
      * Get product quantity by product name

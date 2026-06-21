@@ -1,6 +1,8 @@
 package com.product.mgmt.service.impl;
 
+import com.common.service.dtos.PaginationCriteria;
 import com.product.mgmt.repository.ProductPurchaseHistoryRepository;
+import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 import com.product.mgmt.repository.dto.ProductPurchaseHistoryDTO;
 import com.product.mgmt.service.ProductPurchaseHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,7 @@ public class ProductPurchaseHistoryServiceImpl implements ProductPurchaseHistory
     private ProductPurchaseHistoryRepository productPurchaseHistoryRepository;
 
     @Override
-    public List<ProductPurchaseHistoryDTO> getProductPurchaseHistory(String productName) {
-        return productPurchaseHistoryRepository.getProductPurchaseHistory(productName);
+    public DataWithPaginationResponse getProductPurchaseHistory(String productName, PaginationCriteria paginationCriteria) {
+        return productPurchaseHistoryRepository.getProductPurchaseHistory(productName, paginationCriteria);
     }
 }

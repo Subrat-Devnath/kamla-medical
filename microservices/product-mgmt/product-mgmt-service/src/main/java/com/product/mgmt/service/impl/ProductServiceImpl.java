@@ -3,7 +3,7 @@ package com.product.mgmt.service.impl;
 import com.product.mgmt.repository.ProductPurchaseHistoryRepository;
 import com.product.mgmt.repository.ProductRepository;
 import com.product.mgmt.repository.dto.ProductDTO;
-import com.product.mgmt.repository.dto.ProductPageResponse;
+import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 import com.product.mgmt.repository.dto.ProductPurchaseHistoryDTO;
 import com.product.mgmt.service.ProductService;
 import com.product.mgmt.service.utils.DiscountCalculatorUtil;
@@ -91,12 +91,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductPageResponse getProductsByOrganizationId(Integer pageSize, String pageState) {
+    public DataWithPaginationResponse getProductsByOrganizationId(Integer pageSize, String pageState) {
         return productRepository.getProductsByOrganizationId(SecurityUtil.getPrincipal().getOrgId(), pageSize, pageState);
     }
 
     @Override
-    public ProductPageResponse searchProductWithPagination(String productName, Integer pageSize, String pageState) {
+    public DataWithPaginationResponse searchProductWithPagination(String productName, Integer pageSize, String pageState) {
         return productRepository.searchProductWithPagination(SecurityUtil.getPrincipal().getOrgId(), productName, pageSize, pageState);
     }
 

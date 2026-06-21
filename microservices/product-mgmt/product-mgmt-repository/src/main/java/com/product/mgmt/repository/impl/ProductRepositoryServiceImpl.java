@@ -5,12 +5,11 @@ import com.product.mgmt.repository.ProductRepository;
 import com.product.mgmt.repository.dao.ProductDAO;
 import com.product.mgmt.repository.dao.ProductPurchaseHistoryDAO;
 import com.product.mgmt.repository.dto.ProductDTO;
-import com.product.mgmt.repository.dto.ProductPageResponse;
+import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 import com.product.mgmt.repository.entity.ProductEntity;
 import com.product.mgmt.repository.entity.ProductEntityId;
 import com.product.mgmt.repository.entity.ProductPurchaseHistoryEntity;
 import com.product.mgmt.repository.entity.ProductPurchaseHistoryEntityId;
-import com.security.config.authentication.JWTAuthenticationFilter;
 import com.security.config.utils.SecurityUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,7 +140,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
     }
 
     @Override
-    public ProductPageResponse getProductsByOrganizationId(String organizationId, Integer pageSize, String pageState) {
+    public DataWithPaginationResponse getProductsByOrganizationId(String organizationId, Integer pageSize, String pageState) {
 
         // Parse pageNumber from pageState (if null, default to 0)
         int pageNumber = 0;
@@ -156,10 +155,10 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<ProductEntity> allProducts = productDao.findByProductEntityIdOrganizationIdAndProductEntityIdUserId(organizationId, SecurityUtil.getPrincipal().getUserId(), pageable);
 
-        ProductPageResponse response = new ProductPageResponse();
+        DataWithPaginationResponse response = new DataWithPaginationResponse();
 
         if (allProducts == null || !allProducts.hasContent()) {
-            response.setProducts(Collections.emptyList());
+            response.setData(Collections.emptyList());
             response.setHasNext(false);
             return response;
         }
@@ -175,7 +174,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
                 )
                 .collect(Collectors.toList());
 
-        response.setProducts(products);
+        response.setData(products);
 
         // Check if next page exists
         if (!allProducts.hasNext()) {
@@ -191,10 +190,10 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
     }
 
     @Override
-    public ProductPageResponse searchProductWithPagination(String organizationId, String productName, Integer pageSize, String pageState) {
+    public DataWithPaginationResponse searchProductWithPagination(String organizationId, String productName, Integer pageSize, String pageState) {
 
         if (!StringUtils.hasLength(productName)) {
-            return new ProductPageResponse(Collections.emptyList(), null, false);
+            return new DataWithPaginationResponse(Collections.emptyList(), null, false);
         }
 
         String start = productName.toUpperCase();
@@ -213,10 +212,10 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<ProductEntity> searchResults = productDao.searchProductsWithPagination(organizationId, SecurityUtil.getPrincipal().getUserId(), start, end, pageable);
 
-        ProductPageResponse response = new ProductPageResponse();
+        DataWithPaginationResponse response = new DataWithPaginationResponse();
 
         if (searchResults == null || !searchResults.hasContent()) {
-            response.setProducts(Collections.emptyList());
+            response.setData(Collections.emptyList());
             response.setHasNext(false);
             return response;
         }
@@ -232,7 +231,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
                 )
                 .collect(Collectors.toList());
 
-        response.setProducts(products);
+        response.setData(products);
 
         // Check if next page exists
         if (!searchResults.hasNext()) {

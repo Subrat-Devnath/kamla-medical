@@ -23,6 +23,12 @@ type PurchaseHistory = {
     supplierName: string;
 };
 
+type PurchaseHistoryPageResponse = {
+    data: PurchaseHistory[];
+    nextPageState: string | null;
+    hasNext: boolean;
+};
+
 function PurchaseHistoryPage() {
 
     const navigate = useNavigate();
@@ -32,6 +38,14 @@ function PurchaseHistoryPage() {
     const [history, setHistory] = useState<PurchaseHistory[]>([]);
 
     const [loading, setLoading] = useState(false);
+
+    const [pageState, setPageState] = useState<string | null>(null);
+
+    const [pageStateStack, setPageStateStack] = useState<string[]>([]);
+
+    const [hasNext, setHasNext] = useState(false);
+
+    const pageSize = 5;
 
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -62,7 +76,10 @@ function PurchaseHistoryPage() {
         return value;
     };
 
-    const fetchHistory = async () => {
+    const fetchHistory = async (
+        nextState: string | null = null,
+        isNext: boolean = true
+    ) => {
 
         try {
 
@@ -73,10 +90,15 @@ function PurchaseHistoryPage() {
             const response = await fetch(
                 `${API}/purchase-history/${productName}`,
                 {
-                    method: "GET",
+                    method: "POST",
                     headers: {
+                        "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
+                    body: JSON.stringify({
+                        pageSize,
+                        pageState: nextState,
+                    }),
                 }
             );
 
@@ -84,9 +106,18 @@ function PurchaseHistoryPage() {
                 throw new Error("Failed to fetch history");
             }
 
-            const data = await response.json();
+            const data: PurchaseHistoryPageResponse =
+                await response.json();
 
-            setHistory(Array.isArray(data) ? data : []);
+            setHistory(data.data || []);
+
+            setPageState(data.nextPageState);
+
+            setHasNext(data.hasNext);
+
+            if (isNext && nextState) {
+                setPageStateStack(prev => [...prev, nextState]);
+            }
 
         } catch (err) {
 
@@ -103,10 +134,40 @@ function PurchaseHistoryPage() {
     useEffect(() => {
 
         if (productName) {
-            fetchHistory();
+
+            setPageState(null);
+
+            setPageStateStack([]);
+
+            fetchHistory(null, false);
         }
 
     }, [productName]);
+
+    const handleNext = () => {
+
+        if (!hasNext || !pageState) {
+            return;
+        }
+
+        fetchHistory(pageState, true);
+    };
+
+    const handlePrev = () => {
+
+        const stack = [...pageStateStack];
+
+        stack.pop();
+
+        const prevState =
+            stack.length > 0
+                ? stack[stack.length - 1]
+                : null;
+
+        setPageStateStack(stack);
+
+        fetchHistory(prevState, false);
+    };
 
     return (
 
@@ -174,7 +235,6 @@ function PurchaseHistoryPage() {
                         {/* DATA GRID */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
 
-                            {/* UNIT LIST PRICE */}
                             <div>
                                 <p className="text-gray-400">
                                     Unit List Price
@@ -185,7 +245,6 @@ function PurchaseHistoryPage() {
                                 </p>
                             </div>
 
-                            {/* TOTAL LIST PRICE */}
                             <div>
                                 <p className="text-gray-400">
                                     Total List Price
@@ -196,7 +255,6 @@ function PurchaseHistoryPage() {
                                 </p>
                             </div>
 
-                            {/* UNIT BUY PRICE */}
                             <div>
                                 <p className="text-gray-400">
                                     Unit Buy Price
@@ -207,7 +265,6 @@ function PurchaseHistoryPage() {
                                 </p>
                             </div>
 
-                            {/* TOTAL BUY PRICE */}
                             <div>
                                 <p className="text-gray-400">
                                     Total Buy Price
@@ -218,7 +275,6 @@ function PurchaseHistoryPage() {
                                 </p>
                             </div>
 
-                            {/* UNIT BUY DISCOUNT */}
                             <div>
                                 <p className="text-gray-400">
                                     Unit Buy Discount
@@ -229,7 +285,6 @@ function PurchaseHistoryPage() {
                                 </p>
                             </div>
 
-                            {/* PURCHASED QTY */}
                             <div>
                                 <p className="text-gray-400">
                                     Purchased Qty
@@ -240,7 +295,6 @@ function PurchaseHistoryPage() {
                                 </p>
                             </div>
 
-                            {/* SOLD QTY */}
                             <div>
                                 <p className="text-gray-400">
                                     Sold Qty
@@ -251,7 +305,6 @@ function PurchaseHistoryPage() {
                                 </p>
                             </div>
 
-                            {/* REMAINING QTY */}
                             <div>
                                 <p className="text-gray-400">
                                     Remaining Qty
@@ -262,7 +315,6 @@ function PurchaseHistoryPage() {
                                 </p>
                             </div>
 
-                            {/* SUPPLIER NAME */}
                             <div>
                                 <p className="text-gray-400">
                                     Supplier Name
@@ -278,6 +330,27 @@ function PurchaseHistoryPage() {
                     </div>
 
                 ))}
+
+            </div>
+
+            {/* PAGINATION */}
+            <div className="flex justify-center gap-4 mt-8">
+
+                <button
+                    disabled={pageStateStack.length === 0}
+                    onClick={handlePrev}
+                    className="px-4 py-2 bg-gray-700 rounded-xl disabled:opacity-40"
+                >
+                    Prev
+                </button>
+
+                <button
+                    disabled={!hasNext}
+                    onClick={handleNext}
+                    className="px-4 py-2 bg-cyan-600 rounded-xl disabled:opacity-40"
+                >
+                    Next
+                </button>
 
             </div>
 

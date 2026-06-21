@@ -1,11 +1,13 @@
 package com.product.mgmt.service;
 
+import com.common.service.dtos.PaginationCriteria;
+import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 import com.product.mgmt.repository.dto.ProductPurchaseHistoryDTO;
 
 import java.util.List;
 
 public interface ProductPurchaseHistoryService {
 
-    List<ProductPurchaseHistoryDTO> getProductPurchaseHistory(String productName);
+    DataWithPaginationResponse getProductPurchaseHistory(String productName, PaginationCriteria paginationCriteria);
 
 }

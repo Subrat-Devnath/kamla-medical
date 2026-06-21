@@ -9,7 +9,7 @@ type Product = {
 };
 
 type ProductPageResponse = {
-    products: Product[];
+    data: Product[];
     nextPageState: string | null;
     hasNext: boolean;
 };
@@ -96,7 +96,7 @@ function ProductsPage() {
 
             const data: ProductPageResponse = await response.json();
 
-            setProducts(data.products || []);
+            setProducts(data.data || []);
             setPageState(data.nextPageState);
             setHasNext(data.hasNext);
 
@@ -149,7 +149,7 @@ function ProductsPage() {
 
             const data: ProductPageResponse = await response.json();
 
-            setProducts(data.products || []);
+            setProducts(data.data || []);
             setPageState(data.nextPageState);
             setHasNext(data.hasNext);
 
