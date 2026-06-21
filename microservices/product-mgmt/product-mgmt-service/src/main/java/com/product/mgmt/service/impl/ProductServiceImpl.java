@@ -32,10 +32,8 @@ public class ProductServiceImpl implements ProductService {
             productDto.setProductQuantity(productDto.getProductQuantity() + productQuantity);
         }
         productDto.setUnitBuyDiscount(DiscountCalculatorUtil.calculateBuyDiscountPercentage(productDto.getUnitListPrice(), productDto.getUnitBuyPrice()));
-        productDto.setUnitSellDiscount(DiscountCalculatorUtil.calculateSellDiscountPercentage(productDto.getUnitListPrice(), productDto.getUnitSellPrice()));
         productDto.setTotalListPrice(DiscountCalculatorUtil.calculateTotalListPrice(productDto.getUnitListPrice(), productDto.getPurchasedQuantity()));
         productDto.setTotalBuyPrice(DiscountCalculatorUtil.calculateTotalBuyPrice(productDto.getUnitBuyPrice(), productDto.getPurchasedQuantity()));
-        productDto.setTotalSellPrice(DiscountCalculatorUtil.calculateTotalSellPrice(productDto.getUnitSellPrice(), productDto.getPurchasedQuantity()));
         productRepository.addProduct(productDto);
     }
 
@@ -83,8 +81,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteProduct(String productName) {
-        productRepository.deleteProduct(productName);
+    public void deleteProduct(List<String> productNames) {
+        productRepository.deleteProduct(productNames);
     }
 
     @Override

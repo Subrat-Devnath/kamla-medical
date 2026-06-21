@@ -16,11 +16,6 @@ CREATE TABLE IF NOT EXISTS `product_purchase_history` (
 
     `buy_discount` DOUBLE,
 
-    `unit_sell_price` DOUBLE,
-    `total_sell_price` DOUBLE,
-
-    `sell_discount` DOUBLE,
-
     `purchased_quantity` BIGINT,
     `remaining_quantity` BIGINT,
     `sold_quantity` BIGINT,

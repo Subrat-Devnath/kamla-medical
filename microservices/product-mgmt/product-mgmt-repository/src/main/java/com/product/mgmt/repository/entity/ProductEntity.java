@@ -16,6 +16,9 @@ public class ProductEntity {
     @EmbeddedId
     private ProductEntityId productEntityId;
 
+    @Column(name = "formula", length = 255)
+    private String formula;
+
     @Column(name = "category", length = 255)
     private String category;
 

@@ -7,6 +7,8 @@ public class ProductDTO extends ProductPurchaseHistoryDTO {
 
     private String productName;
 
+    private String formula;
+
     private Long totalQuantity;
 
     private Long productQuantity;

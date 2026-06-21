@@ -10,7 +10,10 @@ import com.product.mgmt.repository.entity.ProductEntity;
 import com.product.mgmt.repository.entity.ProductEntityId;
 import com.product.mgmt.repository.entity.ProductPurchaseHistoryEntity;
 import com.product.mgmt.repository.entity.ProductPurchaseHistoryEntityId;
+import com.security.config.authentication.JWTAuthenticationFilter;
 import com.security.config.utils.SecurityUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +27,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductRepositoryServiceImpl implements ProductRepository {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProductRepositoryServiceImpl.class);
 
     @Autowired
     private ProductDAO productDao;
@@ -52,7 +57,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
         ProductEntityId productEntityId = new ProductEntityId();
         productEntityId.setOrganizationId(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId());
         productEntityId.setUserId(SecurityUtil.getPrincipal().getUserId());
-        productEntityId.setProductName(productDto.getProductName().toUpperCase());
+        productEntityId.setProductName(productDto.getProductName().trim().toUpperCase());
         entity.setProductEntityId(productEntityId);
         productDao.save(entity);
 
@@ -111,12 +116,16 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
     }
 
     @Override
-    public void deleteProduct(String productName) {
-        ProductEntityId productEntityId = new ProductEntityId();
-        productEntityId.setOrganizationId(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId());
-        productEntityId.setProductName(productName.toUpperCase());
+    public void deleteProduct(List<String> productNames) {
 
-        productDao.deleteById(productEntityId);
+        if (CollectionUtils.isEmpty(productNames)) {
+            logger.info("No product names provided for deletion for organizationId: {}, userId: {}", SecurityUtil.getPrincipal().getOrgId(), SecurityUtil.getPrincipal().getUserId());
+            return;
+        }
+
+        productDao.softDeleteProduct(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), Objects.requireNonNull(SecurityUtil.getPrincipal()).getUserId(), productNames);
+
+        productPurchaseHistoryDAO.softDeleteProductPurchaseHistory(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), Objects.requireNonNull(SecurityUtil.getPrincipal()).getUserId(), productNames);
     }
 
     @Override

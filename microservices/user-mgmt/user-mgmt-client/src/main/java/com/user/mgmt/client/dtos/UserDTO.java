@@ -39,6 +39,8 @@ public class UserDTO implements Serializable {
     //Default provider is local, if user is created by other provider like google, facebook etc. then this field will be updated accordingly.
     private Provider provider = Provider.LOCAL;
 
+    private String organizationId;
+
     private OrganizationDTO organization;
 
     private Set<RolesDTO> roles;

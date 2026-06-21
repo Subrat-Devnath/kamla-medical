@@ -24,12 +24,6 @@ public class ProductPurchaseHistoryDTO implements Serializable {
 
     private Double unitBuyDiscount;
 
-    private Double unitSellPrice;
-
-    private Double totalSellPrice;
-
-    private Double unitSellDiscount;
-
     private Long purchasedQuantity;
 
     private Long remainingQuantity;

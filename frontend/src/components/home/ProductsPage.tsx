@@ -5,6 +5,7 @@ type Product = {
     productName: string;
     productQuantity: number;
     category: string;
+    formula: string;
 };
 
 type ProductPageResponse = {
@@ -27,6 +28,7 @@ function ProductsPage() {
     // form
     const [productName, setProductName] = useState("");
     const [category, setCategory] = useState("");
+    const [formula, setFormula] = useState("");
     const [supplierName, setSupplierName] = useState("");
 
     const [totalQuantity, setTotalQuantity] = useState("");
@@ -34,8 +36,7 @@ function ProductsPage() {
     // pricing
     const [unitListPrice, setUnitListPrice] = useState("");
     const [unitBuyPrice, setUnitBuyPrice] = useState("");
-    const [unitSellPrice, setUnitSellPrice] = useState("");
-
+  
     // dates
     const [purchaseDate, setPurchaseDate] = useState("");
     const [expiryDate, setExpiryDate] = useState("");
@@ -168,13 +169,13 @@ function ProductsPage() {
 
         setProductName("");
         setCategory("");
+        setFormula("");
         setSupplierName("");
 
         setTotalQuantity("");
 
         setUnitListPrice("");
         setUnitBuyPrice("");
-        setUnitSellPrice("");
 
         setPurchaseDate("");
         setExpiryDate("");
@@ -207,6 +208,7 @@ function ProductsPage() {
 
                 productName,
                 category,
+                formula,
                 supplierName,
 
                 totalQuantity: quantity,
@@ -217,7 +219,6 @@ function ProductsPage() {
                 // pricing
                 unitListPrice: Number(unitListPrice),
                 unitBuyPrice: Number(unitBuyPrice),
-                unitSellPrice: Number(unitSellPrice),
 
                 purchaseDate: purchaseEpoch,
                 expiryDate: expiryEpoch,
@@ -434,6 +435,11 @@ function ProductsPage() {
                             {p.category}
                         </div>
 
+                        {/* FORMULA */}
+                        <div className="text-right text-purple-400 font-medium">
+                            {p.formula ? p.formula : "N/A"}
+                        </div>
+
                     </div>
 
                 ))}
@@ -489,6 +495,13 @@ function ProductsPage() {
                             />
 
                             <input
+                                placeholder="Formula"
+                                value={formula}
+                                onChange={(e) => setFormula(e.target.value)}
+                                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10"
+                            />
+
+                            <input
                                 placeholder="Supplier Name"
                                 value={supplierName}
                                 onChange={(e) => setSupplierName(e.target.value)}
@@ -518,15 +531,6 @@ function ProductsPage() {
                                 placeholder="Unit Buy Price"
                                 value={unitBuyPrice}
                                 onChange={(e) => setUnitBuyPrice(e.target.value)}
-                                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                            />
-
-                            {/* UNIT SELL PRICE */}
-                            <input
-                                type="number"
-                                placeholder="Unit Sell Price"
-                                value={unitSellPrice}
-                                onChange={(e) => setUnitSellPrice(e.target.value)}
                                 className="px-4 py-2 rounded-xl bg-white/5 border border-white/10"
                             />
 

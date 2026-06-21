@@ -45,6 +45,4 @@ public class OrganizationDTO implements Serializable {
 
     private Long updatedDate = System.currentTimeMillis();
 
-    private Long orgLoggedinTime;
-
 }

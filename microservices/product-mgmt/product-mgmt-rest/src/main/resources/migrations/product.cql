@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS `product` (
     `organization_id` VARCHAR(36) NOT NULL,
     `user_id` VARCHAR(36) NOT NULL,
     `product_name` VARCHAR(255) NOT NULL,
+    `formula` VARCHAR(255) NOT NULL,
     `product_quantity` BIGINT,
     `category` VARCHAR(255),
     `is_deleted` BOOLEAN DEFAULT FALSE,

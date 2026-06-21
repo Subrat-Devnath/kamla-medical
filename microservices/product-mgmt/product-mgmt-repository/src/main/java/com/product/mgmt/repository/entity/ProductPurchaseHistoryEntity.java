@@ -33,18 +33,6 @@ public class ProductPurchaseHistoryEntity implements Serializable {
     @Column(name = "buy_discount")
     private Double unitBuyDiscount;
 
-    @Column(name = "unit_sell_price")
-    private Double unitSellPrice;
-
-    @Column(name = "total_sell_price")
-    private Double totalSellPrice;
-
-    @Column(name = "sell_discount")
-    private Double unitSellDiscount;
-
-    @Column(name = "purchased_quantity")
-    private Long purchasedQuantity;
-
     @Column(name = "remaining_quantity")
     private Long remainingQuantity;
 

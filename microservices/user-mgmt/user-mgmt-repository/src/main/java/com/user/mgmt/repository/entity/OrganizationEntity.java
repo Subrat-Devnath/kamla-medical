@@ -71,8 +71,5 @@ public class OrganizationEntity implements Serializable {
     @Column(name = "updated_date")
     private Long updatedDate = System.currentTimeMillis();
 
-    @Column(name = "org_loggedin_time")
-    private Long orgLoggedinTime;
-
 
 }

@@ -35,9 +35,9 @@ public class ProductController {
         return productService.searchProduct(productName);
     }
 
-    @GetMapping(path = "/{productName}")
-    public ResponseDTO deleteProduct(@PathVariable(name = "productName") String productName) {
-        productService.deleteProduct(productName);
+    @DeleteMapping(path = "/delete-product-and-history", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseDTO deleteProduct(@RequestBody List<String> productNames) {
+        productService.deleteProduct(productNames);
         return new ResponseDTO(true, null, null);
     }
 

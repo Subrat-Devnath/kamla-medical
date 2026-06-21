@@ -22,14 +22,8 @@ public class SecurityUtil {
     }
 
     public static SourceIdentity getPrincipal() {
-
-        if (SecurityContextHolder.getContext() != null && SecurityContextHolder.getContext().getAuthentication() != null && SecurityContextHolder.getContext().getAuthentication().getPrincipal() != null) {
-            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if (principal instanceof SourceIdentity) {
-                return (SourceIdentity) principal;
-            }
-        }
-        return null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return (SourceIdentity) principal;
     }
 
     public static String getCurrentUserName() {
