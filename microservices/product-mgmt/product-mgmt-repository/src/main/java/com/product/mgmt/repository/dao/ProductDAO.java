@@ -24,8 +24,20 @@ public interface ProductDAO extends JpaRepository<ProductEntity, ProductEntityId
 
     Page<ProductEntity> findByProductEntityIdOrganizationIdAndProductEntityIdUserId(String organizationId, String userId, Pageable pageable);
 
-    @Query("SELECT productEntity FROM ProductEntity productEntity WHERE productEntity.productEntityId.organizationId = :organizationId AND  productEntity.productEntityId.userId = :userId AND productEntity.productEntityId.productName >= :start AND productEntity.productEntityId.productName < :end")
-    Page<ProductEntity> searchProductsWithPagination(@Param("organizationId") String organizationId, @Param("userId") String userId, @Param("start") String start, @Param("end") String end, Pageable pageable);
+    @Query("SELECT productEntity FROM ProductEntity productEntity " +
+            "WHERE productEntity.productEntityId.organizationId = :organizationId " +
+            "AND productEntity.productEntityId.userId = :userId " +
+            "AND ( " +
+            "      (productEntity.productEntityId.productName >= :start AND productEntity.productEntityId.productName < :end) " +
+            "      OR " +
+            "      (productEntity.formula >= :start AND productEntity.formula < :end) " +
+            "    )")
+    Page<ProductEntity> searchProductsWithPagination(
+            @Param("organizationId") String organizationId,
+            @Param("userId") String userId,
+            @Param("start") String start,
+            @Param("end") String end,
+            Pageable pageable);
 
     @Query("SELECT productEntity.productQuantity FROM ProductEntity productEntity WHERE productEntity.productEntityId.organizationId = :organizationId AND productEntity.productEntityId.userId = :userId AND productEntity.productEntityId.productName = :productName")
     Long getProductQuantity(@Param("organizationId") String organizationId, @Param("userId") String userId, @Param("productName") String productName);

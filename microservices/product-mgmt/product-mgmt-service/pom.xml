@@ -1,33 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>subrat-code-base</groupId>
-		<artifactId>product-mgmt</artifactId>
-		<version>1.0</version>
-	</parent>
+    <parent>
+        <groupId>subrat-code-base</groupId>
+        <artifactId>product-mgmt</artifactId>
+        <version>1.0</version>
+    </parent>
 
-	<artifactId>product-mgmt-service</artifactId>
-	<name>product-mgmt-service</name>
+    <artifactId>product-mgmt-service</artifactId>
+    <name>product-mgmt-service</name>
 
-	<dependencies>
+    <dependencies>
 
-		<dependency>
-			<groupId>subrat-code-base</groupId>
-			<artifactId>product-mgmt-repository</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>subrat-code-base</groupId>
+            <artifactId>product-mgmt-repository</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>subrat-code-base</groupId>
-			<artifactId>common-service</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>subrat-code-base</groupId>
+            <artifactId>common-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-	</dependencies>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>kernel</artifactId>
+            <version>7.2.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>layout</artifactId>
+            <version>7.2.5</version>
+        </dependency>
+
+    </dependencies>
 
 </project>

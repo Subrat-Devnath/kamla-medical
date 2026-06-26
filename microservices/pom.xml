@@ -97,6 +97,7 @@
     </build>
 
     <modules>
+        <module>common-service</module>
         <module>service-registry</module>
         <module>api-gateway</module>
         <module>user-mgmt</module>
