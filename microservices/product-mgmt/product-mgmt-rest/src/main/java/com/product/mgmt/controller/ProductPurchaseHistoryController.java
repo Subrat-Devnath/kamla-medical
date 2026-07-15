@@ -23,4 +23,16 @@ public class ProductPurchaseHistoryController {
         return productPurchaseHistoryService.getProductPurchaseHistory(productName, paginationCriteria);
     }
 
+    @PostMapping(path = "/purchase-history-with-pagination", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public DataWithPaginationResponse getProductPurchaseHistoryOrganization(
+            @RequestBody PaginationCriteria paginationCriteria) {
+        return productPurchaseHistoryService.getProductPurchaseHistoryOrganization(paginationCriteria.getPageSize(), paginationCriteria.getPageState());
+    }
+
+    @PostMapping(path = "/search-purchase-history-with-pagination", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public DataWithPaginationResponse searchProductPurchaseHistoryWithPagination(@RequestParam String productName, @RequestParam String supplierName,
+                                                                                 @RequestBody PaginationCriteria paginationCriteria) {
+        return productPurchaseHistoryService.searchProductPurchaseHistoryWithPagination(productName, supplierName, paginationCriteria.getPageSize(), paginationCriteria.getPageState());
+    }
+
 }

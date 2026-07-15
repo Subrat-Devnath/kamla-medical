@@ -1,12 +1,13 @@
 package com.product.mgmt.repository.dto;
 
+import com.common.service.dtos.BaseDTO;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.UUID;
 
 @Data
-public class ProductPurchaseHistoryDTO implements Serializable {
+public class ProductPurchaseHistoryDTO extends BaseDTO implements Serializable {
 
     private String userId;
 
@@ -26,28 +27,6 @@ public class ProductPurchaseHistoryDTO implements Serializable {
 
     private Long purchasedQuantity;
 
-    private Long remainingQuantity;
-
-    private Long soldQuantity;
-
     private String supplierName;
-
-    private boolean isDeleted = false;
-
-    private boolean isExpired = false;
-
-    private Long expiryDate;
-
-    private Long createdDate;
-
-    private String createdUserName;
-
-    private String createdUserId;
-
-    private Long updatedDate;
-
-    private String updatedUserName;
-
-    private String updatedUserId;
 
 }

@@ -4,8 +4,8 @@ import com.user.mgmt.repository.enums.OrgProfile;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.persistence.*;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.sql.Timestamp;
 

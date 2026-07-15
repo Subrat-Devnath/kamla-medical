@@ -129,7 +129,7 @@ function ProductsPage() {
             const token = localStorage.getItem("accessToken");
 
             const response = await fetch(
-                `${API}/search-products-with-pagination?productName=${encodeURIComponent(name)}`,
+                `${API}/search-products-with-pagination?productNameOrFormula=${encodeURIComponent(name)}`,
                 {
                     method: "POST",
                     headers: {
@@ -405,7 +405,7 @@ function ProductsPage() {
 
                     <input
                         type="text"
-                        placeholder="Search product..."
+                        placeholder="Search product or formula..."
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className="w-64 px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:outline-none focus:border-cyan-400"

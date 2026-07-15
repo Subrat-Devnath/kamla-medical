@@ -23,6 +23,13 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>subrat-code-base</groupId>
+			<artifactId>common-service</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<modules>

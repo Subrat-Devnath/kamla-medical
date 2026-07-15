@@ -1,33 +1,47 @@
-# -------------------------
-# 1. Build Stage
-# -------------------------
+# =====================================================
+# STAGE 1: BUILD REACT (VITE) APPLICATION
+# =====================================================
+# Use Node.js image to build the React/Vite application
 FROM node:20 AS build
 
+# Set working directory inside container
 WORKDIR /app
 
-# Copy only package files first (better caching)
+# Copy package files first (optimizes Docker layer caching)
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies (clean install for CI/CD consistency)
 RUN npm ci
 
-# Copy full source
+# Copy full project source code
 COPY . .
 
-# Build argument (Vite env)
+# -----------------------------------------------------
+# Environment variable for Vite build time configuration
+# -----------------------------------------------------
+# This value is embedded into the final build during compilation
 ARG VITE_API_BASE_URL
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
-# Build React app
+# Build production-ready static files (creates /dist folder)
 RUN npm run build
 
-# =========================
-# PRODUCTION STAGE
-# =========================
+
+# =====================================================
+# STAGE 2: PRODUCTION NGINX SERVER
+# =====================================================
+# Use lightweight Nginx to serve static React build
 FROM nginx:alpine
 
+# Copy built static files from build stage to Nginx html folder
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Replace default Nginx config with custom SPA config
+# (important for React Router refresh handling)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 80 for container
 EXPOSE 80
 
+# Start Nginx in foreground mode
 CMD ["nginx", "-g", "daemon off;"]

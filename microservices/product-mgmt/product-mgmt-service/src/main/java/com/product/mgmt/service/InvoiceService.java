@@ -1,5 +1,6 @@
 package com.product.mgmt.service;
 
+import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 import com.product.mgmt.repository.dto.InvoiceDTO;
 import com.product.mgmt.repository.dto.InvoiceItemDTO;
 
@@ -11,5 +12,9 @@ public interface InvoiceService {
 
     InvoiceDTO getInvoiceById(String invoiceId);
 
-    byte[] generatePdf(List<InvoiceItemDTO> invoiceItemDTOs);
+    DataWithPaginationResponse getInvoicesByOrganization(Integer pageSize, String pageState);
+
+    DataWithPaginationResponse searchInvoiceWithPagination(String customerName, Integer pageSize, String pageState);
+
+    byte[] generatePdf(List<InvoiceItemDTO> invoiceItemDTOs, InvoiceDTO invoiceDTOs);
 }

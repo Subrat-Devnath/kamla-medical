@@ -10,5 +10,9 @@ public interface ProductPurchaseHistoryRepository {
 
     DataWithPaginationResponse getProductPurchaseHistory(String productName, PaginationCriteria paginationCriteria);
 
+    DataWithPaginationResponse getProductPurchaseHistoryOrganization(String organizationId, Integer pageSize, String pageState);
+
     List<ProductPurchaseHistoryDTO> getProductQuantities(List<String> productName);
+
+    DataWithPaginationResponse searchProductPurchaseHistoryWithPagination(String productName, String supplierName, Integer pageSize, String pageState);
 }

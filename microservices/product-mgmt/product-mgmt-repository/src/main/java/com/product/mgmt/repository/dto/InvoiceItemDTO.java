@@ -3,7 +3,7 @@ package com.product.mgmt.repository.dto;
 import com.common.service.dtos.BaseDTO;
 import lombok.Data;
 
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 
 @Data
 public class InvoiceItemDTO extends BaseDTO {

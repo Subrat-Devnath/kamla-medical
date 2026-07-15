@@ -30,10 +30,10 @@ function FuturisticMedicalDashboard() {
           </button>
 
           <button
-            onClick={() => navigate("/selling")}
+            onClick={() => navigate("/invoices")}
             className="px-10 py-5 rounded-2xl text-xl font-bold bg-gradient-to-r from-purple-500 to-pink-600 hover:scale-105 transition"
           >
-            Selling
+            Invoices
           </button>
 
 

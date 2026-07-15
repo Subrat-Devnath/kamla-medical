@@ -99,7 +99,7 @@ public class ObjectMapperUtils {
 	}
 
 	public static <S, D> ModelMapper configureModelMapper(Class<S> sourceClass, Class<D> destinationClass) {
-		ModelMapper modelMapper = new ModelMapper();
+		ModelMapper modelMapper = ObjectMapperUtils.createAndGetModelMapper();
 
 		modelMapper.getConfiguration().setFieldMatchingEnabled(true).setMatchingStrategy(MatchingStrategies.LOOSE);
 

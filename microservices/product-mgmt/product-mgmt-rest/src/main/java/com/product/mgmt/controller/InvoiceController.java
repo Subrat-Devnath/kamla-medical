@@ -1,6 +1,8 @@
 package com.product.mgmt.controller;
 
+import com.common.service.dtos.PaginationCriteria;
 import com.common.service.enums.Status;
+import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 import com.product.mgmt.repository.dto.InvoiceDTO;
 import com.product.mgmt.repository.dto.InvoiceItemDTO;
 import com.product.mgmt.service.InvoiceItemService;
@@ -28,6 +30,17 @@ public class InvoiceController {
         return invoiceService.createInvoice(invoiceDTO);
     }
 
+    @PostMapping(path = "/invoices-with-pagination", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public DataWithPaginationResponse getInvoicesByOrganization(
+            @RequestBody PaginationCriteria paginationCriteria) {
+        return invoiceService.getInvoicesByOrganization(paginationCriteria.getPageSize(), paginationCriteria.getPageState());
+    }
+
+    @PostMapping(path = "/search-invoices-with-pagination", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public DataWithPaginationResponse searchInvoiceWithPagination(@RequestParam String customerName,
+                                                                   @RequestBody PaginationCriteria paginationCriteria) {
+        return invoiceService.searchInvoiceWithPagination(customerName, paginationCriteria.getPageSize(), paginationCriteria.getPageState());
+    }
 
     @PostMapping("/invoice/{invoiceId}/submit")
     public ResponseEntity<byte[]> submitInvoice(@PathVariable String invoiceId) {
@@ -45,7 +58,7 @@ public class InvoiceController {
         invoice.setStatus(Status.COMPLETED);
         invoiceService.createInvoice(invoice);
 
-        byte[] pdf = invoiceService.generatePdf(items);
+        byte[] pdf = invoiceService.generatePdf(items, invoice);
 
         return ResponseEntity.ok().header("Content-Type", "application/pdf").body(pdf);
     }

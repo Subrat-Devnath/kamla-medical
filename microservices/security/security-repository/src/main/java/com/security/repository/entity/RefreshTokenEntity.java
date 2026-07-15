@@ -5,10 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.util.UUID;
 
 @Builder
@@ -20,10 +23,10 @@ import java.util.UUID;
 public class RefreshTokenEntity {
 
     @Id
-    @Column(name = "token_id")
+    @Column(name = "token_id", length = 36)
     private UUID tokenId;
 
-    @Column(name = "user_id", nullable = false, length = 255)
+    @Column(name = "user_id", nullable = false, length = 36)
     private String userId;
 
     @Column(name = "created_at")

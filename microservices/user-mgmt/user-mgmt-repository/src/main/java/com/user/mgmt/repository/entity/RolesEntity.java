@@ -2,7 +2,7 @@ package com.user.mgmt.repository.entity;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.UUID;
 

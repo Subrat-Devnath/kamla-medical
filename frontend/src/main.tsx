@@ -11,10 +11,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Login from './pages/Login.tsx'
 import Signup from './pages/Signup.tsx'
 
-import FuturisticMedicalDashboard from './components/home/FuturisticMedicalDashboard.tsx'
+import FuturisticMedicalDashboard from './pages/FuturisticMedicalDashboard.tsx'
 import ForgotPassword from './pages/ForgotPassword.tsx'
-import ProductsPage from './components/home/ProductsPage.tsx'
-import PurchaseHistoryPage from './components/home/PurchaseHistoryPage.tsx'
+import ProductsPage from './pages/product/ProductsPage.tsx'
+import PurchaseHistoryPage from './pages/product/PurchaseHistoryPage.tsx'
+import InvoicePage from './pages/invoice/InvoicePage.tsx'
+import InvoiceItemPage from './pages/invoice/InvoiceItemPage.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
@@ -33,6 +35,9 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/home" element={<FuturisticMedicalDashboard />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="purchase-history/:productName" element={<PurchaseHistoryPage />} />
+        <Route path="invoices" element={<InvoicePage />} />
+        <Route path="/invoice-items/:invoiceNumber/:customerName" element={<InvoiceItemPage />}
+/>
       </Route>
 
 

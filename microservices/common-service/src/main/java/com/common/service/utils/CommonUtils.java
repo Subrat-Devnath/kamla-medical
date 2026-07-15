@@ -1,28 +1,21 @@
 package com.common.service.utils;
 
-import com.common.service.dtos.BaseDTO;
-import com.security.config.utils.SecurityUtil;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class CommonUtils {
 
-    public static void setCreationDetails(BaseDTO baseDTO) {
+    public static int getPageNumber(String pageState) {
 
-        if (baseDTO.getCreatedUserId() == null) {
-            baseDTO.setCreatedUserId(SecurityUtil.getPrincipal().getUserId());
+        if (!StringUtils.hasLength(pageState)) {
+            return 0;
         }
 
-        if (baseDTO.getCreatedUserName() == null) {
-            baseDTO.setCreatedUserName(SecurityUtil.getPrincipal().getUserName());
+        try {
+            return Integer.parseInt(pageState);
+        } catch (NumberFormatException e) {
+            return 0;
         }
-
-        if (baseDTO.getCreatedDate() == null) {
-            baseDTO.setCreatedDate(System.currentTimeMillis());
-        }
-
-        baseDTO.setUpdatedUserId(SecurityUtil.getPrincipal().getUserId());
-        baseDTO.setUpdatedUserName(SecurityUtil.getPrincipal().getUserName());
-        baseDTO.setUpdatedDate(System.currentTimeMillis());
     }
 }

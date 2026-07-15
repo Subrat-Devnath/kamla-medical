@@ -6,17 +6,17 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @MappedSuperclass
-@FilterDef(name = "OrgFilter", parameters = @ParamDef(name = "allowedOrgIdList", type = "string"))
+@FilterDef(name = "OrgFilter", parameters = @ParamDef(name = "allowedOrgIdList", type = String.class))
 @Filter(name = "OrgFilter", condition = "org_id in (:allowedOrgIdList)")
 @Data
 public abstract class RootOrgContained implements Serializable {

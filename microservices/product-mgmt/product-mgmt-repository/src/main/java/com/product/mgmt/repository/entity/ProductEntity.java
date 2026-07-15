@@ -3,10 +3,10 @@ package com.product.mgmt.repository.entity;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Table(name = "product")
 @Entity
@@ -24,6 +24,9 @@ public class ProductEntity {
 
     @Column(name = "product_quantity")
     private Long productQuantity;
+
+    @Column(name = "unit_list_price")
+    private Double unitListPrice;
 
     /// --------- Base entity fields ---------
     @Column(name = "is_deleted")

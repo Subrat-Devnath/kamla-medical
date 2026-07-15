@@ -2,10 +2,10 @@ package com.product.mgmt.repository.entity;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Data
 @Entity
@@ -13,7 +13,7 @@ import javax.persistence.Table;
 public class InvoiceItemEntity {
 
     @EmbeddedId
-    private InvoiceItemEntityId invoiceEntityId;
+    private InvoiceItemEntityId invoiceItemEntityId;
 
     @Column(name = "quantity")
     private Integer quantity;

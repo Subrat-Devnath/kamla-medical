@@ -4,7 +4,7 @@ import com.user.mgmt.client.enums.Provider;
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
 

@@ -1,6 +1,8 @@
 package com.product.mgmt.repository.impl;
 
 import com.common.service.configuration.ObjectBuilder;
+import com.common.service.configuration.ObjectMapperUtils;
+import com.common.service.utils.CommonUtils;
 import com.product.mgmt.repository.ProductRepository;
 import com.product.mgmt.repository.dao.ProductDAO;
 import com.product.mgmt.repository.dao.ProductPurchaseHistoryDAO;
@@ -11,6 +13,8 @@ import com.product.mgmt.repository.entity.ProductEntityId;
 import com.product.mgmt.repository.entity.ProductPurchaseHistoryEntity;
 import com.product.mgmt.repository.entity.ProductPurchaseHistoryEntityId;
 import com.security.config.utils.SecurityUtil;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,13 +48,7 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
             productDto.setPurchaseDate(java.time.LocalDate.now().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli());
         }
 
-        productDto.setCreatedUserId(SecurityUtil.getPrincipal().getUserId());
-        productDto.setCreatedUserName(SecurityUtil.getPrincipal().getUserName());
-        productDto.setCreatedDate(System.currentTimeMillis());
-
-        productDto.setUpdatedUserId(SecurityUtil.getPrincipal().getUserId());
-        productDto.setUpdatedUserName(SecurityUtil.getPrincipal().getUserName());
-        productDto.setUpdatedDate(System.currentTimeMillis());
+        SecurityUtil.setCreationDetails(productDto);
 
         ProductEntity entity = ObjectBuilder.buildDtoFromEntity(productDto, null, ProductEntity.class);
         ProductEntityId productEntityId = new ProductEntityId();
@@ -143,74 +141,34 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
     public DataWithPaginationResponse getProductsByOrganizationId(String organizationId, Integer pageSize, String pageState) {
 
         // Parse pageNumber from pageState (if null, default to 0)
-        int pageNumber = 0;
-        if (StringUtils.hasLength(pageState)) {
-            try {
-                pageNumber = Integer.parseInt(pageState);
-            } catch (NumberFormatException e) {
-                pageNumber = 0;
-            }
-        }
+        int pageNumber = CommonUtils.getPageNumber(pageState);
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<ProductEntity> allProducts = productDao.findByProductEntityIdOrganizationIdAndProductEntityIdUserId(organizationId, SecurityUtil.getPrincipal().getUserId(), pageable);
 
-        DataWithPaginationResponse response = new DataWithPaginationResponse();
-
-        if (allProducts == null || !allProducts.hasContent()) {
-            response.setData(Collections.emptyList());
-            response.setHasNext(false);
-            return response;
-        }
-
-        List<ProductDTO> products = allProducts.stream()
-                .filter(entity -> !entity.isDeleted())
-                .map(entity ->
-                        ObjectBuilder.buildDtoFromEntity(
-                                entity,
-                                entity.getProductEntityId(),
-                                ProductDTO.class
-                        )
-                )
-                .collect(Collectors.toList());
-
-        response.setData(products);
-
-        // Check if next page exists
-        if (!allProducts.hasNext()) {
-            response.setHasNext(false);
-            return response;
-        }
-
-        // Set next page state as the next page number
-        response.setNextPageState(String.valueOf(pageNumber + 1));
-        response.setHasNext(true);
-
-        return response;
+        return getDataWithPaginationResponse(allProducts, pageNumber);
     }
 
     @Override
-    public DataWithPaginationResponse searchProductWithPagination(String organizationId, String productName, Integer pageSize, String pageState) {
+    public DataWithPaginationResponse searchProductWithPagination(String organizationId, String productNameOrFormula, Integer pageSize, String pageState) {
 
-        if (!StringUtils.hasLength(productName)) {
+        if (!StringUtils.hasLength(productNameOrFormula)) {
             return new DataWithPaginationResponse(Collections.emptyList(), null, false);
         }
 
-        String start = productName.toUpperCase();
+        String start = productNameOrFormula.toUpperCase();
         String end = start + Character.MAX_VALUE;
 
         // Parse pageNumber from pageState (if null, default to 0)
-        int pageNumber = 0;
-        if (StringUtils.hasLength(pageState)) {
-            try {
-                pageNumber = Integer.parseInt(pageState);
-            } catch (NumberFormatException e) {
-                pageNumber = 0;
-            }
-        }
+        int pageNumber = CommonUtils.getPageNumber(pageState);
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<ProductEntity> searchResults = productDao.searchProductsWithPagination(organizationId, SecurityUtil.getPrincipal().getUserId(), start, end, pageable);
+
+        return getDataWithPaginationResponse(searchResults, pageNumber);
+    }
+
+    private static DataWithPaginationResponse getDataWithPaginationResponse(Page<ProductEntity> searchResults, int pageNumber) {
 
         DataWithPaginationResponse response = new DataWithPaginationResponse();
 
@@ -220,10 +178,12 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
             return response;
         }
 
+        ModelMapper modelMapper = ObjectMapperUtils.createAndGetModelMapper();
+
         List<ProductDTO> products = searchResults.stream()
                 .filter(entity -> !entity.isDeleted())
                 .map(entity ->
-                        ObjectBuilder.buildDtoFromEntity(
+                        ObjectBuilder.buildDtoFromEntity(modelMapper,
                                 entity,
                                 entity.getProductEntityId(),
                                 ProductDTO.class

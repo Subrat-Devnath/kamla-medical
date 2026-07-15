@@ -79,12 +79,16 @@ public class ObjectBuilder {
             return null;
         }
 
+        if (modelMapper == null) {
+            modelMapper = new ModelMapper();
+        }
+
         // First map entity -> dto
         D dto = ObjectMapperUtils.map(modelMapper, entity, outClass);
 
         // Then map entityId -> same dto object
         if (entityId != null) {
-            modelMapper.map(entityId, dto);
+            ObjectMapperUtils.map(modelMapper, entityId, dto);
         }
 
         return dto;

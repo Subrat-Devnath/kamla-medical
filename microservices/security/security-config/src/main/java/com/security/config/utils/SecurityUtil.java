@@ -1,5 +1,6 @@
 package com.security.config.utils;
 
+import com.common.service.dtos.BaseDTO;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.security.client.dtos.SourceIdentity;
@@ -10,6 +11,25 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 public class SecurityUtil {
+
+    public static void setCreationDetails(BaseDTO baseDTO) {
+
+        if (baseDTO.getCreatedUserId() == null) {
+            baseDTO.setCreatedUserId(SecurityUtil.getPrincipal().getUserId());
+        }
+
+        if (baseDTO.getCreatedUserName() == null) {
+            baseDTO.setCreatedUserName(SecurityUtil.getPrincipal().getUserName());
+        }
+
+        if (baseDTO.getCreatedDate() == null) {
+            baseDTO.setCreatedDate(System.currentTimeMillis());
+        }
+
+        baseDTO.setUpdatedUserId(SecurityUtil.getPrincipal().getUserId());
+        baseDTO.setUpdatedUserName(SecurityUtil.getPrincipal().getUserName());
+        baseDTO.setUpdatedDate(System.currentTimeMillis());
+    }
 
 
     public static SourceIdentity getSecuredIdentity(Claims claims) {

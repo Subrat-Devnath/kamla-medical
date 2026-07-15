@@ -53,9 +53,9 @@ public class ProductController {
     }
 
     @PostMapping(path = "/search-products-with-pagination", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public DataWithPaginationResponse searchProductsWithPagination(@RequestParam String productName,
+    public DataWithPaginationResponse searchProductsWithPagination(@RequestParam String productNameOrFormula,
                                                                    @RequestBody PaginationCriteria paginationCriteria) {
-        return productService.searchProductWithPagination(productName, paginationCriteria.getPageSize(), paginationCriteria.getPageState());
+        return productService.searchProductWithPagination(productNameOrFormula, paginationCriteria.getPageSize(), paginationCriteria.getPageState());
     }
 
     @GetMapping(path = "/product-quantity/{productName}")

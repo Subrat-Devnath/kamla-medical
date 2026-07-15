@@ -1,8 +1,10 @@
 package com.product.mgmt.service.impl;
 
 import com.product.mgmt.repository.InvoiceItemRepository;
+import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 import com.product.mgmt.repository.dto.InvoiceItemDTO;
 import com.product.mgmt.service.InvoiceItemService;
+import com.security.config.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,12 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
 
     @Override
     public InvoiceItemDTO addItem(InvoiceItemDTO invoiceItemDTO) {
-       return invoiceItemRepository.addItem(invoiceItemDTO);
+        return invoiceItemRepository.addItem(invoiceItemDTO);
+    }
+
+    @Override
+    public DataWithPaginationResponse getInvoiceItemsByOrganization(String invoiceNumber, Integer pageSize, String pageState) {
+        return invoiceItemRepository.getInvoiceItemsByOrganization(SecurityUtil.getPrincipal().getOrgId(), invoiceNumber, pageSize, pageState);
     }
 
     @Override

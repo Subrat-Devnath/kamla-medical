@@ -61,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
             return Collections.emptyMap();
         }
 
-        return productQuantities.stream().filter(p -> p.getRemainingQuantity() != null).collect(Collectors.groupingBy(p -> Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId() + "-" + p.getProductName(), Collectors.summingLong(ProductPurchaseHistoryDTO::getRemainingQuantity)));
+        return productQuantities.stream().collect(Collectors.groupingBy(p -> Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId() + "-" + p.getProductName(), Collectors.summingLong(ProductPurchaseHistoryDTO::getPurchasedQuantity)));
     }
 
     @Override
@@ -96,8 +96,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public DataWithPaginationResponse searchProductWithPagination(String productName, Integer pageSize, String pageState) {
-        return productRepository.searchProductWithPagination(SecurityUtil.getPrincipal().getOrgId(), productName, pageSize, pageState);
+    public DataWithPaginationResponse searchProductWithPagination(String productNameOrFormula, Integer pageSize, String pageState) {
+        return productRepository.searchProductWithPagination(SecurityUtil.getPrincipal().getOrgId(), productNameOrFormula, pageSize, pageState);
     }
 
     @Override
