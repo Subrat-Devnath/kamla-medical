@@ -5,6 +5,7 @@ import com.common.service.configuration.ObjectMapperUtils;
 import com.common.service.utils.CommonUtils;
 import com.product.mgmt.repository.InvoiceItemRepository;
 import com.product.mgmt.repository.dao.InvoiceItemDAO;
+import com.product.mgmt.repository.dao.ProductDAO;
 import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 import com.product.mgmt.repository.dto.InvoiceItemDTO;
 import com.product.mgmt.repository.dto.ProductDTO;
@@ -31,10 +32,19 @@ import java.util.stream.Collectors;
 public class InvoiceItemRepositoryImpl implements InvoiceItemRepository {
 
     @Autowired
+    private ProductDAO productDAO;
+
+    @Autowired
     private InvoiceItemDAO invoiceItemDAO;
 
     @Override
     public InvoiceItemDTO addItem(InvoiceItemDTO invoiceItemDTO) {
+
+        Long productQuantity = productDAO.getProductQuantity(SecurityUtil.getPrincipal().getOrgId(), SecurityUtil.getPrincipal().getUserId(), invoiceItemDTO.getProductName().toUpperCase());
+
+        if (productQuantity == null || productQuantity < invoiceItemDTO.getQuantity()) {
+            return null;
+        }
 
         if (invoiceItemDTO.getInvoiceItemId() == null) {
             invoiceItemDTO.setInvoiceItemId(UUID.randomUUID().toString());

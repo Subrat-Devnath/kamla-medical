@@ -8,6 +8,8 @@ import com.security.config.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ProductPurchaseHistoryServiceImpl implements ProductPurchaseHistoryService {
 
@@ -27,5 +29,10 @@ public class ProductPurchaseHistoryServiceImpl implements ProductPurchaseHistory
     @Override
     public DataWithPaginationResponse searchProductPurchaseHistoryWithPagination(String productName, String supplierName, Integer pageSize, String pageState) {
         return productPurchaseHistoryRepository.searchProductPurchaseHistoryWithPagination(productName, supplierName, pageSize, pageState);
+    }
+
+    @Override
+    public void deletePurchaseHistory(String productName, List<String> supplierNameAndDateList) {
+        productPurchaseHistoryRepository.deletePurchaseHistory(productName, supplierNameAndDateList);
     }
 }

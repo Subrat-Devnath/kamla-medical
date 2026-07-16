@@ -45,7 +45,6 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
-
     @PostMapping(path = "/products-with-pagination", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public DataWithPaginationResponse getProductsByOrganization(
             @RequestBody PaginationCriteria paginationCriteria) {

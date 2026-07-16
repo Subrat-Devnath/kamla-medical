@@ -178,6 +178,20 @@ public class ProductPurchaseHistoryRepositoryImpl implements ProductPurchaseHist
 
         return getDataWithPaginationResponse(searchResults, pageNumber);
     }
+
+    @Override
+    public void deletePurchaseHistory(String productName, List<String> supplierNameAndDateList) {
+        if (CollectionUtils.isEmpty(supplierNameAndDateList)) {
+            logger.warn("No supplier names and dates provided for deletion of purchase history for product: {}", productName);
+            return;
+        }
+        List<String> supplierNames = supplierNameAndDateList.stream().map(supplierNameAndDate -> supplierNameAndDate.split("-")[0]).collect(Collectors.toList());
+        List<Long> purchaseDates = supplierNameAndDateList.stream()
+                .map(supplierNameAndDate -> supplierNameAndDate.split("-")[1])
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+        productPurchaseHistoryDAO.softDeletePurchaseHistory(SecurityUtil.getPrincipal().getOrgId(), SecurityUtil.getPrincipal().getUserId(), productName, supplierNames, purchaseDates);
+    }
 }
 
 

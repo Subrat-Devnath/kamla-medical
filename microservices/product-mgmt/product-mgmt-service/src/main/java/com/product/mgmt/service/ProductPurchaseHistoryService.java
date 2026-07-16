@@ -13,4 +13,6 @@ public interface ProductPurchaseHistoryService {
     DataWithPaginationResponse getProductPurchaseHistoryOrganization(Integer pageSize, String pageState);
 
     DataWithPaginationResponse searchProductPurchaseHistoryWithPagination(String productName, String supplierName, Integer pageSize, String pageState);
+
+    void deletePurchaseHistory(String productName, List<String> supplierNameAndDateList);
 }

@@ -29,19 +29,48 @@ public interface ProductPurchaseHistoryDAO extends JpaRepository<ProductPurchase
     int softDeleteProductPurchaseHistory(@Param("organizationId") String organizationID, @Param("userId") String userId, @Param("productNames") List<String> productNames);
 
     @Query("""
-SELECT p
-FROM ProductPurchaseHistoryEntity p
-WHERE p.productPurchaseHistoryEntityId.organizationId = :organizationId
-  AND p.productPurchaseHistoryEntityId.userId = :userId
-  AND p.productPurchaseHistoryEntityId.productName = :productName
-  AND p.productPurchaseHistoryEntityId.supplierName >= :start
-  AND p.productPurchaseHistoryEntityId.supplierName < :end
-ORDER BY p.productPurchaseHistoryEntityId.purchaseDate DESC
-""")
-    Page<ProductPurchaseHistoryEntity> searchProductPurchaseHistoryWithPagination(
-            @Param("organizationId") String organizationId,
-            @Param("userId") String userId,
-            @Param("productName") String productName,
-            @Param("start") String start,
-            @Param("end") String end,
-            Pageable pageable);}
+            SELECT p
+            FROM ProductPurchaseHistoryEntity p
+            WHERE p.productPurchaseHistoryEntityId.organizationId = :organizationId
+              AND p.productPurchaseHistoryEntityId.userId = :userId
+              AND p.productPurchaseHistoryEntityId.productName = :productName
+              AND p.productPurchaseHistoryEntityId.supplierName >= :start
+              AND p.productPurchaseHistoryEntityId.supplierName < :end
+            ORDER BY p.productPurchaseHistoryEntityId.purchaseDate DESC
+            """)
+    Page<ProductPurchaseHistoryEntity> searchProductPurchaseHistoryWithPagination(@Param("organizationId") String organizationId, @Param("userId") String userId, @Param("productName") String productName, @Param("start") String start, @Param("end") String end, Pageable pageable);
+
+    @Query("""
+            SELECT p.purchasedQuantity FROM  ProductPurchaseHistoryEntity p
+             WHERE p.productPurchaseHistoryEntityId.organizationId = :organizationId
+               AND p.productPurchaseHistoryEntityId.userId = :userId
+               AND p.productPurchaseHistoryEntityId.productName = :productName
+               AND p.productPurchaseHistoryEntityId.supplierName IN :supplierNames
+               AND p.productPurchaseHistoryEntityId.purchaseDate IN :purchaseDates
+            """)
+    List<Long> getPurchaseProductQuantities(@Param("organizationId") String organizationId, @Param("userId") String userId, @Param("productName") String productName, @Param("supplierNames") List<String> supplierNames, @Param("purchaseDates") List<Long> purchaseDates);
+
+    @Query("""
+            SELECT p.purchasedQuantity FROM  ProductPurchaseHistoryEntity p
+             WHERE p.productPurchaseHistoryEntityId.organizationId = :organizationId
+               AND p.productPurchaseHistoryEntityId.userId = :userId
+               AND p.productPurchaseHistoryEntityId.productName = :productName
+               AND p.productPurchaseHistoryEntityId.supplierName = :supplierName
+               AND p.productPurchaseHistoryEntityId.purchaseDate = :purchaseDate
+            """)
+    Long getPurchaseProductQuantity(@Param("organizationId") String organizationId, @Param("userId") String userId, @Param("productName") String productName, @Param("supplierName") String supplierName, @Param("purchaseDate") Long purchaseDate);
+
+    @Modifying
+    @Transactional
+    @Query("""
+            UPDATE ProductPurchaseHistoryEntity p
+            SET p.isDeleted = true
+            WHERE p.productPurchaseHistoryEntityId.organizationId = :organizationId
+              AND p.productPurchaseHistoryEntityId.userId = :userId
+              AND p.productPurchaseHistoryEntityId.productName = :productName
+              AND p.productPurchaseHistoryEntityId.supplierName IN :supplierNames
+              AND p.productPurchaseHistoryEntityId.purchaseDate IN :purchaseDates
+            """)
+    void softDeletePurchaseHistory(@Param("organizationId") String organizationId, @Param("userId") String userId, @Param("productName") String productName, @Param("supplierNames") List<String> supplierNames, @Param("purchaseDates") List<Long> purchaseDates);
+
+}

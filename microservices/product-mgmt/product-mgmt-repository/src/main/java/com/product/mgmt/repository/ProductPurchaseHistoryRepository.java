@@ -15,4 +15,6 @@ public interface ProductPurchaseHistoryRepository {
     List<ProductPurchaseHistoryDTO> getProductQuantities(List<String> productName);
 
     DataWithPaginationResponse searchProductPurchaseHistoryWithPagination(String productName, String supplierName, Integer pageSize, String pageState);
+
+    void deletePurchaseHistory(String productName, List<String> supplierNameAndDateList);
 }

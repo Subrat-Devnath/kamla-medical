@@ -64,6 +64,12 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
 
         productPurchaseHistoryEntity.setProductPurchaseHistoryEntityId(productPurchaseHistoryEntityId);
 
+        Long purchaseProductQuantity = productPurchaseHistoryDAO.getPurchaseProductQuantity(productPurchaseHistoryEntityId.getOrganizationId(), productPurchaseHistoryEntityId.getUserId(), productPurchaseHistoryEntityId.getProductName(), productPurchaseHistoryEntityId.getSupplierName(), productPurchaseHistoryEntityId.getPurchaseDate());
+
+        if (purchaseProductQuantity != null) {
+            productPurchaseHistoryEntity.setPurchasedQuantity(productPurchaseHistoryEntity.getPurchasedQuantity() + purchaseProductQuantity);
+        }
+
         productPurchaseHistoryDAO.save(productPurchaseHistoryEntity);
     }
 
@@ -120,9 +126,9 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
             return;
         }
 
-        productDao.softDeleteProduct(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), Objects.requireNonNull(SecurityUtil.getPrincipal()).getUserId(), productNames);
+        productDao.softDeleteProduct(SecurityUtil.getPrincipal().getOrgId(), SecurityUtil.getPrincipal().getUserId(), productNames);
 
-        productPurchaseHistoryDAO.softDeleteProductPurchaseHistory(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), Objects.requireNonNull(SecurityUtil.getPrincipal()).getUserId(), productNames);
+        productPurchaseHistoryDAO.softDeleteProductPurchaseHistory(SecurityUtil.getPrincipal().getOrgId(), SecurityUtil.getPrincipal().getUserId(), productNames);
     }
 
     @Override
