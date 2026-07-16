@@ -41,9 +41,6 @@ public class ProductPurchaseHistoryRepositoryImpl implements ProductPurchaseHist
             return null;
         }
 
-        String start = productName.toUpperCase();
-        String end = start + Character.MAX_VALUE;
-
         int pageSize = paginationCriteria.getPageSize();
         String pageState = paginationCriteria.getPageState();
 
@@ -59,7 +56,7 @@ public class ProductPurchaseHistoryRepositoryImpl implements ProductPurchaseHist
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-        Page<ProductPurchaseHistoryEntity> productPricesEntity = productPurchaseHistoryDAO.getProductPrices(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), SecurityUtil.getPrincipal().getUserId(), start, end, pageable);
+        Page<ProductPurchaseHistoryEntity> productPricesEntity = productPurchaseHistoryDAO.getProductPrices(Objects.requireNonNull(SecurityUtil.getPrincipal()).getOrgId(), SecurityUtil.getPrincipal().getUserId(), productName.toUpperCase(), pageable);
 
 
         DataWithPaginationResponse response = new DataWithPaginationResponse();

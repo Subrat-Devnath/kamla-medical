@@ -56,9 +56,9 @@ function Login() {
         <div className="min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center px-6 py-10">
 
             {/* Background effects */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#0891b2_0%,transparent_25%),radial-gradient(circle_at_bottom_left,#7c3aed_0%,transparent_25%)] opacity-30" />
-            <div className="absolute w-[500px] h-[500px] bg-cyan-500/20 blur-3xl rounded-full -top-32 -right-20" />
-            <div className="absolute w-[500px] h-[500px] bg-purple-500/20 blur-3xl rounded-full -bottom-32 -left-20" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#38bdf8_0%,transparent_30%),radial-gradient(circle_at_bottom_left,#2563eb_0%,transparent_30%)] opacity-40" />
+            <div className="absolute w-[550px] h-[550px] bg-sky-400/30 blur-[120px] rounded-full -top-40 -right-24" />
+            <div className="absolute w-[550px] h-[550px] bg-blue-600/25 blur-[120px] rounded-full -bottom-40 -left-24" />
 
             {/* ANIMATED CARD */}
             <motion.div

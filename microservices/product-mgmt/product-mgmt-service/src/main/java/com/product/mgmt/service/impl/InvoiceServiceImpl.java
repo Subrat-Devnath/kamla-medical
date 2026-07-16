@@ -1,5 +1,7 @@
 package com.product.mgmt.service.impl;
 
+import ch.qos.logback.core.util.StringUtil;
+import com.common.service.enums.Status;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
@@ -19,8 +21,11 @@ import com.product.mgmt.repository.InvoiceRepository;
 import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 import com.product.mgmt.repository.dto.InvoiceDTO;
 import com.product.mgmt.repository.dto.InvoiceItemDTO;
+import com.product.mgmt.service.InvoiceItemService;
 import com.product.mgmt.service.InvoiceService;
+import com.product.mgmt.service.ProductService;
 import com.security.config.utils.SecurityUtil;
+import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +33,21 @@ import java.io.ByteArrayOutputStream;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
 
     @Autowired
     private InvoiceRepository invoiceRepository;
+
+    @Autowired
+    private InvoiceItemService invoiceItemService;
+
+    @Autowired
+    private ProductService productService;
 
     @Override
     public InvoiceDTO createInvoice(InvoiceDTO invoiceDTO) {
@@ -53,6 +67,30 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public DataWithPaginationResponse searchInvoiceWithPagination(String customerName, Integer pageSize, String pageState) {
         return invoiceRepository.searchInvoiceWithPagination(SecurityUtil.getPrincipal().getOrgId(), customerName, pageSize, pageState);
+    }
+
+    @Override
+    public byte[] submitInvoice(String invoiceId) {
+
+        if (StringUtils.isEmpty(invoiceId)) {
+            return null;
+        }
+
+        List<InvoiceItemDTO> items = invoiceItemService.getItemsByInvoiceId(invoiceId);
+
+        Map<String, Integer> productNameAndQuantityMap = items.stream().collect(Collectors.toMap(InvoiceItemDTO::getProductName, InvoiceItemDTO::getQuantity));
+
+        productService.updateProductQuantity(productNameAndQuantityMap);
+
+        InvoiceDTO invoice = getInvoiceById(invoiceId);
+
+        double total = items.stream().mapToDouble(InvoiceItemDTO::getTotalSellPrice).sum();
+
+        invoice.setTotalPrice(total);
+        invoice.setStatus(Status.COMPLETED);
+        createInvoice(invoice);
+
+        return generatePdf(items, invoice);
     }
 
     @Override

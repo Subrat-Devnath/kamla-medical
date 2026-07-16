@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 type Product = {
     productName: string;
+    expiryDate: number;
     productQuantity: number;
     category: string;
     formula: string;
@@ -61,6 +62,40 @@ function ProductsPage() {
     const API = `${BASE_URL}/product-mgmt/api/v1`;
 
     const navigate = useNavigate();
+
+    const getExpiryColor = (expiryDate: number): string => {
+        const expiry = new Date(expiryDate);
+        const today = new Date();
+
+        // Ignore time
+        expiry.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        const diffDays =
+            (expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+
+        if (diffDays < 0) {
+            // Already expired
+            return "text-red-500";
+        }
+
+        if (diffDays <= 20) {
+            // Expires within next 20 days
+            return "text-yellow-400";
+        }
+
+        // More than 20 days remaining
+        return "text-green-400";
+    };
+
+    const formatDate = (timestamp?: number) => {
+        if (!timestamp) return "-";
+        return new Date(timestamp).toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
+    };
 
     // ---------------- FETCH PRODUCTS ----------------
     const fetchProducts = async (
@@ -375,6 +410,7 @@ function ProductsPage() {
 
         <div className="min-h-screen bg-black text-white p-6">
 
+
             {/* TOP BAR */}
             <div className="flex justify-between items-center mb-6">
 
@@ -435,12 +471,13 @@ function ProductsPage() {
             {/* PRODUCTS */}
             <div className="overflow-x-auto rounded-2xl border border-white/10">
                 <table className="w-full min-w-[700px]">
-                    <thead className="bg-cyan-700">
+                    <thead className="bg-sky-400">
                         <tr>
                             <th className="text-center p-4 w-12"> Select </th>
                             <th className="text-left p-4">Product Name</th>
+                            <th className="text-left p-4">Product Expiry Date</th>
                             <th className="text-center p-4">Quantity</th>
-                            <th className="text-center p-4">Product Type</th>
+                            <th className="text-left p-4">Product Type</th>
                             <th className="text-left p-4">Formula</th>
                         </tr>
                     </thead>
@@ -468,27 +505,17 @@ function ProductsPage() {
                                     />
                                 </td>
                                 <td className="p-4">
-                                    <button
-                                        onClick={() =>
-                                            navigate(`/purchase-history/${p.productName}`)
-                                        }
+                                    <button onClick={() => navigate(`/purchase-history/${p.productName}`)}
                                         className="text-cyan-300 hover:text-cyan-400"
                                     >
                                         {p.productName}
                                     </button>
                                 </td>
 
-                                <td className="p-4 text-center text-green-400">
-                                    {p.productQuantity}
-                                </td>
-
-                                <td className="p-4 text-center text-purple-400">
-                                    {p.category}
-                                </td>
-
-                                <td className="p-4 text-purple-400">
-                                    {p.formula || "N/A"}
-                                </td>
+                                <td className={`p-4 text-left ${getExpiryColor(p.expiryDate)}`} > {formatDate(p.expiryDate)}</td>
+                                <td className="p-4 text-center text-green-400"> {p.productQuantity} </td>
+                                <td className="p-4 text-left text-purple-400"> {p.category} </td>
+                                <td className="p-4 text-left text-yellow-400"> {p.formula || "N/A"} </td>
                             </tr>
                         ))}
                     </tbody>

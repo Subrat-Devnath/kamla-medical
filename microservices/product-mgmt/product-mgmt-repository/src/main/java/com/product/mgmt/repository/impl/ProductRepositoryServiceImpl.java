@@ -14,7 +14,6 @@ import com.product.mgmt.repository.entity.ProductPurchaseHistoryEntity;
 import com.product.mgmt.repository.entity.ProductPurchaseHistoryEntityId;
 import com.security.config.utils.SecurityUtil;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -218,5 +217,26 @@ public class ProductRepositoryServiceImpl implements ProductRepository {
             return null;
         }
         return productDao.getProductQuantity(organizationId, SecurityUtil.getPrincipal().getUserId(), productName.toUpperCase());
+    }
+
+    @Override
+    public void updateProductQuantity(Map<String, Integer> productNameAndQuantityMap) {
+
+        List<ProductEntity> products = productDao.getProducts(SecurityUtil.getPrincipal().getOrgId(), SecurityUtil.getPrincipal().getUserId(), new ArrayList<>(productNameAndQuantityMap.keySet()));
+
+        for (ProductEntity product : products) {
+            String productName = product.getProductEntityId().getProductName();
+            Integer quantityToDeduct = productNameAndQuantityMap.get(productName);
+            if (quantityToDeduct != null) {
+                Long currentQuantity = product.getProductQuantity();
+                long newQuantity = currentQuantity - quantityToDeduct;
+                if (newQuantity < 0) {
+                    newQuantity = 0L; // Prevent negative quantity
+                }
+                product.setProductQuantity(newQuantity);
+            }
+        }
+
+        productDao.saveAll(products);
     }
 }

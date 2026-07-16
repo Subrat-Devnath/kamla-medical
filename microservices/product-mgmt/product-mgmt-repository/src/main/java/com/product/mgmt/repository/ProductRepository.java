@@ -4,6 +4,7 @@ import com.product.mgmt.repository.dto.ProductDTO;
 import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ProductRepository {
 
@@ -26,4 +27,6 @@ public interface ProductRepository {
      * Returns only the product_quantity field
      */
     Long getProductQuantity(String organizationId, String userId, String productName);
+
+    void updateProductQuantity(Map<String, Integer> productNameAndQuantityMap);
 }

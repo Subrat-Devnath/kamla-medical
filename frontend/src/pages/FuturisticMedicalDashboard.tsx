@@ -6,8 +6,11 @@ function FuturisticMedicalDashboard() {
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center relative overflow-hidden">
 
-      {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#0f766e_0%,transparent_30%),radial-gradient(circle_at_bottom_left,#1d4ed8_0%,transparent_30%)] opacity-30" />
+      {/* Background effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#38bdf8_0%,transparent_30%),radial-gradient(circle_at_bottom_left,#2563eb_0%,transparent_30%)] opacity-40" />
+      <div className="absolute w-[550px] h-[550px] bg-sky-400/30 blur-[120px] rounded-full -top-40 -right-24" />
+      <div className="absolute w-[550px] h-[550px] bg-blue-600/25 blur-[120px] rounded-full -bottom-40 -left-24" />
+
 
       {/* MAIN CONTENT */}
       <div className="relative z-10 text-center space-y-10">

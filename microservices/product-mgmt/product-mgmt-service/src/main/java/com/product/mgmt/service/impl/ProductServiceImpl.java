@@ -9,6 +9,7 @@ import com.product.mgmt.service.ProductService;
 import com.product.mgmt.service.utils.DiscountCalculatorUtil;
 import com.security.config.utils.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -31,7 +32,7 @@ public class ProductServiceImpl implements ProductService {
         if (productQuantity != null) {
             productDto.setProductQuantity(productDto.getProductQuantity() + productQuantity);
         }
-        productDto.setUnitBuyDiscount(DiscountCalculatorUtil.calculateBuyDiscountPercentage(productDto.getUnitListPrice(), productDto.getUnitBuyPrice()));
+        productDto.setUnitBuyDiscount(DiscountCalculatorUtil.calculateBuyDiscount(productDto.getUnitListPrice(), productDto.getUnitBuyPrice()));
         productDto.setTotalListPrice(DiscountCalculatorUtil.calculateTotalListPrice(productDto.getUnitListPrice(), productDto.getPurchasedQuantity()));
         productDto.setTotalBuyPrice(DiscountCalculatorUtil.calculateTotalBuyPrice(productDto.getUnitBuyPrice(), productDto.getPurchasedQuantity()));
         productRepository.addProduct(productDto);
@@ -103,6 +104,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Long getProductQuantity(String productName) {
         return productRepository.getProductQuantity(SecurityUtil.getPrincipal().getOrgId(), SecurityUtil.getPrincipal().getUserId(), productName);
+    }
+
+    @Override
+    public void updateProductQuantity(Map<String, Integer> productNameAndQuantityMap) {
+        productRepository.updateProductQuantity(productNameAndQuantityMap);
     }
 
 }

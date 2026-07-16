@@ -52,6 +52,31 @@ function PurchaseHistoryPage() {
         });
     };
 
+    const getExpiryColor = (expiryDate: number): string => {
+        const expiry = new Date(expiryDate);
+        const today = new Date();
+
+        // Ignore time
+        expiry.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        const diffDays =
+            (expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+
+        if (diffDays < 0) {
+            // Already expired
+            return "text-red-500";
+        }
+
+        if (diffDays <= 20) {
+            // Expires within next 20 days
+            return "text-yellow-400";
+        }
+
+        // More than 20 days remaining
+        return "text-green-400";
+    };
+
     const formatValue = (value?: number | null) => {
         if (value === null || value === undefined) return "-";
         return value;
@@ -341,7 +366,7 @@ function PurchaseHistoryPage() {
                                             />
                                         </td>
                                         <td className="px-4 py-3">{formatDate(h.purchaseDate)}</td>
-                                        <td className="px-4 py-3 text-red-300">{formatDate(h.expiryDate)}</td>
+                                        <td className={`p-4 text-left ${getExpiryColor(h.expiryDate)}`}> {formatDate(h.expiryDate)}</td>
                                         <td className="px-4 py-3 text-right font-semibold">{formatValue(h.purchasedQuantity)}</td>
                                         <td className="px-4 py-3 text-right">₹{formatValue(h.unitListPrice)}</td>
                                         <td className="px-4 py-3 text-right text-cyan-300 font-medium">₹{formatValue(h.totalListPrice)}</td>

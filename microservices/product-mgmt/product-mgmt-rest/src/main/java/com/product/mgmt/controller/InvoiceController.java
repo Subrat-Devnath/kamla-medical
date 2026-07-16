@@ -14,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/api/v1", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -21,9 +24,6 @@ public class InvoiceController {
 
     @Autowired
     private InvoiceService invoiceService;
-
-    @Autowired
-    private InvoiceItemService invoiceItemService;
 
     @PostMapping(path = "/invoice", consumes = MediaType.APPLICATION_JSON_VALUE)
     public InvoiceDTO createInvoice(@RequestBody InvoiceDTO invoiceDTO) {
@@ -38,7 +38,7 @@ public class InvoiceController {
 
     @PostMapping(path = "/search-invoices-with-pagination", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public DataWithPaginationResponse searchInvoiceWithPagination(@RequestParam String customerName,
-                                                                   @RequestBody PaginationCriteria paginationCriteria) {
+                                                                  @RequestBody PaginationCriteria paginationCriteria) {
         return invoiceService.searchInvoiceWithPagination(customerName, paginationCriteria.getPageSize(), paginationCriteria.getPageState());
     }
 
@@ -49,16 +49,7 @@ public class InvoiceController {
             return ResponseEntity.badRequest().build();
         }
 
-        List<InvoiceItemDTO> items = invoiceItemService.getItemsByInvoiceId(invoiceId);
-        InvoiceDTO invoice = invoiceService.getInvoiceById(invoiceId);
-
-        double total = items.stream().mapToDouble(InvoiceItemDTO::getTotalSellPrice).sum();
-
-        invoice.setTotalPrice(total);
-        invoice.setStatus(Status.COMPLETED);
-        invoiceService.createInvoice(invoice);
-
-        byte[] pdf = invoiceService.generatePdf(items, invoice);
+        byte[] pdf = invoiceService.submitInvoice(invoiceId);
 
         return ResponseEntity.ok().header("Content-Type", "application/pdf").body(pdf);
     }

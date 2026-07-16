@@ -302,7 +302,7 @@ function InvoicePage() {
                             }
 
                         }}
-                        className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500"
+                        className="px-4 py-2 rounded-xl bg-sky-400 hover:bg-sky-500"
                     >
                         Search
                     </button>
@@ -324,7 +324,7 @@ function InvoicePage() {
 
                 <table className="w-full">
 
-                    <thead className="bg-sky-500 text-white">
+                    <thead className="bg-sky-400 text-white">
 
                         <tr>
 
@@ -338,57 +338,54 @@ function InvoicePage() {
 
                     </thead>
 
-                    <tbody>
+                   <tbody>
+    {invoices.map((invoice) => (
+        <tr
+            key={invoice.invoiceNumber}
+            className="border-t border-white/10 hover:bg-white/5 transition-colors"
+        >
+            {/* Invoice Number (Clickable) */}
+            <td className="p-4">
+                <button
+                    onClick={() =>
+                        navigate(`/invoice-items/${invoice.invoiceNumber}/${invoice.customerName}`)
+                    }
+                    className="font-medium text-cyan-300 hover:text-cyan-200 hover:underline"
+                >
+                    {invoice.invoiceNumber?.slice(0, 10)}
+                </button>
+            </td>
 
-                        {invoices.map((invoice) => (
+            {/* Customer Name */}
+            <td className="p-4 text-slate-100 font-medium">
+                {invoice.customerName}
+            </td>
 
-                            <tr
-                                key={invoice.invoiceNumber}
-                                className="border-t border-white/10 hover:bg-white/5"
-                            >
+            {/* Address */}
+            <td className="p-4 text-sky-300">
+                {invoice.customerAddress?.trim() || "-"}
+            </td>
 
-                                <td className="p-4">
+            {/* Amount */}
+            <td className="p-4 text-center text-emerald-300 font-semibold">
+                {invoice.totalPrice != null ? `₹ ${invoice.totalPrice}` : "-"}
+            </td>
 
-                                    <button
-                                        onClick={() => navigate(`/invoice-items/${invoice.invoiceNumber}/${invoice.customerName}`)}
-                                        className="text-cyan-300 hover:text-cyan-400"
-                                    >
-                                        {invoice.invoiceNumber}
-                                    </button>
-
-                                </td>
-
-                                <td className="p-4">
-                                    {invoice.customerName}
-                                </td>
-
-                                <td className="p-4">
-                                    {invoice.customerAddress}
-                                </td>
-
-                                <td className="p-4 text-center">
-                                    ₹ {invoice.totalPrice}
-                                </td>
-
-                                <td className="p-4 text-center">
-
-                                    <span
-                                        className={
-                                            invoice.status === "COMPLETED"
-                                                ? "text-green-400"
-                                                : "text-yellow-400"
-                                        }
-                                    >
-                                        {invoice.status}
-                                    </span>
-
-                                </td>
-
-                            </tr>
-
-                        ))}
-
-                    </tbody>
+            {/* Status */}
+            <td className="p-4 text-center">
+                <span
+                    className={
+                        invoice.status === "COMPLETED"
+                            ? "text-green-400 font-semibold"
+                            : "text-amber-400 font-semibold"
+                    }
+                >
+                    {invoice.status}
+                </span>
+            </td>
+        </tr>
+    ))}
+</tbody>
 
                 </table>
 
@@ -428,9 +425,7 @@ function InvoicePage() {
 
                         <div className="space-y-4">
 
-                            <input
-                                placeholder="Customer Name"
-                                value={customerName}
+                            <input  placeholder="Customer Name" value={customerName}
                                 onChange={(e) => setCustomerName(e.target.value)}
                                 className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10"
                             />

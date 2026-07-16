@@ -16,5 +16,7 @@ public interface InvoiceService {
 
     DataWithPaginationResponse searchInvoiceWithPagination(String customerName, Integer pageSize, String pageState);
 
+    byte[] submitInvoice(String invoiceId);
+
     byte[] generatePdf(List<InvoiceItemDTO> invoiceItemDTOs, InvoiceDTO invoiceDTOs);
 }
