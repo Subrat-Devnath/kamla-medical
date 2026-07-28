@@ -54,4 +54,9 @@ public class InvoiceController {
         return ResponseEntity.ok().header("Content-Type", "application/pdf").body(pdf);
     }
 
+    @GetMapping(path = "/invoice", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public InvoiceDTO getInvoiceById(@RequestParam String invoiceId) {
+        return invoiceService.getInvoiceById(invoiceId);
+    }
+
 }

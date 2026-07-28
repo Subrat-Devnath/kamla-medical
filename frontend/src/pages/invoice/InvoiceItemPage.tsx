@@ -70,6 +70,9 @@ function InvoiceItemPage() {
         unitSellDiscount: 0,
     });
 
+    const [invoiceStatus, setInvoiceStatus] = useState("");
+    const isInvoiceLocked = invoiceStatus === "COMPLETED";
+
     // -------------------------------------------------------
     // Fetch Invoice Items
     // -------------------------------------------------------
@@ -207,8 +210,38 @@ function InvoiceItemPage() {
         }
     };
 
+    const fetchInvoice = async () => {
+        try {
+            const token = localStorage.getItem("accessToken");
+
+            const response = await fetch(
+                `${PRODUCT_API}/invoice?invoiceId=${invoiceNumber}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch invoice.");
+            }
+
+            const data = await response.json();
+            setInvoiceStatus(data.status);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
     const addInvoiceItem = async (product: Product) => {
         try {
+            if (isInvoiceLocked) {
+                setError("This invoice has already been completed and cannot be modified.");
+                return;
+            }
             setLoading(true);
             setError("");
 
@@ -368,6 +401,10 @@ function InvoiceItemPage() {
 
     const saveInlineEdit = async (item: InvoiceItem) => {
         try {
+            if (isInvoiceLocked) {
+                setError("This invoice has already been completed and cannot be modified.");
+                return;
+            }
             setLoading(true);
             setError("");
             const token = localStorage.getItem("accessToken");
@@ -416,6 +453,10 @@ function InvoiceItemPage() {
     // -------------------------------------------------------
     const handleGenerateInvoice = async () => {
         try {
+            if (isInvoiceLocked) {
+                setError("This invoice has already been completed and cannot be modified.");
+                return;
+            }
             setLoading(true);
             setError("");
             const token = localStorage.getItem("accessToken");
@@ -505,6 +546,10 @@ function InvoiceItemPage() {
     };
 
     const openProductModal = () => {
+        if (isInvoiceLocked) {
+            setError("This invoice has already been completed and cannot be modified.");
+            return;
+        }
         setSearchText("");
         setIsSearchMode(false);
         setProductPageState(null);
@@ -515,6 +560,7 @@ function InvoiceItemPage() {
     };
 
     useEffect(() => {
+        fetchInvoice();
         fetchInvoiceItems(null, false);
     }, []);
 
@@ -540,20 +586,41 @@ function InvoiceItemPage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                        <button
-                            onClick={openProductModal}
-                            className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-slate-700 text-slate-200 font-semibold text-sm transition-all active:scale-95"
-                        >
-                            + Add Product
-                        </button>
 
-                        <button
-                            onClick={handleGenerateInvoice}
-                            disabled={loading}
-                            className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-950/40 transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
-                        >
-                            Generate Invoice
-                        </button>
+                        {/* Add Product */}
+                        <div className="relative group">
+                            <button
+                                onClick={openProductModal}
+                                disabled={isInvoiceLocked}
+                                className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-slate-700 text-slate-200 font-semibold text-sm transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
+                            >
+                                + Add Product
+                            </button>
+
+                            {isInvoiceLocked && (
+                                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover:block whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-xs text-white shadow-lg z-50">
+                                    Invoice is locked. You cannot add products.
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Generate Invoice */}
+                        <div className="relative group">
+                            <button
+                                onClick={handleGenerateInvoice}
+                                disabled={loading || isInvoiceLocked || invoiceItems.length === 0}
+                                className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-950/40 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
+                            >
+                                Generate Invoice
+                            </button>
+
+                            {isInvoiceLocked && (
+                                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover:block whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-xs text-white shadow-lg z-50">
+                                    Invoice is locked. You cannot generate the invoice.
+                                </div>
+                            )}
+                        </div>
+
                     </div>
                 </div>
 
@@ -700,12 +767,17 @@ function InvoiceItemPage() {
                                                             </button>
                                                         </div>
                                                     ) : (
+
+
                                                         <button
                                                             onClick={() => startInlineEditing(index, item)}
+                                                            disabled={isInvoiceLocked}
                                                             className="px-3 py-1 text-xs font-semibold rounded bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-600/30 transition-all"
                                                         >
                                                             Edit
                                                         </button>
+
+
                                                     )}
                                                 </td>
                                             </tr>
