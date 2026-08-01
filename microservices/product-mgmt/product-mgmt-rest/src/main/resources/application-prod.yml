@@ -56,7 +56,7 @@ security:
     refresh-ttl-seconds: 86400
     # Issuer of the JWT token (who created the token)
     # Used for validation and tracking
-    issuer: kamlamedical.com
+    issuer: ${DOMAIN_NAME}
     # Cookie name where access token will be stored in browser
     access-token-cookie-name: accessToken
     # Cookie name where refresh token will be stored
@@ -72,4 +72,4 @@ security:
     cookie-same-site: lax
     # Domain for which cookie is valid
     # 'localhost' works for local dev, in prod use your actual domain (e.g., example.com)
-    cookie-domain: kamlamedical.com
+    cookie-domain: ${DOMAIN_NAME}

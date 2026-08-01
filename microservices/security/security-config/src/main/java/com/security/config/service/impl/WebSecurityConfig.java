@@ -45,7 +45,6 @@ public class WebSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-        // return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @Bean
@@ -68,7 +67,10 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .cors(AbstractHttpConfigurer::disable)
+                // 1. Enable CORS and attach your custom CorsConfigurationSource bean
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // 2. Disable CSRF for stateless REST APIs
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers ->
                         headers.cacheControl(HeadersConfigurer.CacheControlConfig::disable)

@@ -24,8 +24,7 @@ eureka:
     register-with-eureka: true       # register to eureka
     fetch-registry: true    
     service-url:
-      defaultZone: http://localhost:8761/eureka/ 
-      #defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}   
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
 
 ##--------- fien properties ---------
 
@@ -50,11 +49,11 @@ security:
     secret: bXlTdXBlclNlY3VyZUhTNTEyS2V5VGhhdElzQXRMZWFzdDY0Qnl0ZXNMb25nRm9yU2VjdXJlSldUVG9rZW5TaWduaW5nMTIzNDU2
     access-ttl-seconds: 36000 
     refresh-ttl-seconds: 86400
-    issuer: kamlamedical.com
+    issuer: ${DOMAIN_NAME}
     access-token-cookie-name: accessToken
     refresh-token-cookie-name: refreshToken
     cookie-secure: true
     cookie-http-only: true
     cookie-same-site: lax
-    cookie-domain: localhost
+    cookie-domain: ${DOMAIN_NAME}
   
