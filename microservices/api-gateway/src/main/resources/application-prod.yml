@@ -82,8 +82,8 @@ spring:
             cors-configurations:
               '[/**]':
                 allowedOrigins:
-                  - "http://localhost:5173"
-                  - "http://127.0.0.1:5173"
+                  - "https://kamlamedical.com"
+                  - "https://www.kamlamedical.com"
                 allowedMethods:
                   - GET
                   - POST
@@ -106,4 +106,4 @@ eureka:
     secret: bXlTdXBlclNlY3VyZUhTNTEyS2V5VGhhdElzQXRMZWFzdDY0Qnl0ZXNMb25nRm9yU2VjdXJlSldUVG9rZW5TaWduaW5nMTIzNDU2
     access-ttl-seconds: 36000
     refresh-ttl-seconds: 86400
-    issuer: kamlamedical.com
+    issuer: ${DOMAIN_NAME}
