@@ -1,83 +1,112 @@
+import { useMemo } from "react";
+import { NavLink, Outlet } from "react-router-dom";
+import { CircleHelp, Home, LogOut } from "lucide-react";
 
-
-
-import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
 function ReactLayout() {
-  const navigate = useNavigate();
+  const user = useMemo(() => {
+    const email = localStorage.getItem("userEmail") || "Guest";
 
-  const [showProfile, setShowProfile] = useState(false);
+    const username = email.includes("@")
+      ? email.split("@")[0]
+      : email;
 
-  // get user from localStorage (after login)
-  const user = {
-    email: localStorage.getItem("userEmail") || "guest@email.com",
+    return {
+      username,
+      initial: username.charAt(0).toUpperCase(),
+    };
+  }, []);
+
+  const handleLogout = () => {
+    // Clear all stored data
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Redirect to login page
+    window.location.href = "/";
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative">
+    <div className="relative min-h-screen bg-black text-white">
+      {/* Background */}
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_top_right,#38bdf8_0%,transparent_30%),radial-gradient(circle_at_bottom_left,#2563eb_0%,transparent_30%)] opacity-40" />
+      <div className="pointer-events-none fixed -top-40 -right-24 h-[550px] w-[550px] rounded-full bg-sky-400/30 blur-[120px]" />
+      <div className="pointer-events-none fixed -bottom-40 -left-24 h-[550px] w-[550px] rounded-full bg-blue-600/25 blur-[120px]" />
 
-      {/* NAVBAR */}
-      <div className="flex justify-end p-4">
-        <button
-          onClick={() => setShowProfile(true)}
-          className="px-5 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20"
-        >
-          Profile
-        </button>
-      </div>
+      <div className="relative z-10 flex min-h-screen">
+        {/* Sidebar */}
+        <aside className="group sticky top-0 z-50 flex h-screen w-[88px] flex-col overflow-hidden border-r border-white/10 bg-black/50 px-3 py-5 backdrop-blur-xl transition-all duration-300 ease-in-out hover:w-64">
+          {/* User Info */}
+          <div className="mb-8 flex items-center gap-3 px-1">
+            <div className="flex h-10 w-10 min-w-[40px] items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 text-sm font-bold text-black">
+              {user.initial}
+            </div>
 
-      {/* PAGE CONTENT */}
-      <Outlet />
+            <div className="hidden overflow-hidden group-hover:block">
+              <p className="truncate text-base font-bold text-cyan-300">
+                {user.username}
+              </p>
+              <p className="text-xs text-gray-500">
+                Logged in
+              </p>
+            </div>
+          </div>
 
-      {/* PROFILE SIDEBAR */}
-      <div
-        className={`fixed top-0 right-0 h-full w-80 bg-black/90 backdrop-blur-2xl border-l border-white/10 shadow-2xl transform transition-transform duration-300 z-50
-                ${showProfile ? "translate-x-0" : "translate-x-full"}`}
-      >
-        <div className="p-6 space-y-6">
-
-          <div className="flex justify-between">
-            <h2 className="text-xl font-bold text-cyan-400">
-              User Profile
-            </h2>
-
-            <button
-              onClick={() => setShowProfile(false)}
-              className="text-gray-400"
+          {/* Navigation */}
+          <nav className="flex-1 space-y-2">
+            <NavLink
+              to="/home"
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300 ${
+                  isActive
+                    ? "bg-cyan-500/15 text-cyan-300"
+                    : "text-gray-400 hover:bg-white/5 hover:text-white"
+                }`
+              }
             >
-              ✕
+              <Home size={20} className="min-w-[20px]" />
+
+              <span className="hidden whitespace-nowrap group-hover:inline">
+                Home
+              </span>
+            </NavLink>
+          </nav>
+
+          {/* Bottom Menu */}
+          <div className="space-y-2 border-t border-white/10 pt-4">
+            {/* Help */}
+            <button
+              type="button"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-gray-400 transition-all duration-300 hover:bg-white/5 hover:text-white"
+            >
+              <CircleHelp size={20} className="min-w-[20px]" />
+
+              <span className="hidden whitespace-nowrap group-hover:inline">
+                Help
+              </span>
+            </button>
+
+            {/* Logout */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-red-400 transition-all duration-300 hover:bg-red-500/10 hover:text-red-300"
+            >
+              <LogOut size={20} className="min-w-[20px]" />
+
+              <span className="hidden whitespace-nowrap group-hover:inline">
+                Sign Out
+              </span>
             </button>
           </div>
+        </aside>
 
-          <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-            <p className="text-gray-400 text-sm">Email</p>
-            <p className="text-lg font-semibold">{user.email}</p>
-          </div>
-
-          <button
-            onClick={() => {
-              localStorage.clear();
-              navigate("/");
-            }}
-            className="w-full py-3 bg-red-600 rounded-xl"
-          >
-            Logout
-          </button>
-
-        </div>
+        {/* Main Content */}
+        <main className="relative min-w-0 flex-1">
+          <Outlet />
+        </main>
       </div>
-
-      {/* BACKDROP */}
-      {showProfile && (
-        <div
-          onClick={() => setShowProfile(false)}
-          className="fixed inset-0 bg-black/60 z-40"
-        />
-      )}
     </div>
   );
 }
 
-
-
-export default ReactLayout
+export default ReactLayout;
