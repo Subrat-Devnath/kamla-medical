@@ -78,6 +78,10 @@ spring:
                 - GlobalAuthHeaderFilter
                 - PreserveHostHeader
 
+          default-filters:
+            # Keeps a single CORS header set if a downstream service also emits one
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials Vary, RETAIN_UNIQUE
+
           globalcors:
             cors-configurations:
               '[/**]':
