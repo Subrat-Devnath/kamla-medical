@@ -1,5 +1,35 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  CalendarDays,
+  FlaskConical,
+  History,
+  Package,
+  PackageSearch,
+  Plus,
+  Save,
+  Trash2,
+  TriangleAlert,
+} from "lucide-react";
+
+import {
+  EmptyState,
+  ErrorBanner,
+  Field,
+  InfoBox,
+  InfoRow,
+  LoadingStrip,
+  Modal,
+  NeonButton,
+  PageHeader,
+  PageShell,
+  Pagination,
+  Panel,
+  Pill,
+  SearchBar,
+  TextInput,
+} from "@/components/hud";
+import { cn } from "@/lib/utils";
 
 type Product = {
     productName: string;
@@ -76,16 +106,35 @@ function ProductsPage() {
 
         if (diffDays < 0) {
             // Already expired
-            return "text-red-500";
+            return "text-rose-400";
         }
 
         if (diffDays <= 20) {
             // Expires within next 20 days
-            return "text-yellow-400";
+            return "text-amber-300";
         }
 
         // More than 20 days remaining
-        return "text-green-400";
+        return "text-emerald-400";
+    };
+
+    const getExpiryStatus = (expiryDate?: number) => {
+        if (!expiryDate) return null;
+
+        const expiry = new Date(expiryDate);
+        const today = new Date();
+
+        expiry.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        const diffDays =
+            (expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+
+        if (diffDays < 0) return { tone: "rose" as const, label: "Expired" };
+        if (diffDays <= 20)
+            return { tone: "amber" as const, label: `${Math.round(diffDays)}d left` };
+
+        return { tone: "emerald" as const, label: "In date" };
     };
 
     const formatDate = (timestamp?: number) => {
@@ -407,91 +456,90 @@ function ProductsPage() {
     };
 
     return (
+        <PageShell>
+            <PageHeader
+                eyebrow="Inventory"
+                title="Manage Products"
+                icon={Package}
+                backTo="/home"
+                subtitle="Track stock, formulas and expiry dates across your catalogue."
+                actions={
+                    <>
+                        {selectedProducts.length > 0 && (
+                            <NeonButton
+                                variant="danger"
+                                icon={Trash2}
+                                onClick={() => setShowDeleteConfirm(true)}
+                            >
+                                Delete ({selectedProducts.length})
+                            </NeonButton>
+                        )}
 
-        <div className="min-h-screen bg-black text-white p-6">
+                        <NeonButton
+                            variant="primary"
+                            icon={Plus}
+                            onClick={() => setShowAddModal(true)}
+                        >
+                            Add Product
+                        </NeonButton>
+                    </>
+                }
+            />
 
+            <SearchBar
+                value={searchText}
+                onChange={setSearchText}
+                onSubmit={handleSearch}
+                placeholder="Search product or formula…"
+                className="sm:justify-end"
+            />
 
-            {/* TOP BAR */}
-            <div className="flex justify-between items-center mb-6">
+            {error && <ErrorBanner message={error} onDismiss={() => setError("")} />}
 
-                <button
-                    onClick={() => navigate("/home")}
-                    className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20"
-                >
-                    ← Back
-                </button>
+            {loading && <LoadingStrip label="Loading products…" />}
 
-                <button
-                    onClick={() => setShowAddModal(true)}
-                    className="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-500"
-                >
-                    + Add Product
-                </button>
-
-            </div>
-
-            <h1 className="text-3xl font-bold text-cyan-400 mb-6">
-                Manage Products
-            </h1>
-
-            {/* SEARCH */}
-            <div className="flex justify-end mb-6">
-
-                <div className="flex gap-2 items-center">
-
-                    <input
-                        type="text"
-                        placeholder="Search product or formula..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        className="w-64 px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:outline-none focus:border-cyan-400"
-                    />
-
-                    <button
-                        onClick={handleSearch}
-                        className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500"
-                    >
-                        Search
-                    </button>
-
-                </div>
-
-            </div>
-
-            {/* ERROR */}
-            {error && (
-                <p className="text-red-400 mb-4">{error}</p>
-            )}
-
-            {/* LOADING */}
-            {loading && (
-                <p className="text-cyan-400 mb-4">Loading...</p>
-            )}
-
-            {/* PRODUCTS — BOX FORMAT */}
             {products.length === 0 && !loading ? (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center text-slate-400">
-                    No products found.
-                </div>
+                <EmptyState
+                    icon={PackageSearch}
+                    title="No products found"
+                    description={
+                        isSearchMode
+                            ? "No product matches your search. Try a different name or formula."
+                            : "Add your first product to start tracking stock and expiry."
+                    }
+                    action={
+                        <NeonButton
+                            variant="primary"
+                            icon={Plus}
+                            onClick={() => setShowAddModal(true)}
+                            className="mt-2"
+                        >
+                            Add Product
+                        </NeonButton>
+                    }
+                />
             ) : (
-                <div className="space-y-5">
+                <div className="space-y-4">
                     {products.map((p) => {
                         const selected = selectedProducts.includes(p.productName);
+                        const expiryStatus = getExpiryStatus(p.expiryDate);
+
                         return (
-                            <div
+                            <Panel
                                 key={p.productName}
-                                className={`rounded-2xl border bg-white/[0.03] p-5 transition-colors ${
-                                    selected
-                                        ? "border-cyan-400/50 bg-cyan-500/5"
-                                        : "border-white/10 hover:border-white/20"
-                                }`}
+                                interactive
+                                className={cn(
+                                    "p-4 sm:p-5",
+                                    selected && "border-cyan-400/50 bg-cyan-400/[0.06]",
+                                )}
                             >
                                 {/* Header */}
-                                <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                                    <div className="flex items-start gap-3 min-w-0">
+                                <div className="mb-4 flex items-start gap-3">
+                                    <label className="flex shrink-0 cursor-pointer items-center pt-1">
                                         <input
                                             type="checkbox"
                                             checked={selected}
+                                            aria-label={`Select ${p.productName}`}
                                             onChange={(e) => {
                                                 if (e.target.checked) {
                                                     setSelectedProducts((prev) => [...prev, p.productName]);
@@ -501,306 +549,246 @@ function ProductsPage() {
                                                     );
                                                 }
                                             }}
-                                            className="mt-1.5 h-4 w-4 cursor-pointer shrink-0"
+                                            className="hud-checkbox"
                                         />
-                                        <div className="min-w-0">
-                                            <h2 className="text-xl font-bold text-white truncate">
-                                                {p.productName}
-                                            </h2>
-                                            <p className="mt-1 text-sm text-slate-400">
-                                                Category{" "}
-                                                <span className="text-purple-300">{p.category || "—"}</span>
-                                                {" · "}
-                                                Formula{" "}
-                                                <span className="text-yellow-300">{p.formula || "N/A"}</span>
-                                            </p>
+                                    </label>
+
+                                    <div className="min-w-0 flex-1">
+                                        <h2 className="text-base leading-snug font-bold text-white sm:text-lg">
+                                            {p.productName}
+                                        </h2>
+
+                                        <div className="mt-2 flex flex-wrap gap-1.5">
+                                            <Pill tone="cyan" icon={Package}>
+                                                Qty {p.productQuantity}
+                                            </Pill>
+                                            {p.category && (
+                                                <Pill tone="violet">{p.category}</Pill>
+                                            )}
+                                            {expiryStatus && (
+                                                <Pill tone={expiryStatus.tone} icon={CalendarDays}>
+                                                    {expiryStatus.label}
+                                                </Pill>
+                                            )}
                                         </div>
                                     </div>
-                                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-cyan-300">
-                                        Qty {p.productQuantity}
-                                    </span>
                                 </div>
 
                                 {/* Info boxes */}
                                 <div className="grid gap-3 sm:grid-cols-3">
-                                    <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-4">
-                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-violet-300">
-                                            Inventory
-                                        </p>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Stock</span>
-                                                <span className="font-semibold text-green-400">
-                                                    {p.productQuantity}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Type</span>
-                                                <span className="font-medium text-purple-300">
-                                                    {p.category || "—"}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <InfoBox tone="violet" label="Inventory" icon={Package}>
+                                        <InfoRow
+                                            label="Stock"
+                                            value={p.productQuantity}
+                                            valueClassName="text-emerald-400 font-semibold"
+                                        />
+                                        <InfoRow
+                                            label="Category"
+                                            value={p.category || "—"}
+                                            valueClassName="text-violet-300"
+                                        />
+                                    </InfoBox>
 
-                                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
-                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-amber-300">
-                                            Composition
-                                        </p>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Formula</span>
-                                                <span className="font-medium text-yellow-300 text-right">
-                                                    {p.formula || "N/A"}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Product</span>
-                                                <span className="font-medium text-slate-200 text-right truncate max-w-[60%]">
-                                                    {p.productName}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <InfoBox tone="amber" label="Composition" icon={FlaskConical}>
+                                        <InfoRow
+                                            label="Formula"
+                                            value={p.formula || "N/A"}
+                                            valueClassName="text-amber-300"
+                                        />
+                                        <InfoRow label="Product" value={p.productName} />
+                                    </InfoBox>
 
-                                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
-                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-rose-300">
-                                            Expiry
-                                        </p>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Date</span>
-                                                <span className={`font-semibold ${getExpiryColor(p.expiryDate)}`}>
-                                                    {formatDate(p.expiryDate)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <InfoBox tone="rose" label="Expiry" icon={CalendarDays}>
+                                        <InfoRow
+                                            label="Date"
+                                            value={formatDate(p.expiryDate)}
+                                            valueClassName={cn(
+                                                "font-semibold",
+                                                getExpiryColor(p.expiryDate),
+                                            )}
+                                        />
+                                        <InfoRow
+                                            label="Status"
+                                            value={expiryStatus?.label ?? "—"}
+                                            valueClassName={getExpiryColor(p.expiryDate)}
+                                        />
+                                    </InfoBox>
                                 </div>
 
                                 {/* Actions */}
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    <button
+                                <div className="mt-4">
+                                    <NeonButton
+                                        size="sm"
+                                        icon={History}
                                         onClick={() => navigate(`/purchase-history/${p.productName}`)}
-                                        className="inline-flex items-center rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500"
+                                        className="w-full sm:w-auto"
                                     >
                                         View Purchase History
-                                    </button>
+                                    </NeonButton>
                                 </div>
-                            </div>
+                            </Panel>
                         );
                     })}
                 </div>
             )}
 
-            {selectedProducts.length > 0 && (
+            <Pagination
+                canPrev={pageStateStack.length > 0}
+                canNext={hasNext}
+                onPrev={handlePrev}
+                onNext={handleNext}
+                loading={loading}
+                className="pt-2"
+            />
 
-                <div className="mt-4 flex justify-end">
-
-                    <button
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500"
-                    >
-                        Delete Selected ({selectedProducts.length})
-                    </button>
-
-                </div>
-
-            )}
-
-            {/* PAGINATION */}
-            <div className="flex justify-center gap-4 mt-8">
-
-                <button
-                    disabled={pageStateStack.length === 0}
-                    onClick={handlePrev}
-                    className="px-4 py-2 bg-gray-700 rounded-xl disabled:opacity-40"
-                >
-                    Prev
-                </button>
-
-                <button
-                    disabled={!hasNext}
-                    onClick={handleNext}
-                    className="px-4 py-2 bg-cyan-600 rounded-xl disabled:opacity-40"
-                >
-                    Next
-                </button>
-
-            </div>
-
-            {showDeleteConfirm && (
-
-                <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
-
-                    <div className="bg-zinc-900 p-6 rounded-2xl w-[450px] border border-white/10">
-
-                        <h2 className="text-xl font-bold text-red-400 mb-4">
-                            Confirm Delete
-                        </h2>
-
-                        <p className="mb-6">
-                            Are you sure you want to delete
-                            {" "}
-                            {selectedProducts.length}
-                            {" "}
-                            selected product(s)?
-                        </p>
-
-                        <div className="flex justify-end gap-3">
-
-                            <button
-                                onClick={() => setShowDeleteConfirm(false)}
-                                className="px-4 py-2 rounded-xl bg-gray-700"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                onClick={deleteProducts}
-                                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500"
-                            >
-                                Delete
-                            </button>
-
-                        </div>
-
+            {/* ---------------- DELETE CONFIRM ---------------- */}
+            <Modal
+                open={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                title="Confirm Delete"
+                description="This also removes the linked purchase history."
+                icon={TriangleAlert}
+                size="sm"
+                footer={
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <NeonButton onClick={() => setShowDeleteConfirm(false)}>
+                            Cancel
+                        </NeonButton>
+                        <NeonButton
+                            variant="danger"
+                            icon={Trash2}
+                            onClick={deleteProducts}
+                            loading={loading}
+                        >
+                            Delete
+                        </NeonButton>
                     </div>
+                }
+            >
+                <p className="text-sm text-slate-300">
+                    Are you sure you want to delete{" "}
+                    <span className="font-semibold text-rose-300">
+                        {selectedProducts.length}
+                    </span>{" "}
+                    selected product(s)? This action cannot be undone.
+                </p>
+            </Modal>
 
-                </div>
-
-            )}
-
-            {/* ADD PRODUCT MODAL */}
-            {showAddModal && (
-
-                <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
-
-                    <div className="bg-zinc-900 p-6 rounded-2xl w-[650px] border border-white/10">
-
-                        <h2 className="text-2xl font-bold text-cyan-400 mb-6">
-                            Add Product
-                        </h2>
-
-                        <div className="grid grid-cols-2 gap-4">
-
-                            <input
-                                placeholder="Product Name"
-                                value={productName}
-                                onChange={(e) => setProductName(e.target.value)}
-                                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                            />
-
-                            <input
-                                placeholder="Category"
-                                value={category}
-                                onChange={(e) => setCategory(e.target.value)}
-                                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                            />
-
-                            <input
-                                placeholder="Formula"
-                                value={formula}
-                                onChange={(e) => setFormula(e.target.value)}
-                                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                            />
-
-                            <input
-                                placeholder="Supplier Name"
-                                value={supplierName}
-                                onChange={(e) => setSupplierName(e.target.value)}
-                                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                            />
-
-                            <input
-                                type="number"
-                                placeholder="Total Quantity"
-                                value={totalQuantity}
-                                onChange={(e) => setTotalQuantity(e.target.value)}
-                                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                            />
-
-                            {/* UNIT LIST PRICE */}
-                            <input
-                                type="number"
-                                placeholder="Unit List Price"
-                                value={unitListPrice}
-                                onChange={(e) => setUnitListPrice(e.target.value)}
-                                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                            />
-
-                            {/* UNIT BUY PRICE */}
-                            <input
-                                type="number"
-                                placeholder="Unit Buy Price"
-                                value={unitBuyPrice}
-                                onChange={(e) => setUnitBuyPrice(e.target.value)}
-                                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                            />
-
-                            {/* PURCHASE DATE */}
-                            <div>
-
-                                <label className="text-sm text-gray-300">
-                                    Purchase Date
-                                </label>
-
-                                <input
-                                    type="date"
-                                    value={purchaseDate}
-                                    onChange={(e) => setPurchaseDate(e.target.value)}
-                                    className="w-full mt-1 px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                                />
-
-                            </div>
-
-                            {/* EXPIRY DATE */}
-                            <div>
-
-                                <label className="text-sm text-gray-300">
-                                    Expiry Date
-                                </label>
-
-                                <input
-                                    type="date"
-                                    value={expiryDate}
-                                    onChange={(e) => setExpiryDate(e.target.value)}
-                                    className="w-full mt-1 px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                                />
-
-                            </div>
-
-                        </div>
-
-                        {/* ACTIONS */}
-                        <div className="flex justify-end gap-3 mt-6">
-
-                            <button
-                                onClick={() => {
-                                    resetForm();
-                                    setShowAddModal(false);
-                                }}
-                                className="px-4 py-2 rounded-xl bg-gray-700 hover:bg-gray-600"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                onClick={addProduct}
-                                className="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-500"
-                            >
-                                Save Product
-                            </button>
-
-                        </div>
-
+            {/* ---------------- ADD PRODUCT ---------------- */}
+            <Modal
+                open={showAddModal}
+                onClose={() => {
+                    resetForm();
+                    setShowAddModal(false);
+                }}
+                title="Add Product"
+                description="Register a new medicine into your inventory."
+                icon={Plus}
+                footer={
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <NeonButton
+                            onClick={() => {
+                                resetForm();
+                                setShowAddModal(false);
+                            }}
+                        >
+                            Cancel
+                        </NeonButton>
+                        <NeonButton
+                            variant="success"
+                            icon={Save}
+                            onClick={addProduct}
+                            loading={loading}
+                        >
+                            Save Product
+                        </NeonButton>
                     </div>
+                }
+            >
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Product Name">
+                        <TextInput
+                            placeholder="e.g. Paracetamol 500mg"
+                            value={productName}
+                            onChange={(e) => setProductName(e.target.value)}
+                        />
+                    </Field>
 
+                    <Field label="Category">
+                        <TextInput
+                            placeholder="e.g. Tablet"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                        />
+                    </Field>
+
+                    <Field label="Formula">
+                        <TextInput
+                            placeholder="e.g. Acetaminophen"
+                            value={formula}
+                            onChange={(e) => setFormula(e.target.value)}
+                        />
+                    </Field>
+
+                    <Field label="Supplier Name">
+                        <TextInput
+                            placeholder="e.g. MediSupply Co."
+                            value={supplierName}
+                            onChange={(e) => setSupplierName(e.target.value)}
+                        />
+                    </Field>
+
+                    <Field label="Total Quantity">
+                        <TextInput
+                            type="number"
+                            inputMode="numeric"
+                            placeholder="0"
+                            value={totalQuantity}
+                            onChange={(e) => setTotalQuantity(e.target.value)}
+                            className="no-spin"
+                        />
+                    </Field>
+
+                    <Field label="Unit List Price">
+                        <TextInput
+                            type="number"
+                            inputMode="decimal"
+                            placeholder="0.00"
+                            value={unitListPrice}
+                            onChange={(e) => setUnitListPrice(e.target.value)}
+                            className="no-spin"
+                        />
+                    </Field>
+
+                    <Field label="Unit Buy Price">
+                        <TextInput
+                            type="number"
+                            inputMode="decimal"
+                            placeholder="0.00"
+                            value={unitBuyPrice}
+                            onChange={(e) => setUnitBuyPrice(e.target.value)}
+                            className="no-spin"
+                        />
+                    </Field>
+
+                    <Field label="Purchase Date">
+                        <TextInput
+                            type="date"
+                            value={purchaseDate}
+                            onChange={(e) => setPurchaseDate(e.target.value)}
+                        />
+                    </Field>
+
+                    <Field label="Expiry Date">
+                        <TextInput
+                            type="date"
+                            value={expiryDate}
+                            onChange={(e) => setExpiryDate(e.target.value)}
+                        />
+                    </Field>
                 </div>
-
-            )}
-
-        </div>
+            </Modal>
+        </PageShell>
     );
 }
 

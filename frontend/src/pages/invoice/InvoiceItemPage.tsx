@@ -1,5 +1,36 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import {
+  Check,
+  FileText,
+  Hash,
+  Layers,
+  Lock,
+  Package,
+  PackageSearch,
+  Pencil,
+  Plus,
+  Tag,
+  Wallet,
+  X,
+} from "lucide-react";
+
+import {
+  EmptyState,
+  ErrorBanner,
+  InfoBox,
+  InfoRow,
+  LoadingStrip,
+  Modal,
+  NeonButton,
+  PageHeader,
+  PageShell,
+  Pagination,
+  Panel,
+  Pill,
+  SearchBar,
+} from "@/components/hud";
+import { cn } from "@/lib/utils";
 
 type InvoiceItem = {
     invoiceItemId: string;
@@ -28,7 +59,6 @@ type PaginationResponse<T> = {
 
 function InvoiceItemPage() {
     const { invoiceNumber, customerName } = useParams();
-    const navigate = useNavigate();
 
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     const PRODUCT_API = `${BASE_URL}/product-mgmt/api/v1`;
@@ -565,394 +595,361 @@ function InvoiceItemPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 antialiased font-sans">
-            <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-
-                {/* FIXED HIGHLY VISIBLE HEADER ROW WITH ACTIONS */}
-                <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-6">
-                    <div className="space-y-1">
-                        <button
-                            onClick={() => navigate("/invoices")}
-                            className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20"
+        <PageShell>
+            <PageHeader
+                eyebrow="Billing"
+                title="Invoice Items"
+                icon={FileText}
+                backTo="/invoices"
+                subtitle={
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        <Pill tone="violet">{customerName || "N/A"}</Pill>
+                        {invoiceNumber && (
+                            <Pill tone="cyan" icon={Hash}>
+                                {invoiceNumber.slice(0, 10)}
+                            </Pill>
+                        )}
+                        {invoiceStatus && (
+                            <Pill tone={isInvoiceLocked ? "emerald" : "amber"}>
+                                {invoiceStatus}
+                            </Pill>
+                        )}
+                    </div>
+                }
+                actions={
+                    <>
+                        <NeonButton
+                            icon={Plus}
+                            onClick={openProductModal}
+                            disabled={isInvoiceLocked}
                         >
-                            ← Back
-                        </button>
-                        <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                            Invoice Items
-                        </h1>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400">
-                            <p>Customer: <span className="text-slate-200 font-semibold">{customerName || "N/A"}</span></p>
-                        </div>
-                    </div>
+                            Add Product
+                        </NeonButton>
 
-                    <div className="flex flex-wrap items-center gap-3">
+                        <NeonButton
+                            variant="success"
+                            icon={FileText}
+                            onClick={handleGenerateInvoice}
+                            disabled={
+                                loading || isInvoiceLocked || invoiceItems.length === 0
+                            }
+                        >
+                            Generate Invoice
+                        </NeonButton>
+                    </>
+                }
+            />
 
-                        {/* Add Product */}
-                        <div className="relative group">
-                            <button
-                                onClick={openProductModal}
-                                disabled={isInvoiceLocked}
-                                className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-slate-700 text-slate-200 font-semibold text-sm transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
-                            >
-                                + Add Product
-                            </button>
-
-                            {isInvoiceLocked && (
-                                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover:block whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-xs text-white shadow-lg z-50">
-                                    Invoice is locked. You cannot add products.
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Generate Invoice */}
-                        <div className="relative group">
-                            <button
-                                onClick={handleGenerateInvoice}
-                                disabled={loading || isInvoiceLocked || invoiceItems.length === 0}
-                                className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-950/40 transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
-                            >
-                                Generate Invoice
-                            </button>
-
-                            {isInvoiceLocked && (
-                                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 hidden group-hover:block whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-xs text-white shadow-lg z-50">
-                                    Invoice is locked. You cannot generate the invoice.
-                                </div>
-                            )}
-                        </div>
-
-                    </div>
+            {isInvoiceLocked && (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-3.5 text-sm text-amber-200 sm:p-4">
+                    <Lock size={15} className="mt-0.5 shrink-0 text-amber-400" />
+                    <p>
+                        This invoice is completed and locked. Items can no longer be added
+                        or edited.
+                    </p>
                 </div>
+            )}
 
-                {/* ERROR/LOADING STATES */}
-                {error && (
-                    <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                        ⚠️ {error}
-                    </div>
-                )}
+            {error && <ErrorBanner message={error} onDismiss={() => setError("")} />}
 
-                {loading && (
-                    <div className="flex items-center gap-2 text-cyan-400 text-sm font-medium animate-pulse">
-                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-bounce"></div>
-                        Processing request...
-                    </div>
-                )}
+            {loading && <LoadingStrip label="Processing request…" />}
 
-                {/* INVOICE ITEMS — BOX FORMAT */}
-                {invoiceItems.length === 0 && !loading ? (
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900/20 p-10 text-center text-slate-500">
-                        No products mapped onto this invoice yet. Click "+ Add Product" to get started.
-                    </div>
-                ) : (
-                    <div className="space-y-5">
-                        {invoiceItems.map((item, index) => {
-                            const isEditing = editingIndex === index;
-                            const liveTotal = isEditing
-                                ? Number(editFields.unitSellPrice || 0) * Number(editFields.quantity || 0)
-                                : item.totalSellPrice ?? 0;
-                            const liveDiscount = isEditing
-                                ? Number(editFields.unitSellDiscount || 0)
-                                : item.unitSellDiscount ?? 0;
-                            const liveTotalDiscount = isEditing
-                                ? Number(editFields.unitSellDiscount || 0) * Number(editFields.quantity || 0)
-                                : item.totalSellDiscount ?? 0;
+            {invoiceItems.length === 0 && !loading ? (
+                <EmptyState
+                    icon={PackageSearch}
+                    title="No products on this invoice"
+                    description="Add a product from your inventory to start building this bill."
+                    action={
+                        <NeonButton
+                            variant="primary"
+                            icon={Plus}
+                            onClick={openProductModal}
+                            disabled={isInvoiceLocked}
+                            className="mt-2"
+                        >
+                            Add Product
+                        </NeonButton>
+                    }
+                />
+            ) : (
+                <div className="space-y-4">
+                    {invoiceItems.map((item, index) => {
+                        const isEditing = editingIndex === index;
+                        const liveTotal = isEditing
+                            ? Number(editFields.unitSellPrice || 0) * Number(editFields.quantity || 0)
+                            : item.totalSellPrice ?? 0;
+                        const liveDiscount = isEditing
+                            ? Number(editFields.unitSellDiscount || 0)
+                            : item.unitSellDiscount ?? 0;
+                        const liveTotalDiscount = isEditing
+                            ? Number(editFields.unitSellDiscount || 0) * Number(editFields.quantity || 0)
+                            : item.totalSellDiscount ?? 0;
 
-                            return (
-                                <div
-                                    key={item.invoiceItemId || index}
-                                    className={`rounded-2xl border bg-slate-900/30 p-5 transition-colors ${
-                                        isEditing
-                                            ? "border-cyan-400/50 bg-cyan-500/5"
-                                            : "border-slate-800 hover:border-slate-700"
-                                    }`}
-                                >
-                                    <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                                        <div className="min-w-0">
-                                            <h2 className="text-xl font-bold text-slate-100 truncate">
-                                                {item.productName}
-                                            </h2>
-                                            <p className="mt-1 text-sm text-slate-400">
-                                                List{" "}
-                                                <span className="text-slate-300">
-                                                    ₹{(item.unitListPrice ?? 0).toLocaleString("en-IN")}
-                                                </span>
-                                                {" · "}
-                                                Qty{" "}
-                                                <span className="text-cyan-300 font-semibold">
-                                                    {isEditing ? editFields.quantity || "—" : item.quantity}
-                                                </span>
-                                            </p>
-                                        </div>
-                                        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-                                            ₹{liveTotal.toLocaleString("en-IN")}
-                                        </span>
-                                    </div>
-
-                                    <div className="grid gap-3 sm:grid-cols-3">
-                                        <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-4">
-                                            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-violet-300">
-                                                Quantity
-                                            </p>
-                                            <div className="space-y-2 text-sm">
-                                                <div className="flex justify-between items-center gap-2">
-                                                    <span className="text-slate-400">Units</span>
-                                                    {isEditing ? (
-                                                        <input
-                                                            type="number"
-                                                            min="1"
-                                                            className="w-20 text-center px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-cyan-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                            value={editFields.quantity}
-                                                            onKeyDown={(e) => {
-                                                                if (["-", "+", "e", "E"].includes(e.key)) {
-                                                                    e.preventDefault();
-                                                                }
-                                                            }}
-                                                            onChange={(e) => {
-                                                                const value = e.target.value;
-                                                                if (value === "") {
-                                                                    handleEditFieldChange("quantity", value, item.unitListPrice);
-                                                                    return;
-                                                                }
-                                                                if (/^\d+$/.test(value) && Number(value) >= 1) {
-                                                                    handleEditFieldChange("quantity", value, item.unitListPrice);
-                                                                }
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <span className="font-semibold text-slate-200">
-                                                            {item.quantity}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="flex justify-between gap-2">
-                                                    <span className="text-slate-400">List Price</span>
-                                                    <span className="font-medium text-slate-300">
-                                                        ₹{(item.unitListPrice ?? 0).toLocaleString("en-IN")}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
-                                            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-amber-300">
-                                                Pricing
-                                            </p>
-                                            <div className="space-y-2 text-sm">
-                                                <div className="flex justify-between items-center gap-2">
-                                                    <span className="text-slate-400">Sell Price</span>
-                                                    {isEditing ? (
-                                                        <input
-                                                            type="number"
-                                                            min="0"
-                                                            className="w-28 text-right px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-cyan-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                            value={editFields.unitSellPrice}
-                                                            onChange={(e) =>
-                                                                handleEditFieldChange(
-                                                                    "unitSellPrice",
-                                                                    e.target.value,
-                                                                    item.unitListPrice
-                                                                )
-                                                            }
-                                                        />
-                                                    ) : (
-                                                        <span className="font-medium text-slate-200">
-                                                            ₹{(item.unitSellPrice ?? 0).toLocaleString("en-IN")}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="flex justify-between gap-2">
-                                                    <span className="text-slate-400">Discount / item</span>
-                                                    <span className="font-medium text-amber-300">
-                                                        ₹{liveDiscount.toLocaleString("en-IN")}
-                                                    </span>
-                                                </div>
-                                                <div className="flex justify-between gap-2">
-                                                    <span className="text-slate-400">Total discount</span>
-                                                    <span className="font-medium text-amber-400/90">
-                                                        ₹{liveTotalDiscount.toLocaleString("en-IN")}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-                                            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-emerald-300">
-                                                Totals
-                                            </p>
-                                            <div className="space-y-2 text-sm">
-                                                <div className="flex justify-between gap-2">
-                                                    <span className="text-slate-400">Line total</span>
-                                                    <span className="font-bold text-emerald-400">
-                                                        ₹{liveTotal.toLocaleString("en-IN")}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-4 flex flex-wrap gap-2">
-                                        {isEditing ? (
-                                            <>
-                                                <button
-                                                    onClick={() => saveInlineEdit(item)}
-                                                    className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
-                                                >
-                                                    Save
-                                                </button>
-                                                <button
-                                                    onClick={() => setEditingIndex(null)}
-                                                    className="inline-flex items-center rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-300 hover:bg-slate-700"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <button
-                                                onClick={() => startInlineEditing(index, item)}
-                                                disabled={isInvoiceLocked}
-                                                className="inline-flex items-center rounded-xl bg-cyan-600/20 border border-cyan-500/30 px-4 py-2 text-sm font-semibold text-cyan-400 hover:bg-cyan-600/30 disabled:opacity-40 disabled:cursor-not-allowed"
-                                            >
-                                                Edit
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-
-                {/* MAIN PAGINATION */}
-                <div className="flex justify-end gap-3 border-t border-slate-900 pt-4">
-                    <button
-                        disabled={pageStateStack.length === 0}
-                        onClick={handlePrev}
-                        className="px-4 py-2 text-xs font-semibold bg-slate-900 border border-slate-800 rounded-xl text-slate-300 hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-all"
-                    >
-                        Previous
-                    </button>
-                    <button
-                        disabled={!hasNext}
-                        onClick={handleNext}
-                        className="px-4 py-2 text-xs font-semibold bg-cyan-600 rounded-xl text-white hover:bg-cyan-500 disabled:opacity-30 disabled:pointer-events-none transition-all shadow-md"
-                    >
-                        Next
-                    </button>
-                </div>
-
-                {/* MODAL WINDOW */}
-                {showProductModal && (
-                    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-all">
-                        <div className="bg-slate-900 rounded-2xl w-full max-w-4xl border border-slate-800 shadow-2xl flex flex-col max-h-[85vh]">
-
-                            <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-                                <div>
-                                    <h2 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                                        Select Inventory Product
-                                    </h2>
-                                    <p className="text-xs text-slate-400 mt-1">Pick a product profile to directly register onto this draft bill layout.</p>
-                                </div>
-                                <button
-                                    onClick={() => setShowProductModal(false)}
-                                    className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
-                                >
-                                    &#10005;
-                                </button>
-                            </div>
-
-                            <div className="p-6 pb-2 flex gap-3">
-                                <input
-                                    placeholder="Search Product Name or Formula..."
-                                    value={searchText}
-                                    onChange={(e) => setSearchText(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleProductSearch()}
-                                    className="flex-1 px-4 py-2 text-sm rounded-xl bg-slate-950 border border-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-slate-200 placeholder-slate-600 transition-all"
-                                />
-                                <button
-                                    onClick={handleProductSearch}
-                                    className="px-5 py-2 text-sm font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
-                                >
-                                    Search
-                                </button>
-                            </div>
-
-                            {/* PRODUCT PICKER — BOX FORMAT */}
-                            <div className="p-6 flex-1 overflow-y-auto space-y-3">
-                                {products.length === 0 ? (
-                                    <div className="rounded-xl border border-slate-800 p-8 text-center text-slate-500">
-                                        No verified master product records matches criteria scope.
-                                    </div>
-                                ) : (
-                                    products.map((product, idx) => (
-                                        <div
-                                            key={idx}
-                                            className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 hover:border-slate-700 transition-colors"
-                                        >
-                                            <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-                                                <div className="min-w-0">
-                                                    <h3 className="text-base font-bold text-slate-100 truncate">
-                                                        {product.productName}
-                                                    </h3>
-                                                    <p className="mt-1 text-xs text-slate-400">
-                                                        Formula{" "}
-                                                        <span className="font-mono text-slate-300">
-                                                            {product.formula || "N/A"}
-                                                        </span>
-                                                        {" · "}
-                                                        <span className="text-slate-300">{product.category}</span>
-                                                    </p>
-                                                </div>
-                                                <button
-                                                    onClick={() => addInvoiceItem(product)}
-                                                    className="shrink-0 px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
-                                                >
-                                                    Select
-                                                </button>
-                                            </div>
-                                            <div className="grid gap-2 sm:grid-cols-3">
-                                                <div className="rounded-lg border border-violet-500/20 bg-violet-500/10 px-3 py-2 text-sm flex justify-between gap-2">
-                                                    <span className="text-slate-400">Category</span>
-                                                    <span className="font-medium text-slate-200">{product.category}</span>
-                                                </div>
-                                                <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm flex justify-between gap-2">
-                                                    <span className="text-slate-400">List Price</span>
-                                                    <span className="font-semibold text-slate-200">
-                                                        ₹{(product.unitListPrice ?? 0).toLocaleString("en-IN")}
-                                                    </span>
-                                                </div>
-                                                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm flex justify-between gap-2">
-                                                    <span className="text-slate-400">Stock</span>
-                                                    <span className="font-medium text-amber-400">
-                                                        {product.productQuantity}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
+                        return (
+                            <Panel
+                                key={item.invoiceItemId || index}
+                                interactive
+                                className={cn(
+                                    "p-4 sm:p-5",
+                                    isEditing && "border-cyan-400/50 bg-cyan-400/[0.06]",
                                 )}
-                            </div>
+                            >
+                                <div className="mb-4 min-w-0">
+                                    <h2 className="text-base leading-snug font-bold text-slate-100 sm:text-lg">
+                                        {item.productName}
+                                    </h2>
 
-                            <div className="p-4 bg-slate-900/50 border-t border-slate-800 flex justify-center gap-3">
-                                <button
-                                    disabled={productPageStateStack.length === 0}
-                                    onClick={handleProductPrev}
-                                    className="px-4 py-1.5 text-xs font-semibold bg-slate-950 border border-slate-800 rounded-lg text-slate-400 hover:text-slate-200 disabled:opacity-20 transition-all"
-                                >
-                                    Prev
-                                </button>
-                                <button
-                                    disabled={!productHasNext}
-                                    onClick={handleProductNext}
-                                    className="px-4 py-1.5 text-xs font-semibold bg-cyan-600 rounded-lg text-white hover:bg-cyan-500 disabled:opacity-20 transition-all"
-                                >
-                                    Next
-                                </button>
-                            </div>
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                        <Pill tone="slate" icon={Tag}>
+                                            List ₹{(item.unitListPrice ?? 0).toLocaleString("en-IN")}
+                                        </Pill>
+                                        <Pill tone="cyan" icon={Layers}>
+                                            Qty {isEditing ? editFields.quantity || "—" : item.quantity}
+                                        </Pill>
+                                        <Pill tone="emerald" icon={Wallet}>
+                                            ₹{liveTotal.toLocaleString("en-IN")}
+                                        </Pill>
+                                    </div>
+                                </div>
+
+                                <div className="grid gap-3 sm:grid-cols-3">
+                                    <InfoBox tone="violet" label="Quantity" icon={Layers}>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="shrink-0 text-slate-400">Units</span>
+                                            {isEditing ? (
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    aria-label="Quantity"
+                                                    className="hud-input no-spin tabular w-24 px-2.5 py-1.5 text-center"
+                                                    value={editFields.quantity}
+                                                    onKeyDown={(e) => {
+                                                        if (["-", "+", "e", "E"].includes(e.key)) {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value;
+                                                        if (value === "") {
+                                                            handleEditFieldChange("quantity", value, item.unitListPrice);
+                                                            return;
+                                                        }
+                                                        if (/^\d+$/.test(value) && Number(value) >= 1) {
+                                                            handleEditFieldChange("quantity", value, item.unitListPrice);
+                                                        }
+                                                    }}
+                                                />
+                                            ) : (
+                                                <span className="font-semibold text-slate-200 tabular">
+                                                    {item.quantity}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <InfoRow
+                                            label="List price"
+                                            value={`₹${(item.unitListPrice ?? 0).toLocaleString("en-IN")}`}
+                                        />
+                                    </InfoBox>
+
+                                    <InfoBox tone="amber" label="Pricing" icon={Tag}>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="shrink-0 text-slate-400">Sell price</span>
+                                            {isEditing ? (
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    aria-label="Unit sell price"
+                                                    className="hud-input no-spin tabular w-28 px-2.5 py-1.5 text-right"
+                                                    value={editFields.unitSellPrice}
+                                                    onChange={(e) =>
+                                                        handleEditFieldChange(
+                                                            "unitSellPrice",
+                                                            e.target.value,
+                                                            item.unitListPrice
+                                                        )
+                                                    }
+                                                />
+                                            ) : (
+                                                <span className="font-medium text-slate-200 tabular">
+                                                    ₹{(item.unitSellPrice ?? 0).toLocaleString("en-IN")}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <InfoRow
+                                            label="Discount / item"
+                                            value={`₹${liveDiscount.toLocaleString("en-IN")}`}
+                                            valueClassName="text-amber-300"
+                                        />
+                                        <InfoRow
+                                            label="Total discount"
+                                            value={`₹${liveTotalDiscount.toLocaleString("en-IN")}`}
+                                            valueClassName="text-amber-400/90"
+                                        />
+                                    </InfoBox>
+
+                                    <InfoBox tone="emerald" label="Totals" icon={Wallet}>
+                                        <InfoRow
+                                            label="Line total"
+                                            value={`₹${liveTotal.toLocaleString("en-IN")}`}
+                                            valueClassName="font-bold text-emerald-400"
+                                        />
+                                        <InfoRow
+                                            label="Customer saves"
+                                            value={`₹${liveTotalDiscount.toLocaleString("en-IN")}`}
+                                            valueClassName="text-amber-300"
+                                        />
+                                    </InfoBox>
+                                </div>
+
+                                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                                    {isEditing ? (
+                                        <>
+                                            <NeonButton
+                                                variant="success"
+                                                size="sm"
+                                                icon={Check}
+                                                onClick={() => saveInlineEdit(item)}
+                                                loading={loading}
+                                            >
+                                                Save
+                                            </NeonButton>
+                                            <NeonButton
+                                                size="sm"
+                                                icon={X}
+                                                onClick={() => setEditingIndex(null)}
+                                            >
+                                                Cancel
+                                            </NeonButton>
+                                        </>
+                                    ) : (
+                                        <NeonButton
+                                            size="sm"
+                                            icon={Pencil}
+                                            onClick={() => startInlineEditing(index, item)}
+                                            disabled={isInvoiceLocked}
+                                        >
+                                            Edit item
+                                        </NeonButton>
+                                    )}
+                                </div>
+                            </Panel>
+                        );
+                    })}
+                </div>
+            )}
+
+            <Pagination
+                canPrev={pageStateStack.length > 0}
+                canNext={hasNext}
+                onPrev={handlePrev}
+                onNext={handleNext}
+                loading={loading}
+                className="pt-2"
+            />
+
+            {/* ---------------- PRODUCT PICKER ---------------- */}
+            <Modal
+                open={showProductModal}
+                onClose={() => setShowProductModal(false)}
+                title="Select Inventory Product"
+                description="Pick a product to register onto this draft bill."
+                icon={Package}
+                size="lg"
+                footer={
+                    <Pagination
+                        canPrev={productPageStateStack.length > 0}
+                        canNext={productHasNext}
+                        onPrev={handleProductPrev}
+                        onNext={handleProductNext}
+                        loading={loading}
+                    />
+                }
+            >
+                <div className="space-y-4">
+                    <SearchBar
+                        value={searchText}
+                        onChange={setSearchText}
+                        onSubmit={handleProductSearch}
+                        placeholder="Search product name or formula…"
+                        fullWidth
+                    />
+
+                    {products.length === 0 ? (
+                        <div className="rounded-2xl border border-white/10 p-8 text-center text-sm text-slate-500">
+                            No product matches this search.
                         </div>
-                    </div>
-                )}
-            </div>
-        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {products.map((product, idx) => (
+                                <div
+                                    key={idx}
+                                    className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-cyan-400/30"
+                                >
+                                    <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="text-sm leading-snug font-bold text-slate-100 sm:text-base">
+                                                {product.productName}
+                                            </h3>
+                                            <p className="mt-1 text-xs text-slate-400">
+                                                Formula{" "}
+                                                <span className="font-mono text-slate-300">
+                                                    {product.formula || "N/A"}
+                                                </span>
+                                            </p>
+                                        </div>
+
+                                        <NeonButton
+                                            variant="success"
+                                            size="sm"
+                                            icon={Plus}
+                                            onClick={() => addInvoiceItem(product)}
+                                            className="w-full sm:w-auto"
+                                        >
+                                            Select
+                                        </NeonButton>
+                                    </div>
+
+                                    <div className="grid gap-2 sm:grid-cols-3">
+                                        <InfoBox
+                                            tone="violet"
+                                            label="Category"
+                                            className="py-2.5"
+                                        >
+                                            <InfoRow
+                                                label="Type"
+                                                value={product.category || "—"}
+                                            />
+                                        </InfoBox>
+
+                                        <InfoBox tone="amber" label="List Price" className="py-2.5">
+                                            <InfoRow
+                                                label="Unit"
+                                                value={`₹${(product.unitListPrice ?? 0).toLocaleString("en-IN")}`}
+                                                valueClassName="font-semibold"
+                                            />
+                                        </InfoBox>
+
+                                        <InfoBox tone="emerald" label="Stock" className="py-2.5">
+                                            <InfoRow
+                                                label="Available"
+                                                value={product.productQuantity}
+                                                valueClassName={
+                                                    product.productQuantity > 0
+                                                        ? "font-semibold text-emerald-300"
+                                                        : "font-semibold text-rose-400"
+                                                }
+                                            />
+                                        </InfoBox>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </Modal>
+        </PageShell>
     );
 }
 

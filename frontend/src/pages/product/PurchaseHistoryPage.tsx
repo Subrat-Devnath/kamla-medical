@@ -1,5 +1,31 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import {
+  CalendarDays,
+  History,
+  Tag,
+  Trash2,
+  TriangleAlert,
+  Truck,
+  Wallet,
+} from "lucide-react";
+
+import {
+  EmptyState,
+  ErrorBanner,
+  InfoBox,
+  InfoRow,
+  LoadingStrip,
+  Modal,
+  NeonButton,
+  PageHeader,
+  PageShell,
+  Pagination,
+  Panel,
+  Pill,
+  SearchBar,
+} from "@/components/hud";
+import { cn } from "@/lib/utils";
 
 type PurchaseHistory = {
     productName: string;
@@ -21,7 +47,6 @@ type PurchaseHistoryPageResponse = {
 };
 
 function PurchaseHistoryPage() {
-    const navigate = useNavigate();
     const { productName } = useParams();
 
     const [history, setHistory] = useState<PurchaseHistory[]>([]);
@@ -65,16 +90,16 @@ function PurchaseHistoryPage() {
 
         if (diffDays < 0) {
             // Already expired
-            return "text-red-500";
+            return "text-rose-400";
         }
 
         if (diffDays <= 20) {
             // Expires within next 20 days
-            return "text-yellow-400";
+            return "text-amber-300";
         }
 
         // More than 20 days remaining
-        return "text-green-400";
+        return "text-emerald-400";
     };
 
     const formatValue = (value?: number | null) => {
@@ -270,75 +295,77 @@ function PurchaseHistoryPage() {
     };
 
     return (
-        <div className="min-h-screen bg-black text-white p-6">
+        <PageShell>
+            <PageHeader
+                eyebrow="Supply Ledger"
+                title="Purchase History"
+                icon={History}
+                backTo="/products"
+                subtitle={
+                    <span>
+                        Product{" "}
+                        <span className="font-semibold text-cyan-300">
+                            {productName}
+                        </span>
+                    </span>
+                }
+                actions={
+                    selectedRecords.length > 0 ? (
+                        <NeonButton
+                            variant="danger"
+                            icon={Trash2}
+                            onClick={() => setShowDeleteConfirm(true)}
+                        >
+                            Delete ({selectedRecords.length})
+                        </NeonButton>
+                    ) : undefined
+                }
+            />
 
-            {/* TOP BAR */}
-            <div className="flex justify-between items-center mb-6">
-                <button
-                    onClick={() => navigate("/products")}
-                    className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20 transition"
-                >
-                    &larr; Back
-                </button>
-            </div>
+            <SearchBar
+                value={searchText}
+                onChange={setSearchText}
+                onSubmit={handleSearch}
+                placeholder="Search supplier…"
+                className="sm:justify-end"
+            />
 
-            {/* TITLE */}
-            <h1 className="text-3xl font-bold text-green-400 mb-2">
-                Purchase History
-            </h1>
-            <h2 className="text-lg text-cyan-300 mb-6">
-                Product: {productName}
-            </h2>
+            {error && <ErrorBanner message={error} onDismiss={() => setError("")} />}
 
-            {/* SEARCH CONTAINER (Jaise ProductsPage me tha) */}
-            <div className="flex justify-end mb-6">
-                <div className="flex gap-2 items-center">
-                    <input
-                        type="text"
-                        placeholder="Search supplier..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        className="w-64 px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:outline-none focus:border-cyan-400"
-                    />
-                    <button
-                        onClick={handleSearch}
-                        className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 transition"
-                    >
-                        Search
-                    </button>
-                </div>
-            </div>
+            {loading && <LoadingStrip label="Processing…" />}
 
-            {/* ERROR & LOADING STATUS */}
-            {error && <p className="text-red-400 mb-4">{error}</p>}
-            {loading && <p className="text-cyan-400 mb-4">Processing...</p>}
-
-            {/* PURCHASE HISTORY — BOX FORMAT */}
             {history.length === 0 && !loading ? (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center text-slate-400">
-                    No purchase history found.
-                </div>
+                <EmptyState
+                    icon={History}
+                    title="No purchase history found"
+                    description={
+                        isSearchMode
+                            ? "No record matches that supplier name."
+                            : "Purchases recorded for this product will appear here."
+                    }
+                />
             ) : (
-                <div className="space-y-5">
+                <div className="space-y-4">
                     {history.map((h, index) => {
                         const recordId = `${h.supplierName}-${h.purchaseDate}`;
                         const selected = selectedRecords.includes(recordId);
 
                         return (
-                            <div
+                            <Panel
                                 key={index}
-                                className={`rounded-2xl border bg-white/[0.03] p-5 transition-colors ${
-                                    selected
-                                        ? "border-cyan-400/50 bg-cyan-500/5"
-                                        : "border-white/10 hover:border-white/20"
-                                }`}
+                                interactive
+                                className={cn(
+                                    "p-4 sm:p-5",
+                                    selected && "border-cyan-400/50 bg-cyan-400/[0.06]",
+                                )}
                             >
                                 {/* Header */}
-                                <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                                    <div className="flex items-start gap-3 min-w-0">
+                                <div className="mb-4 flex items-start gap-3">
+                                    <label className="flex shrink-0 cursor-pointer items-center pt-1">
                                         <input
                                             type="checkbox"
                                             checked={selected}
+                                            aria-label={`Select purchase from ${h.supplierName}`}
                                             onChange={(e) => {
                                                 if (e.target.checked) {
                                                     setSelectedRecords((prev) => [...prev, recordId]);
@@ -348,171 +375,131 @@ function PurchaseHistoryPage() {
                                                     );
                                                 }
                                             }}
-                                            className="mt-1.5 h-4 w-4 cursor-pointer shrink-0"
+                                            className="hud-checkbox"
                                         />
-                                        <div className="min-w-0">
-                                            <h2 className="text-xl font-bold text-white truncate">
+                                    </label>
+
+                                    <div className="min-w-0 flex-1">
+                                        <h2 className="flex items-center gap-2 text-base leading-snug font-bold text-white sm:text-lg">
+                                            <Truck size={16} className="shrink-0 text-slate-500" />
+                                            <span className="min-w-0">
                                                 {h.supplierName || "Unknown Supplier"}
-                                            </h2>
-                                            <p className="mt-1 text-sm text-slate-400">
-                                                Purchased{" "}
-                                                <span className="text-slate-200">
-                                                    {formatDate(h.purchaseDate)}
-                                                </span>
-                                                {" · "}
-                                                Qty{" "}
-                                                <span className="text-cyan-300 font-semibold">
-                                                    {formatValue(h.purchasedQuantity)}
-                                                </span>
-                                            </p>
+                                            </span>
+                                        </h2>
+
+                                        <div className="mt-2 flex flex-wrap gap-1.5">
+                                            <Pill tone="slate" icon={CalendarDays}>
+                                                {formatDate(h.purchaseDate)}
+                                            </Pill>
+                                            <Pill tone="cyan">
+                                                Qty {formatValue(h.purchasedQuantity)}
+                                            </Pill>
+                                            <Pill tone="amber">
+                                                Buy ₹{formatValue(h.totalBuyPrice)}
+                                            </Pill>
                                         </div>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-yellow-300">
-                                            Buy ₹{formatValue(h.totalBuyPrice)}
-                                        </span>
-                                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-cyan-300">
-                                            List ₹{formatValue(h.totalListPrice)}
-                                        </span>
                                     </div>
                                 </div>
 
                                 {/* Info boxes */}
                                 <div className="grid gap-3 sm:grid-cols-3">
-                                    <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-4">
-                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-violet-300">
-                                            List Pricing
-                                        </p>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Unit List</span>
-                                                <span className="font-medium text-slate-200">
-                                                    ₹{formatValue(h.unitListPrice)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Total List</span>
-                                                <span className="font-semibold text-cyan-300">
-                                                    ₹{formatValue(h.totalListPrice)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <InfoBox tone="violet" label="List Pricing" icon={Tag}>
+                                        <InfoRow
+                                            label="Unit list"
+                                            value={`₹${formatValue(h.unitListPrice)}`}
+                                        />
+                                        <InfoRow
+                                            label="Total list"
+                                            value={`₹${formatValue(h.totalListPrice)}`}
+                                            valueClassName="text-cyan-300 font-semibold"
+                                        />
+                                    </InfoBox>
 
-                                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-emerald-300">
-                                            Buy Pricing
-                                        </p>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Unit Buy</span>
-                                                <span className="font-medium text-green-300">
-                                                    ₹{formatValue(h.unitBuyPrice)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Total Buy</span>
-                                                <span className="font-semibold text-yellow-300">
-                                                    ₹{formatValue(h.totalBuyPrice)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Discount</span>
-                                                <span className="font-medium text-pink-300">
-                                                    ₹{formatValue(h.unitBuyDiscount)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <InfoBox tone="emerald" label="Buy Pricing" icon={Wallet}>
+                                        <InfoRow
+                                            label="Unit buy"
+                                            value={`₹${formatValue(h.unitBuyPrice)}`}
+                                            valueClassName="text-emerald-300"
+                                        />
+                                        <InfoRow
+                                            label="Total buy"
+                                            value={`₹${formatValue(h.totalBuyPrice)}`}
+                                            valueClassName="text-amber-300 font-semibold"
+                                        />
+                                        <InfoRow
+                                            label="Discount"
+                                            value={`₹${formatValue(h.unitBuyDiscount)}`}
+                                            valueClassName="text-pink-300"
+                                        />
+                                    </InfoBox>
 
-                                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
-                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-rose-300">
-                                            Dates &amp; Qty
-                                        </p>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Purchase</span>
-                                                <span className="font-medium text-slate-200">
-                                                    {formatDate(h.purchaseDate)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Expiry</span>
-                                                <span className={`font-semibold ${getExpiryColor(h.expiryDate)}`}>
-                                                    {formatDate(h.expiryDate)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between gap-2">
-                                                <span className="text-slate-400">Quantity</span>
-                                                <span className="font-semibold text-slate-100">
-                                                    {formatValue(h.purchasedQuantity)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <InfoBox tone="rose" label="Dates & Qty" icon={CalendarDays}>
+                                        <InfoRow
+                                            label="Purchase"
+                                            value={formatDate(h.purchaseDate)}
+                                        />
+                                        <InfoRow
+                                            label="Expiry"
+                                            value={formatDate(h.expiryDate)}
+                                            valueClassName={cn(
+                                                "font-semibold",
+                                                getExpiryColor(h.expiryDate),
+                                            )}
+                                        />
+                                        <InfoRow
+                                            label="Quantity"
+                                            value={formatValue(h.purchasedQuantity)}
+                                            valueClassName="font-semibold text-slate-100"
+                                        />
+                                    </InfoBox>
                                 </div>
-                            </div>
+                            </Panel>
                         );
                     })}
                 </div>
             )}
 
-            {/* DELETE SELECTION CONTAINER */}
-            {selectedRecords.length > 0 && (
-                <div className="mt-4 flex justify-end">
-                    <button
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 transition"
-                    >
-                        Delete Selected ({selectedRecords.length})
-                    </button>
-                </div>
-            )}
+            <Pagination
+                canPrev={pageStateStack.length > 0}
+                canNext={hasNext}
+                onPrev={handlePrev}
+                onNext={handleNext}
+                loading={loading}
+                className="pt-2"
+            />
 
-            {/* PAGINATION PANEL */}
-            <div className="flex justify-center gap-4 mt-8">
-                <button
-                    disabled={pageStateStack.length === 0}
-                    onClick={handlePrev}
-                    className="px-4 py-2 bg-gray-700 rounded-xl disabled:opacity-40 transition"
-                >
-                    Prev
-                </button>
-                <button
-                    disabled={!hasNext}
-                    onClick={handleNext}
-                    className="px-4 py-2 bg-cyan-600 rounded-xl disabled:opacity-40 transition"
-                >
-                    Next
-                </button>
-            </div>
-
-            {/* CONFIRM DELETE MODAL */}
-            {showDeleteConfirm && (
-                <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
-                    <div className="bg-zinc-900 p-6 rounded-2xl w-[450px] border border-white/10">
-                        <h2 className="text-xl font-bold text-red-400 mb-4">Confirm Delete</h2>
-                        <p className="mb-6">
-                            Are you sure you want to delete {selectedRecords.length} selected history record(s)?
-                        </p>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setShowDeleteConfirm(false)}
-                                className="px-4 py-2 rounded-xl bg-gray-700 hover:bg-gray-600 transition"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={deleteHistoryRecords}
-                                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 transition"
-                            >
-                                Delete
-                            </button>
-                        </div>
+            <Modal
+                open={showDeleteConfirm}
+                onClose={() => setShowDeleteConfirm(false)}
+                title="Confirm Delete"
+                description="Selected purchase records will be removed."
+                icon={TriangleAlert}
+                size="sm"
+                footer={
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <NeonButton onClick={() => setShowDeleteConfirm(false)}>
+                            Cancel
+                        </NeonButton>
+                        <NeonButton
+                            variant="danger"
+                            icon={Trash2}
+                            onClick={deleteHistoryRecords}
+                            loading={loading}
+                        >
+                            Delete
+                        </NeonButton>
                     </div>
-                </div>
-            )}
-        </div>
+                }
+            >
+                <p className="text-sm text-slate-300">
+                    Are you sure you want to delete{" "}
+                    <span className="font-semibold text-rose-300">
+                        {selectedRecords.length}
+                    </span>{" "}
+                    selected history record(s)?
+                </p>
+            </Modal>
+        </PageShell>
     );
 }
 

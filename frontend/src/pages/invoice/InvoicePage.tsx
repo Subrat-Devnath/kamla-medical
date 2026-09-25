@@ -1,5 +1,33 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  ArrowRight,
+  Hash,
+  MapPin,
+  Plus,
+  ReceiptText,
+  User,
+  Wallet,
+} from "lucide-react";
+
+import {
+  EmptyState,
+  ErrorBanner,
+  Field,
+  InfoBox,
+  InfoRow,
+  LoadingStrip,
+  Modal,
+  NeonButton,
+  PageHeader,
+  PageShell,
+  Pagination,
+  Panel,
+  Pill,
+  SearchBar,
+  TextArea,
+  TextInput,
+} from "@/components/hud";
 
 type Invoice = {
     invoiceNumber: string;
@@ -246,279 +274,231 @@ function InvoicePage() {
 
     };
 
+    const handleSearch = () => {
+
+        setPageState(null);
+        setPageStateStack([]);
+
+        if (searchText.trim() === "") {
+            setIsSearchMode(false);
+            fetchInvoices(null, false);
+        } else {
+            setIsSearchMode(true);
+            searchInvoice(searchText, null, false);
+        }
+
+    };
 
     return (
-
-        <div className="min-h-screen bg-black text-white p-6">
-
-            {/* TOP BAR */}
-            <div className="flex justify-between items-center mb-6">
-
-                <button
-                    onClick={() => navigate("/home")}
-                    className="px-4 py-2 rounded-xl bg-white/10 border border-white/10 hover:bg-white/20"
-                >
-                    ← Back
-                </button>
-
-                <button
-                    onClick={() => setShowAddModal(true)}
-                    className="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-500"
-                >
-                    + Create Invoice
-                </button>
-
-            </div>
-
-            <h1 className="text-3xl font-bold text-cyan-400 mb-6">
-                Manage Invoices
-            </h1>
-
-            {/* SEARCH */}
-            <div className="flex justify-end mb-6">
-
-                <div className="flex gap-2">
-
-                    <input
-                        type="text"
-                        placeholder="Search customer..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        className="w-64 px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                    />
-
-                    <button
-                        onClick={() => {
-
-                            setPageState(null);
-                            setPageStateStack([]);
-
-                            if (searchText.trim() === "") {
-                                setIsSearchMode(false);
-                                fetchInvoices(null, false);
-                            } else {
-                                setIsSearchMode(true);
-                                searchInvoice(searchText, null, false);
-                            }
-
-                        }}
-                        className="px-4 py-2 rounded-xl bg-sky-400 hover:bg-sky-500"
+        <PageShell>
+            <PageHeader
+                eyebrow="Billing"
+                title="Manage Invoices"
+                icon={ReceiptText}
+                backTo="/home"
+                subtitle="Draft, itemise and finalise customer bills."
+                actions={
+                    <NeonButton
+                        variant="primary"
+                        icon={Plus}
+                        onClick={() => setShowAddModal(true)}
                     >
-                        Search
-                    </button>
+                        Create Invoice
+                    </NeonButton>
+                }
+            />
 
-                </div>
+            <SearchBar
+                value={searchText}
+                onChange={setSearchText}
+                onSubmit={handleSearch}
+                placeholder="Search customer…"
+                className="sm:justify-end"
+            />
 
-            </div>
+            {error && <ErrorBanner message={error} onDismiss={() => setError("")} />}
 
-            {error && (
-                <p className="text-red-400 mb-4">{error}</p>
-            )}
+            {loading && <LoadingStrip label="Loading invoices…" />}
 
-            {loading && (
-                <p className="text-cyan-400 mb-4">Loading...</p>
-            )}
-
-            {/* INVOICES — BOX FORMAT */}
             {invoices.length === 0 && !loading ? (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center text-slate-400">
-                    No invoices found.
-                </div>
+                <EmptyState
+                    icon={ReceiptText}
+                    title="No invoices found"
+                    description={
+                        isSearchMode
+                            ? "No invoice matches that customer name."
+                            : "Create your first invoice to start billing."
+                    }
+                    action={
+                        <NeonButton
+                            variant="primary"
+                            icon={Plus}
+                            onClick={() => setShowAddModal(true)}
+                            className="mt-2"
+                        >
+                            Create Invoice
+                        </NeonButton>
+                    }
+                />
             ) : (
-                <div className="space-y-5">
+                <div className="space-y-4">
                     {invoices.map((invoice) => (
-                        <div
+                        <Panel
                             key={invoice.invoiceNumber}
-                            className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-white/20"
+                            interactive
+                            className="p-4 sm:p-5"
                         >
                             {/* Header */}
-                            <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                                <div className="min-w-0">
-                                    <h2 className="text-xl font-bold text-white truncate">
-                                        {invoice.customerName}
-                                    </h2>
-                                    <p className="mt-1 text-sm text-slate-400">
-                                        Invoice{" "}
-                                        <span className="text-cyan-300 font-mono">
-                                            {invoice.invoiceNumber?.slice(0, 10)}
-                                        </span>
-                                        {" · "}
-                                        <span
-                                            className={
-                                                invoice.status === "COMPLETED"
-                                                    ? "text-green-400 font-semibold"
-                                                    : "text-amber-400 font-semibold"
-                                            }
-                                        >
-                                            {invoice.status}
-                                        </span>
-                                    </p>
+                            <div className="mb-4 min-w-0">
+                                <h2 className="text-base leading-snug font-bold text-white sm:text-lg">
+                                    {invoice.customerName}
+                                </h2>
+
+                                <div className="mt-2 flex flex-wrap gap-1.5">
+                                    <Pill tone="cyan" icon={Hash}>
+                                        {invoice.invoiceNumber?.slice(0, 10)}
+                                    </Pill>
+                                    <Pill
+                                        tone={
+                                            invoice.status === "COMPLETED" ? "emerald" : "amber"
+                                        }
+                                    >
+                                        {invoice.status}
+                                    </Pill>
+                                    <Pill tone="emerald" icon={Wallet}>
+                                        {invoice.totalPrice != null
+                                            ? `₹ ${invoice.totalPrice}`
+                                            : "—"}
+                                    </Pill>
                                 </div>
-                                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-emerald-300">
-                                    {invoice.totalPrice != null ? `₹ ${invoice.totalPrice}` : "—"}
-                                </span>
                             </div>
 
                             {/* Info boxes */}
                             <div className="grid gap-3 sm:grid-cols-3">
-                                <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-4">
-                                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-violet-300">
-                                        Customer
-                                    </p>
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex justify-between gap-2">
-                                            <span className="text-slate-400">Name</span>
-                                            <span className="font-medium text-slate-100 text-right truncate max-w-[65%]">
-                                                {invoice.customerName}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between gap-2">
-                                            <span className="text-slate-400">Address</span>
-                                            <span className="font-medium text-sky-300 text-right truncate max-w-[65%]">
-                                                {invoice.customerAddress?.trim() || "—"}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <InfoBox tone="violet" label="Customer" icon={User}>
+                                    <InfoRow label="Name" value={invoice.customerName} />
+                                    <InfoRow
+                                        label="Address"
+                                        value={invoice.customerAddress?.trim() || "—"}
+                                        valueClassName="text-sky-300"
+                                    />
+                                </InfoBox>
 
-                                <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
-                                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-amber-300">
-                                        Invoice
-                                    </p>
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex justify-between gap-2">
-                                            <span className="text-slate-400">Number</span>
-                                            <span className="font-mono font-medium text-cyan-300">
-                                                {invoice.invoiceNumber?.slice(0, 10)}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between gap-2">
-                                            <span className="text-slate-400">Status</span>
-                                            <span
-                                                className={
-                                                    invoice.status === "COMPLETED"
-                                                        ? "font-semibold text-green-400"
-                                                        : "font-semibold text-amber-400"
-                                                }
-                                            >
-                                                {invoice.status}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                <InfoBox tone="amber" label="Invoice" icon={Hash}>
+                                    <InfoRow
+                                        label="Number"
+                                        value={invoice.invoiceNumber?.slice(0, 10)}
+                                        valueClassName="font-mono text-cyan-300"
+                                    />
+                                    <InfoRow
+                                        label="Status"
+                                        value={invoice.status}
+                                        valueClassName={
+                                            invoice.status === "COMPLETED"
+                                                ? "font-semibold text-emerald-400"
+                                                : "font-semibold text-amber-300"
+                                        }
+                                    />
+                                </InfoBox>
 
-                                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-                                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-emerald-300">
-                                        Amount
+                                <InfoBox tone="emerald" label="Amount" icon={Wallet}>
+                                    <p className="tabular text-2xl font-bold text-emerald-300">
+                                        {invoice.totalPrice != null
+                                            ? `₹${invoice.totalPrice.toLocaleString("en-IN")}`
+                                            : "—"}
                                     </p>
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex justify-between gap-2">
-                                            <span className="text-slate-400">Total</span>
-                                            <span className="font-semibold text-emerald-300">
-                                                {invoice.totalPrice != null
-                                                    ? `₹ ${invoice.totalPrice}`
-                                                    : "—"}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                    <p className="text-xs text-slate-500">
+                                        Invoice total
+                                    </p>
+                                </InfoBox>
                             </div>
 
                             {/* Actions */}
-                            <div className="mt-4 flex flex-wrap gap-2">
-                                <button
+                            <div className="mt-4">
+                                <NeonButton
+                                    size="sm"
+                                    icon={ArrowRight}
                                     onClick={() =>
                                         navigate(
                                             `/invoice-items/${invoice.invoiceNumber}/${invoice.customerName}`
                                         )
                                     }
-                                    className="inline-flex items-center rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500"
+                                    className="w-full sm:w-auto"
                                 >
                                     View Details
-                                </button>
+                                </NeonButton>
                             </div>
-                        </div>
+                        </Panel>
                     ))}
                 </div>
             )}
 
-            {/* PAGINATION */}
-            <div className="flex justify-center gap-4 mt-8">
-
-                <button
-                    disabled={loading || pageStateStack.length === 0}
-                    onClick={handlePrev}
-                    className="px-4 py-2 bg-gray-700 rounded-xl disabled:opacity-40"
-                >
-                    Prev
-                </button>
-
-                <button
-                    disabled={loading || !hasNext}
-                    onClick={handleNext}
-                    className="px-4 py-2 bg-cyan-600 rounded-xl disabled:opacity-40"
-                >
-                    Next
-                </button>
-
-            </div>
+            <Pagination
+                canPrev={pageStateStack.length > 0}
+                canNext={hasNext}
+                onPrev={handlePrev}
+                onNext={handleNext}
+                loading={loading}
+                className="pt-2"
+            />
 
             {/* CREATE MODAL */}
-            {showAddModal && (
-
-                <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50">
-
-                    <div className="bg-zinc-900 p-6 rounded-2xl w-[500px] border border-white/10">
-
-                        <h2 className="text-2xl font-bold text-cyan-400 mb-6">
-                            Create Invoice
-                        </h2>
-
-                        <div className="space-y-4">
-
-                            <input placeholder="Customer Name" value={customerName}
-                                onChange={(e) => setCustomerName(e.target.value)}
-                                className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                            />
-
-                            <textarea
-                                placeholder="Customer Address"
-                                value={customerAddress}
-                                onChange={(e) => setCustomerAddress(e.target.value)}
-                                className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10"
-                            />
-
-                        </div>
-
-                        <div className="flex justify-end gap-3 mt-6">
-
-                            <button
-                                onClick={() => {
-                                    resetForm();
-                                    setShowAddModal(false);
-                                }}
-                                className="px-4 py-2 rounded-xl bg-gray-700"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                onClick={createInvoice}
-                                className="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-500"
-                            >
-                                Create
-                            </button>
-
-                        </div>
-
+            <Modal
+                open={showAddModal}
+                onClose={() => {
+                    resetForm();
+                    setShowAddModal(false);
+                }}
+                title="Create Invoice"
+                description="Start a draft bill for a customer."
+                icon={ReceiptText}
+                size="sm"
+                footer={
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <NeonButton
+                            onClick={() => {
+                                resetForm();
+                                setShowAddModal(false);
+                            }}
+                        >
+                            Cancel
+                        </NeonButton>
+                        <NeonButton
+                            variant="success"
+                            icon={Plus}
+                            onClick={createInvoice}
+                            loading={loading}
+                        >
+                            Create
+                        </NeonButton>
                     </div>
+                }
+            >
+                <div className="space-y-4">
+                    <Field label="Customer Name">
+                        <TextInput
+                            icon={User}
+                            placeholder="e.g. Ramesh Kumar"
+                            value={customerName}
+                            onChange={(e) => setCustomerName(e.target.value)}
+                        />
+                    </Field>
 
+                    <Field label="Customer Address">
+                        <TextArea
+                            placeholder="Street, city, pincode"
+                            value={customerAddress}
+                            onChange={(e) => setCustomerAddress(e.target.value)}
+                        />
+                    </Field>
+
+                    <p className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <MapPin size={12} />
+                        The invoice opens in draft mode so you can add products next.
+                    </p>
                 </div>
-
-            )}
-
-        </div>
-
+            </Modal>
+        </PageShell>
     );
 }
 

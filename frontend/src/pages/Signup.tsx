@@ -1,271 +1,178 @@
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Building2, Mail, UserPlus } from "lucide-react";
+
+import {
+  AuthShell,
+  ErrorBanner,
+  Field,
+  NeonButton,
+  PasswordInput,
+  SuccessBanner,
+  TextInput,
+} from "@/components/hud";
 
 function Signup() {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const [companyName, setCompanyname] = useState("");
+  const [emailId, setEmailId] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-    const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-    const [companyName, setCompanyname] = useState("");
-    const [emailId, setEmailId] = useState("");
-    const [password, setPassword] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessageForPassword, setErrorMessageForPassword] = useState("");
 
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-    const [loading, setLoading] = useState(false);
+  const API = `${BASE_URL}/user-mgmt/api/v1`;
 
-    const [successMessage, setSuccessMessage] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [errorMessageForPassword, setErrorMessageForPassword] = useState("");
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    setSuccessMessage("");
+    setErrorMessage("");
+    setErrorMessageForPassword("");
 
-    const API = `${BASE_URL}/user-mgmt/api/v1`;
+    try {
+      setLoading(true);
 
-    const handleSignup = async (e: React.FormEvent) => {
+      const response = await fetch(`${API}/register-normal-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          companyName,
+          emailId,
+          password,
+          name: emailId,
+        }),
+      });
 
-        e.preventDefault();
+      const data = await response.json();
 
-        setSuccessMessage("");
-        setErrorMessage("");
-        setErrorMessageForPassword("");
-        try {
+      if (response.ok && data.success) {
+        setSuccessMessage("Account created successfully!");
 
-            setLoading(true);
+        setCompanyname("");
+        setEmailId("");
+        setPassword("");
+        setConfirmPassword("");
 
-            const response = await fetch(
-                `${API}/register-normal-user`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        companyName,
-                        emailId,
-                        password,
-                        name: emailId
-                    }),
-                }
-            );
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      } else {
+        setErrorMessage(data.message || "Signup failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
 
-            const data = await response.json();
+      setErrorMessage("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            console.log("Signup success:", data);
+  return (
+    <AuthShell
+      eyebrow="New Workspace"
+      title="Create Your Account"
+      subtitle="Set up your medical store console in under a minute."
+      footer={
+        <>
+          Already have an account?{" "}
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="font-semibold text-cyan-400 transition-colors hover:text-cyan-300"
+          >
+            Sign In
+          </button>
+        </>
+      }
+    >
+      <form className="space-y-5" onSubmit={handleSignup}>
+        {successMessage && <SuccessBanner message={successMessage} />}
 
-            if (response.ok && data.success) {
+        {errorMessage && (
+          <ErrorBanner
+            message={errorMessage}
+            onDismiss={() => setErrorMessage("")}
+          />
+        )}
 
-                setSuccessMessage("Account created successfully!");
+        <Field label="Company Name">
+          <TextInput
+            type="text"
+            icon={Building2}
+            placeholder="Kamla Medical Store"
+            value={companyName}
+            onChange={(e) => setCompanyname(e.target.value)}
+            required
+          />
+        </Field>
 
-                setCompanyname("");
-                setEmailId("");
-                setPassword("");
+        <Field label="Email ID">
+          <TextInput
+            type="email"
+            icon={Mail}
+            autoComplete="email"
+            placeholder="you@company.com"
+            value={emailId}
+            onChange={(e) => setEmailId(e.target.value)}
+            required
+          />
+        </Field>
 
-                setTimeout(() => {
-                    navigate("/login");
-                }, 2000);
+        <Field label="Password">
+          <PasswordInput
+            autoComplete="new-password"
+            placeholder="Create a strong password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </Field>
 
-            } else {
+        <Field label="Re-enter Password" error={errorMessageForPassword}>
+          <PasswordInput
+            autoComplete="new-password"
+            placeholder="Repeat your password"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
 
-                setErrorMessage(
-                    data.message || "Signup failed. Please try again."
+              if (password !== e.target.value) {
+                setErrorMessageForPassword(
+                  "Password and Re-enter Password do not match",
                 );
-            }
+              } else {
+                setErrorMessageForPassword("");
+              }
+            }}
+            required
+          />
+        </Field>
 
-        } catch (error) {
-
-            console.error("Signup error:", error);
-
-            setErrorMessage("Something went wrong. Please try again.");
-
-        } finally {
-
-            setLoading(false);
-
-        }
-    };
-
-    return (
-        <div className="min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center px-6 py-10">
-
-            {/* Background effects */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#38bdf8_0%,transparent_30%),radial-gradient(circle_at_bottom_left,#2563eb_0%,transparent_30%)] opacity-40" />
-            <div className="absolute w-[550px] h-[550px] bg-sky-400/30 blur-[120px] rounded-full -top-40 -right-24" />
-            <div className="absolute w-[550px] h-[550px] bg-blue-600/25 blur-[120px] rounded-full -bottom-40 -left-24" />
-
-            <motion.div
-                initial={{ opacity: 0, y: -100 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md z-10"
-            >
-                <div className="bg-white/5 border border-white/10 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl shadow-cyan-500/10">
-
-                    {/* HEADER */}
-                    <div className="text-center mb-8">
-
-                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-400 to-blue-600 shadow-lg shadow-cyan-500/40 mb-5">
-                            <span className="text-3xl">✚</span>
-                        </div>
-
-                        <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-cyan-400 via-blue-400 to-sky-500 bg-clip-text text-transparent">
-                            Create Your Account
-                        </h1>
-
-                    </div>
-
-                    {successMessage && (
-                        <div className="mb-4 rounded-xl border border-green-500/30 bg-green-500/10 p-3 text-green-400 text-sm text-center">
-                            {successMessage}
-                        </div>
-                    )}
-
-                    {errorMessage && (
-                        <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-red-400 text-sm text-center">
-                            {errorMessage}
-                        </div>
-                    )}
-
-                    <form className="space-y-6" onSubmit={handleSignup}>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Company Name
-                            </label>
-
-                            <input
-                                type="text"
-                                placeholder="Enter your company name"
-                                value={companyName}
-                                onChange={(e) => setCompanyname(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Email ID
-                            </label>
-
-                            <input
-                                type="email"
-                                placeholder="Enter your email"
-                                value={emailId}
-                                onChange={(e) => setEmailId(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Password
-                            </label>
-
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 pr-14 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
-                                    required
-                                />
-
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition"
-                                >
-                                    {showPassword ? (<EyeOff size={18} />) : (<Eye size={18} />)}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Re-enter Password
-                            </label>
-
-                            <div className="relative">
-                                <input
-                                    type={showConfirmPassword ? "text" : "password"}
-                                    placeholder="Re-enter your password"
-                                    value={confirmPassword}
-                                    onChange={(e) => {
-                                        setConfirmPassword(e.target.value);
-
-                                        if (password !== e.target.value) {
-                                            setErrorMessageForPassword("Password and Re-enter Password do not match");
-                                        } else {
-                                            setErrorMessageForPassword("");
-                                        }
-                                    }}
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 pr-14 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
-                                    required
-                                />
-
-                                <button
-                                    type="button"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition"
-                                >
-                                    {showConfirmPassword ? (
-                                        <EyeOff size={18} />
-                                    ) : (
-                                        <Eye size={18} />
-                                    )}
-                                </button>
-                            </div>
-
-                            {errorMessageForPassword && (
-                                <p className="text-red-400 text-sm mt-2">
-                                    {errorMessageForPassword}
-                                </p>
-                            )}
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading || password !== confirmPassword}
-                            className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 transition-all duration-300 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-cyan-500/30 hover:scale-[1.02] disabled:opacity-50"
-                        >
-                            {loading ? "Creating Account..." : "Create Account"}
-                        </button>
-
-                    </form>
-
-                    <div className="relative my-8">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-white/10" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="bg-black/80 px-4 text-gray-500">
-                                Secure Medical Platform
-                            </span>
-                        </div>
-                    </div>
-
-                    <p className="text-center text-gray-500 text-sm">
-                        Already have an account?{" "}
-                        <button
-                            type="button"
-                            onClick={() => navigate("/login")}
-                            className="text-cyan-400 hover:text-cyan-300 transition"
-                        >
-                            Sign In
-                        </button>
-                    </p>
-
-                </div>
-            </motion.div>
-
-        </div>
-    );
+        <NeonButton
+          type="submit"
+          variant="primary"
+          size="lg"
+          icon={UserPlus}
+          loading={loading}
+          disabled={password !== confirmPassword}
+          className="w-full"
+        >
+          {loading ? "Creating Account…" : "Create Account"}
+        </NeonButton>
+      </form>
+    </AuthShell>
+  );
 }
 
 export default Signup;

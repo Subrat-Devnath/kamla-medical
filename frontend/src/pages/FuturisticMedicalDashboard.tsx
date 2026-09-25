@@ -1,164 +1,200 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
+  Activity,
   ArrowRight,
-  FileText,
+  CalendarDays,
+  History,
   Package,
+  ReceiptText,
+  ShieldCheck,
+  Sparkles,
+  Tag,
+  Wallet,
+  type LucideIcon,
 } from "lucide-react";
 
-const cards = [
+import { PageShell, Panel, Pill } from "@/components/hud";
+import { tones, type Tone } from "@/components/hud/tones";
+import { cn } from "@/lib/utils";
+
+type ModuleCard = {
+  title: string;
+  description: string;
+  path: string;
+  icon: LucideIcon;
+  tone: Tone;
+  cta: string;
+  boxes: { label: string; value: string; icon: LucideIcon }[];
+};
+
+const modules: ModuleCard[] = [
   {
     title: "Products",
     description:
-      "Manage medicine inventory, stock levels, pricing, and expiry tracking in one place.",
+      "Manage medicine inventory, stock levels, pricing and expiry tracking in one place.",
     path: "/products",
     icon: Package,
-    accent: "cyan",
+    tone: "cyan",
     cta: "Manage Products",
     boxes: [
-      { label: "Inventory", value: "Stock & qty" },
-      { label: "Expiry", value: "Date alerts" },
-      { label: "History", value: "Purchases" },
+      { label: "Inventory", value: "Stock & qty", icon: Package },
+      { label: "Expiry", value: "Date alerts", icon: CalendarDays },
+      { label: "History", value: "Purchases", icon: History },
     ],
   },
   {
     title: "Invoices",
     description:
-      "Create customer invoices, map products, apply discounts, and generate final bills.",
+      "Create customer invoices, map products, apply discounts and generate final bills.",
     path: "/invoices",
-    icon: FileText,
-    accent: "blue",
+    icon: ReceiptText,
+    tone: "blue",
     cta: "Manage Invoices",
     boxes: [
-      { label: "Draft", value: "Create bill" },
-      { label: "Items", value: "Map products" },
-      { label: "PDF", value: "Generate" },
+      { label: "Draft", value: "Create bill", icon: ReceiptText },
+      { label: "Items", value: "Map products", icon: Tag },
+      { label: "Totals", value: "Auto maths", icon: Wallet },
     ],
   },
-] as const;
-
-const accentStyles = {
-  cyan: {
-    iconWrap: "bg-cyan-500/20 text-cyan-300 ring-cyan-400/30",
-    button: "bg-cyan-500 hover:bg-cyan-400 text-black",
-    glow: "group-hover:shadow-cyan-500/20",
-    box: "border-cyan-500/20 bg-cyan-500/10",
-    boxLabel: "text-cyan-300",
-  },
-  blue: {
-    iconWrap: "bg-blue-500/20 text-blue-300 ring-blue-400/30",
-    button: "bg-blue-500 hover:bg-blue-400 text-white",
-    glow: "group-hover:shadow-blue-500/20",
-    box: "border-blue-500/20 bg-blue-500/10",
-    boxLabel: "text-blue-300",
-  },
-} as const;
+];
 
 function FuturisticMedicalDashboard() {
   const navigate = useNavigate();
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-white">
-      {/* Background */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,#38bdf8_0%,transparent_30%),radial-gradient(circle_at_bottom_left,#2563eb_0%,transparent_30%)] opacity-40" />
-      <div className="pointer-events-none absolute -top-40 -right-24 h-[550px] w-[550px] rounded-full bg-sky-400/30 blur-[120px]" />
-      <div className="pointer-events-none absolute -bottom-40 -left-24 h-[550px] w-[550px] rounded-full bg-blue-600/25 blur-[120px]" />
+    <PageShell>
+      {/* ---------- Hero ---------- */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="flex flex-col items-center pt-4 text-center sm:pt-8"
+      >
+        <span className="hud-label inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/10 px-3.5 py-1.5 text-cyan-300">
+          <Sparkles size={13} />
+          Welcome aboard
+        </span>
 
-      <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-6 py-14 sm:py-20">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45 }}
-          className="mb-10 text-center"
-        >
-          <span className="inline-flex items-center rounded-full border border-cyan-400/40 bg-cyan-400/10 px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-cyan-300">
-            WELCOME ABOARD
-          </span>
+        <h1 className="hud-title mt-5 text-3xl leading-[1.1] font-black tracking-tight sm:text-5xl lg:text-6xl">
+          Kamla Medical Store
+        </h1>
 
-          <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-5xl md:text-6xl">
-            <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
-              Kamla Medical Store
-            </span>
-          </h1>
+        <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-400 sm:mt-5 sm:text-base">
+          Streamline inventory and billing from a single console. Track stock,
+          watch expiry dates and raise invoices in seconds.
+        </p>
 
-          <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-gray-400 sm:text-base">
-            Streamline inventory and billing from one place. Manage products
-            and create invoices efficiently with a modern interface.
-          </p>
-        </motion.div>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <Pill tone="emerald" icon={Activity}>
+            All systems operational
+          </Pill>
+          <Pill tone="cyan" icon={ShieldCheck}>
+            Secure session
+          </Pill>
+        </div>
+      </motion.section>
 
-        {/* Cards */}
-        <div className="grid w-full max-w-4xl gap-6 md:grid-cols-2">
-          {cards.map((card, index) => {
-            const Icon = card.icon;
-            const styles = accentStyles[card.accent];
+      {/* ---------- Module cards ---------- */}
+      <section className="grid gap-4 sm:gap-5 md:grid-cols-2">
+        {modules.map((module, index) => {
+          const Icon = module.icon;
+          const tone = tones[module.tone];
 
-            return (
-              <motion.button
-                key={card.title}
-                type="button"
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.4,
-                  delay: 0.12 + index * 0.08,
+          return (
+            <motion.div
+              key={module.title}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 + index * 0.08 }}
+            >
+              <Panel
+                interactive
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(module.path)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    navigate(module.path);
+                  }
                 }}
-                whileHover={{
-                  y: -8,
-                  scale: 1.02,
-                }}
-                whileTap={{
-                  scale: 0.98,
-                }}
-                onClick={() => navigate(card.path)}
-                className={`group flex h-full flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left shadow-lg backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:bg-white/[0.07] hover:shadow-2xl ${styles.glow}`}
+                className={cn(
+                  "group flex h-full cursor-pointer flex-col p-5 text-left sm:p-6",
+                  tone.glow,
+                )}
               >
-                <div
-                  className={`mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl ring-1 ${styles.iconWrap}`}
-                >
-                  <Icon size={22} />
+                <div className="flex items-start justify-between gap-3">
+                  <span
+                    className={cn(
+                      "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ring-1",
+                      tone.badge,
+                    )}
+                  >
+                    <Icon size={22} />
+                  </span>
+
+                  <ArrowRight
+                    size={18}
+                    className="mt-3 shrink-0 text-slate-600 transition-all duration-300 group-hover:translate-x-1 group-hover:text-cyan-300"
+                  />
                 </div>
 
-                <h2 className="text-xl font-bold text-white">
-                  {card.title}
+                <h2 className="mt-4 text-lg font-bold text-white sm:text-xl">
+                  {module.title}
                 </h2>
 
-                <p className="mt-3 text-sm leading-relaxed text-gray-400">
-                  {card.description}
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                  {module.description}
                 </p>
 
                 <div className="mt-5 grid grid-cols-3 gap-2">
-                  {card.boxes.map((box) => (
-                    <div
-                      key={box.label}
-                      className={`rounded-xl border p-2.5 ${styles.box}`}
-                    >
-                      <p className={`text-[10px] font-semibold uppercase tracking-wider ${styles.boxLabel}`}>
-                        {box.label}
-                      </p>
-                      <p className="mt-1 text-xs font-medium text-slate-200">
-                        {box.value}
-                      </p>
-                    </div>
-                  ))}
+                  {module.boxes.map((box) => {
+                    const BoxIcon = box.icon;
+
+                    return (
+                      <div
+                        key={box.label}
+                        className={cn(
+                          "rounded-xl border p-2.5 text-left",
+                          tone.box,
+                        )}
+                      >
+                        <p
+                          className={cn(
+                            "flex items-center gap-1 text-[0.625rem] font-semibold tracking-wider uppercase",
+                            tone.label,
+                          )}
+                        >
+                          <BoxIcon size={11} className="shrink-0" />
+                          <span className="truncate">{box.label}</span>
+                        </p>
+                        <p className="mt-1 text-xs font-medium text-slate-300">
+                          {box.value}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <span
-                  className={`mt-6 inline-flex w-fit items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${styles.button}`}
+                  className={cn(
+                    "mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors sm:w-fit",
+                    tone.pill,
+                  )}
                 >
-                  {card.cta}
+                  {module.cta}
                   <ArrowRight
-                    size={16}
+                    size={15}
                     className="transition-transform duration-300 group-hover:translate-x-1"
                   />
                 </span>
-              </motion.button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
+              </Panel>
+            </motion.div>
+          );
+        })}
+      </section>
+    </PageShell>
   );
 }
 
