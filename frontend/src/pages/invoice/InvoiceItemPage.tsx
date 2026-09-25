@@ -638,43 +638,69 @@ function InvoiceItemPage() {
                     </div>
                 )}
 
-                {/* INVOICE ITEMS TABLE */}
-                <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/20 backdrop-blur-sm shadow-xl">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead className="bg-sky-500 text-white">
-                                <tr>
-                                    <th className="p-4">Product Name</th>
-                                    <th className="p-4 text-center">Qty</th>
-                                    <th className="p-4 text-right">List Price</th>
-                                    <th className="p-4 text-right">Sell Price</th>
-                                    <th className="p-4 text-right">Discount (Per Item)</th>
-                                    <th className="p-4 text-right">Total Price</th>
-                                    <th className="p-4 text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-800/60 text-sm">
-                                {invoiceItems.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={7} className="p-8 text-center text-slate-500">
-                                            No products mapped onto this invoice yet. Click "+ Add Product" to get started.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    invoiceItems.map((item, index) => {
-                                        const isEditing = editingIndex === index;
+                {/* INVOICE ITEMS — BOX FORMAT */}
+                {invoiceItems.length === 0 && !loading ? (
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900/20 p-10 text-center text-slate-500">
+                        No products mapped onto this invoice yet. Click "+ Add Product" to get started.
+                    </div>
+                ) : (
+                    <div className="space-y-5">
+                        {invoiceItems.map((item, index) => {
+                            const isEditing = editingIndex === index;
+                            const liveTotal = isEditing
+                                ? Number(editFields.unitSellPrice || 0) * Number(editFields.quantity || 0)
+                                : item.totalSellPrice ?? 0;
+                            const liveDiscount = isEditing
+                                ? Number(editFields.unitSellDiscount || 0)
+                                : item.unitSellDiscount ?? 0;
+                            const liveTotalDiscount = isEditing
+                                ? Number(editFields.unitSellDiscount || 0) * Number(editFields.quantity || 0)
+                                : item.totalSellDiscount ?? 0;
 
-                                        return (
-                                            <tr key={index} className="hover:bg-slate-800/20 transition-colors">
-                                                <td className="p-4 font-medium text-slate-200">{item.productName}</td>
+                            return (
+                                <div
+                                    key={item.invoiceItemId || index}
+                                    className={`rounded-2xl border bg-slate-900/30 p-5 transition-colors ${
+                                        isEditing
+                                            ? "border-cyan-400/50 bg-cyan-500/5"
+                                            : "border-slate-800 hover:border-slate-700"
+                                    }`}
+                                >
+                                    <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                                        <div className="min-w-0">
+                                            <h2 className="text-xl font-bold text-slate-100 truncate">
+                                                {item.productName}
+                                            </h2>
+                                            <p className="mt-1 text-sm text-slate-400">
+                                                List{" "}
+                                                <span className="text-slate-300">
+                                                    ₹{(item.unitListPrice ?? 0).toLocaleString("en-IN")}
+                                                </span>
+                                                {" · "}
+                                                Qty{" "}
+                                                <span className="text-cyan-300 font-semibold">
+                                                    {isEditing ? editFields.quantity || "—" : item.quantity}
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                                            ₹{liveTotal.toLocaleString("en-IN")}
+                                        </span>
+                                    </div>
 
-                                                {/* QUANTITY FIELD - TYPEABLE ONLY */}
-                                                <td className="p-4 text-center">
+                                    <div className="grid gap-3 sm:grid-cols-3">
+                                        <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-4">
+                                            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-violet-300">
+                                                Quantity
+                                            </p>
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex justify-between items-center gap-2">
+                                                    <span className="text-slate-400">Units</span>
                                                     {isEditing ? (
                                                         <input
                                                             type="number"
                                                             min="1"
-                                                            className="w-20 text-center px-2 py-1 rounded bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-cyan-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                            className="w-20 text-center px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-cyan-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                             value={editFields.quantity}
                                                             onKeyDown={(e) => {
                                                                 if (["-", "+", "e", "E"].includes(e.key)) {
@@ -683,111 +709,118 @@ function InvoiceItemPage() {
                                                             }}
                                                             onChange={(e) => {
                                                                 const value = e.target.value;
-
-                                                                // Allow empty value while editing
                                                                 if (value === "") {
                                                                     handleEditFieldChange("quantity", value, item.unitListPrice);
                                                                     return;
                                                                 }
-
-                                                                // Only allow positive integers
                                                                 if (/^\d+$/.test(value) && Number(value) >= 1) {
                                                                     handleEditFieldChange("quantity", value, item.unitListPrice);
                                                                 }
                                                             }}
                                                         />
                                                     ) : (
-                                                        <span className="font-semibold text-slate-300">{item.quantity}</span>
+                                                        <span className="font-semibold text-slate-200">
+                                                            {item.quantity}
+                                                        </span>
                                                     )}
-                                                </td>
+                                                </div>
+                                                <div className="flex justify-between gap-2">
+                                                    <span className="text-slate-400">List Price</span>
+                                                    <span className="font-medium text-slate-300">
+                                                        ₹{(item.unitListPrice ?? 0).toLocaleString("en-IN")}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                                <td className="p-4 text-right text-slate-400">
-                                                    ₹{(item.unitListPrice ?? 0).toLocaleString('en-IN')}
-                                                </td>
-
-                                                {/* SELL PRICE FIELD - TYPEABLE ONLY */}
-                                                <td className="p-4 text-right text-slate-200">
+                                        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
+                                            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-amber-300">
+                                                Pricing
+                                            </p>
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex justify-between items-center gap-2">
+                                                    <span className="text-slate-400">Sell Price</span>
                                                     {isEditing ? (
                                                         <input
                                                             type="number"
                                                             min="0"
-                                                            className="w-28 text-right px-2 py-1 rounded bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-cyan-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                            className="w-28 text-right px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-cyan-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                             value={editFields.unitSellPrice}
-                                                            // Fix: Pass raw string value directly
-                                                            onChange={(e) => handleEditFieldChange("unitSellPrice", e.target.value, item.unitListPrice)}
+                                                            onChange={(e) =>
+                                                                handleEditFieldChange(
+                                                                    "unitSellPrice",
+                                                                    e.target.value,
+                                                                    item.unitListPrice
+                                                                )
+                                                            }
                                                         />
                                                     ) : (
-                                                        `₹${(item.unitSellPrice ?? 0).toLocaleString('en-IN')}`
-                                                    )}
-                                                </td>
-
-                                                {/* DISCOUNT FIELD (READ-ONLY) */}
-                                                <td className="p-4 text-right text-amber-400/90">
-                                                    {isEditing ? (
-                                                        <span>
-                                                            ₹{(Number(editFields.unitSellDiscount || 0)).toLocaleString('en-IN')}
-                                                            <span className="text-xs text-slate-500 block">
-                                                                {/* Safe live calculation fallback for total discount */}
-                                                                (Tot: ₹{(Number(editFields.unitSellDiscount || 0) * Number(editFields.quantity || 0)).toLocaleString('en-IN')})
-                                                            </span>
+                                                        <span className="font-medium text-slate-200">
+                                                            ₹{(item.unitSellPrice ?? 0).toLocaleString("en-IN")}
                                                         </span>
-                                                    ) : (
-                                                        `₹${(item.unitSellDiscount ?? 0).toLocaleString('en-IN')} (Tot: ₹${(item.totalSellDiscount ?? 0).toLocaleString('en-IN')})`
                                                     )}
-                                                </td>
+                                                </div>
+                                                <div className="flex justify-between gap-2">
+                                                    <span className="text-slate-400">Discount / item</span>
+                                                    <span className="font-medium text-amber-300">
+                                                        ₹{liveDiscount.toLocaleString("en-IN")}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between gap-2">
+                                                    <span className="text-slate-400">Total discount</span>
+                                                    <span className="font-medium text-amber-400/90">
+                                                        ₹{liveTotalDiscount.toLocaleString("en-IN")}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                                {/* LIVE DYNAMIC TOTAL DISPLAY */}
-                                                <td className="p-4 text-right font-bold text-emerald-400">
-                                                    {isEditing ? (
-                                                        <span>
-                                                            ₹{(
-                                                                (Number(editFields.unitSellPrice || 0) * Number(editFields.quantity || 0))
-                                                            ).toLocaleString('en-IN')}
-                                                        </span>
-                                                    ) : (
-                                                        `₹${(item.totalSellPrice ?? 0).toLocaleString('en-IN')}`
-                                                    )}
-                                                </td>
+                                        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                                            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-emerald-300">
+                                                Totals
+                                            </p>
+                                            <div className="space-y-2 text-sm">
+                                                <div className="flex justify-between gap-2">
+                                                    <span className="text-slate-400">Line total</span>
+                                                    <span className="font-bold text-emerald-400">
+                                                        ₹{liveTotal.toLocaleString("en-IN")}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                                {/* ACTION CONTROL BUTTONS */}
-                                                <td className="p-4 text-center">
-                                                    {isEditing ? (
-                                                        <div className="flex items-center justify-center gap-2">
-                                                            <button
-                                                                onClick={() => saveInlineEdit(item)}
-                                                                className="px-2.5 py-1 text-xs font-bold rounded bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
-                                                            >
-                                                                Save
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setEditingIndex(null)}
-                                                                className="px-2.5 py-1 text-xs font-bold rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-                                                            >
-                                                                Cancel
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-
-
-                                                        <button
-                                                            onClick={() => startInlineEditing(index, item)}
-                                                            disabled={isInvoiceLocked}
-                                                            className="px-3 py-1 text-xs font-semibold rounded bg-cyan-600/20 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-600/30 transition-all"
-                                                        >
-                                                            Edit
-                                                        </button>
-
-
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })
-                                )}
-                            </tbody>
-                        </table>
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {isEditing ? (
+                                            <>
+                                                <button
+                                                    onClick={() => saveInlineEdit(item)}
+                                                    className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+                                                >
+                                                    Save
+                                                </button>
+                                                <button
+                                                    onClick={() => setEditingIndex(null)}
+                                                    className="inline-flex items-center rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-300 hover:bg-slate-700"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                onClick={() => startInlineEditing(index, item)}
+                                                disabled={isInvoiceLocked}
+                                                className="inline-flex items-center rounded-xl bg-cyan-600/20 border border-cyan-500/30 px-4 py-2 text-sm font-semibold text-cyan-400 hover:bg-cyan-600/30 disabled:opacity-40 disabled:cursor-not-allowed"
+                                            >
+                                                Edit
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
-                </div>
+                )}
 
                 {/* MAIN PAGINATION */}
                 <div className="flex justify-end gap-3 border-t border-slate-900 pt-4">
@@ -827,7 +860,6 @@ function InvoiceItemPage() {
                                 </button>
                             </div>
 
-                            {/* MODAL SEARCH BAR */}
                             <div className="p-6 pb-2 flex gap-3">
                                 <input
                                     placeholder="Search Product Name or Formula..."
@@ -844,51 +876,62 @@ function InvoiceItemPage() {
                                 </button>
                             </div>
 
-                            {/* MODAL TABLE OVERFLOW LISTING */}
-                            <div className="p-6 flex-1 overflow-y-auto">
-                                <div className="overflow-hidden rounded-xl border border-slate-800/80 bg-slate-950/40">
-                                    <table className="w-full text-left border-collapse text-sm">
-                                        <thead className="bg-slate-900 sticky top-0 border-b border-slate-800 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                                            <tr>
-                                                <th className="p-3">Product Name</th>
-                                                <th className="p-3">Formula</th>
-                                                <th className="p-3 text-center">Category</th>
-                                                <th className="p-3 text-right">Unit List Price</th>
-                                                <th className="p-3 text-center">Stock Available</th>
-                                                <th className="p-3 text-center">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-800/60">
-                                            {products.map((product, idx) => (
-                                                <tr key={idx} className="hover:bg-slate-800/30 transition-colors text-slate-300">
-                                                    <td className="p-3 font-medium text-slate-200">{product.productName}</td>
-                                                    <td className="p-3 font-mono text-xs text-slate-400">{product.formula || "N/A"}</td>
-                                                    <td className="p-3 text-center text-xs"><span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300">{product.category}</span></td>
-                                                    <td className="p-3 text-right font-semibold text-slate-200">₹{(product.unitListPrice ?? 0).toLocaleString('en-IN')}</td>
-                                                    <td className="p-3 text-center text-amber-400 font-medium">{product.productQuantity}</td>
-                                                    <td className="p-3 text-center">
-                                                        <button
-                                                            onClick={() => addInvoiceItem(product)}
-                                                            className="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
-                                                        >
-                                                            Select
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                            {products.length === 0 && (
-                                                <tr>
-                                                    <td colSpan={6} className="p-8 text-center text-slate-500">
-                                                        No verified master product records matches criteria scope.
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                            {/* PRODUCT PICKER — BOX FORMAT */}
+                            <div className="p-6 flex-1 overflow-y-auto space-y-3">
+                                {products.length === 0 ? (
+                                    <div className="rounded-xl border border-slate-800 p-8 text-center text-slate-500">
+                                        No verified master product records matches criteria scope.
+                                    </div>
+                                ) : (
+                                    products.map((product, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="rounded-xl border border-slate-800 bg-slate-950/40 p-4 hover:border-slate-700 transition-colors"
+                                        >
+                                            <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                                                <div className="min-w-0">
+                                                    <h3 className="text-base font-bold text-slate-100 truncate">
+                                                        {product.productName}
+                                                    </h3>
+                                                    <p className="mt-1 text-xs text-slate-400">
+                                                        Formula{" "}
+                                                        <span className="font-mono text-slate-300">
+                                                            {product.formula || "N/A"}
+                                                        </span>
+                                                        {" · "}
+                                                        <span className="text-slate-300">{product.category}</span>
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => addInvoiceItem(product)}
+                                                    className="shrink-0 px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+                                                >
+                                                    Select
+                                                </button>
+                                            </div>
+                                            <div className="grid gap-2 sm:grid-cols-3">
+                                                <div className="rounded-lg border border-violet-500/20 bg-violet-500/10 px-3 py-2 text-sm flex justify-between gap-2">
+                                                    <span className="text-slate-400">Category</span>
+                                                    <span className="font-medium text-slate-200">{product.category}</span>
+                                                </div>
+                                                <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm flex justify-between gap-2">
+                                                    <span className="text-slate-400">List Price</span>
+                                                    <span className="font-semibold text-slate-200">
+                                                        ₹{(product.unitListPrice ?? 0).toLocaleString("en-IN")}
+                                                    </span>
+                                                </div>
+                                                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm flex justify-between gap-2">
+                                                    <span className="text-slate-400">Stock</span>
+                                                    <span className="font-medium text-amber-400">
+                                                        {product.productQuantity}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
 
-                            {/* MODAL FOOTER PAGINATION */}
                             <div className="p-4 bg-slate-900/50 border-t border-slate-800 flex justify-center gap-3">
                                 <button
                                     disabled={productPageStateStack.length === 0}

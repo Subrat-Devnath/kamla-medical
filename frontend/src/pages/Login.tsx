@@ -75,7 +75,7 @@ function Login() {
                             <span className="text-3xl">✚</span>
                         </div>
 
-                        <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-cyan-400 via-blue-400 to-sky-500 bg-clip-text text-transparent">
                             Login to Your Account
                         </h1>
 
@@ -123,7 +123,7 @@ function Login() {
                                     placeholder="Enter your password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 pr-14 outline-none focus:border-purple-500 transition text-white placeholder:text-gray-500"
+                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 pr-14 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
                                     required
                                 />
 

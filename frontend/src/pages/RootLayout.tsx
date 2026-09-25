@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { CircleHelp, Home, LogOut } from "lucide-react";
+import { CircleHelp, FileText, Home, LogOut, Package } from "lucide-react";
 
 function ReactLayout() {
   const user = useMemo(() => {
@@ -24,6 +24,13 @@ function ReactLayout() {
     // Redirect to login page
     window.location.href = "/";
   };
+
+  const navClass = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300 ${
+      isActive
+        ? "bg-cyan-500/15 text-cyan-300"
+        : "text-gray-400 hover:bg-white/5 hover:text-white"
+    }`;
 
   return (
     <div className="relative min-h-screen bg-black text-white">
@@ -53,27 +60,30 @@ function ReactLayout() {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-2">
-            <NavLink
-              to="/home"
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300 ${
-                  isActive
-                    ? "bg-cyan-500/15 text-cyan-300"
-                    : "text-gray-400 hover:bg-white/5 hover:text-white"
-                }`
-              }
-            >
+            <NavLink to="/home" className={navClass}>
               <Home size={20} className="min-w-[20px]" />
-
               <span className="hidden whitespace-nowrap group-hover:inline">
                 Home
+              </span>
+            </NavLink>
+
+            <NavLink to="/products" className={navClass}>
+              <Package size={20} className="min-w-[20px]" />
+              <span className="hidden whitespace-nowrap group-hover:inline">
+                Products
+              </span>
+            </NavLink>
+
+            <NavLink to="/invoices" className={navClass}>
+              <FileText size={20} className="min-w-[20px]" />
+              <span className="hidden whitespace-nowrap group-hover:inline">
+                Invoices
               </span>
             </NavLink>
           </nav>
 
           {/* Bottom Menu */}
           <div className="space-y-2 border-t border-white/10 pt-4">
-            {/* Help */}
             <button
               type="button"
               className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-gray-400 transition-all duration-300 hover:bg-white/5 hover:text-white"
@@ -85,7 +95,6 @@ function ReactLayout() {
               </span>
             </button>
 
-            {/* Logout */}
             <button
               type="button"
               onClick={handleLogout}

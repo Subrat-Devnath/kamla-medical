@@ -170,7 +170,7 @@ function ForgotPassword() {
 
             if (response.ok) {
                 showToast("success", "Password reset successful");
-                setTimeout(() => navigate("/"), 1500);
+                setTimeout(() => navigate("/login"), 1500);
             } else {
                 showToast("error", data?.message || "Failed to reset password");
             }
@@ -179,14 +179,16 @@ function ForgotPassword() {
         }
     };
 
+    const stepLabel =
+        step === 1 ? "Step 1 of 3 · Email" : step === 2 ? "Step 2 of 3 · OTP" : "Step 3 of 3 · New Password";
+
     return (
-        <div className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+        <div className="min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center px-6 py-10">
 
-            {/* Background effects */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#0891b2_0%,transparent_25%),radial-gradient(circle_at_bottom_left,#7c3aed_0%,transparent_25%)] opacity-30" />
-            <div className="absolute w-[500px] h-[500px] bg-cyan-500/20 blur-3xl rounded-full -top-32 -right-20" />
-            <div className="absolute w-[500px] h-[500px] bg-purple-500/20 blur-3xl rounded-full -bottom-32 -left-20" />
-
+            {/* Background effects — match Login */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#38bdf8_0%,transparent_30%),radial-gradient(circle_at_bottom_left,#2563eb_0%,transparent_30%)] opacity-40" />
+            <div className="absolute w-[550px] h-[550px] bg-sky-400/30 blur-[120px] rounded-full -top-40 -right-24" />
+            <div className="absolute w-[550px] h-[550px] bg-blue-600/25 blur-[120px] rounded-full -bottom-40 -left-24" />
 
             {/* TOAST */}
             {toast && (
@@ -205,26 +207,62 @@ function ForgotPassword() {
             <motion.div
                 initial={{ opacity: 0, y: -100 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md"
+                className="w-full max-w-md z-10"
             >
-                <div className="bg-white/5 border border-white/10 backdrop-blur-2xl rounded-3xl p-8">
+                <div className="bg-white/5 border border-white/10 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl shadow-cyan-500/10">
 
-                    <h1 className="text-3xl font-bold text-center mb-6">
-                        Forgot Password
-                    </h1>
+                    {/* HEADER */}
+                    <div className="text-center mb-6">
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-400 to-blue-600 shadow-lg shadow-cyan-500/40 mb-5">
+                            <span className="text-3xl">✚</span>
+                        </div>
+
+                        <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-cyan-400 via-blue-400 to-sky-500 bg-clip-text text-transparent">
+                            Forgot Password
+                        </h1>
+
+                        <p className="mt-3 text-sm text-slate-400">{stepLabel}</p>
+                    </div>
+
+                    {/* Step indicator boxes */}
+                    <div className="mb-6 grid grid-cols-3 gap-2">
+                        {[1, 2, 3].map((n) => (
+                            <div
+                                key={n}
+                                className={`rounded-xl border px-2 py-2 text-center text-xs font-semibold ${
+                                    step === n
+                                        ? "border-cyan-400/40 bg-cyan-500/15 text-cyan-300"
+                                        : step > n
+                                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                                          : "border-white/10 bg-white/[0.03] text-slate-500"
+                                }`}
+                            >
+                                {n === 1 ? "Email" : n === 2 ? "OTP" : "Reset"}
+                            </div>
+                        ))}
+                    </div>
 
                     {/* STEP 1 */}
                     {step === 1 && (
                         <form onSubmit={handleSendOtp} className="space-y-5">
-
-                            <div className="relative">
-                                <input type="email" placeholder="Enter Email Address" value={emailId} onChange={(e) => setEmailId(e.target.value)}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Email ID
+                                </label>
+                                <input
+                                    type="email"
+                                    placeholder="Enter Email Address"
+                                    value={emailId}
+                                    onChange={(e) => setEmailId(e.target.value)}
                                     className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
+                                    required
                                 />
                             </div>
 
-                            <button type="submit" disabled={loading}
-                                className=" w-full bg-cyan-600 hover:bg-cyan-700 transition py-4 rounded-2xl font-semibold disabled:opacity-60  disabled:cursor-not-allowed "
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 transition-all duration-300 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-cyan-500/30 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? (
                                     <Loader2 className="animate-spin mx-auto" />
@@ -232,44 +270,50 @@ function ForgotPassword() {
                                     "Send OTP"
                                 )}
                             </button>
-
                         </form>
                     )}
 
                     {/* STEP 2 */}
                     {step === 2 && (
                         <form onSubmit={handleVerifyOtp} className="space-y-5">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    Email ID
+                                </label>
+                                <input
+                                    type="email"
+                                    value={emailId}
+                                    readOnly
+                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 outline-none text-white"
+                                />
+                            </div>
 
-                            <input
-                                type="email"
-                                value={emailId}
-                                readOnly
-                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
-                            />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    OTP
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter OTP"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
+                                />
+                            </div>
 
-                            <input
-                                type="text"
-                                placeholder="Enter OTP"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 pr-14 outline-none focus:border-purple-500 transition text-white placeholder:text-gray-500"
-                            />
-
-                            {/* TIMER */}
-                            <div className="text-center text-sm text-gray-300">
+                            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-sm text-gray-300">
                                 OTP expires in:{" "}
-                                <span className={otpExpired ? "text-red-500" : "text-green-400"}>
+                                <span className={otpExpired ? "text-red-500 font-semibold" : "text-green-400 font-semibold"}>
                                     {formatTime(timeLeft)}
                                 </span>
                             </div>
 
                             <div className="flex gap-3">
-
                                 <button
                                     type="button"
                                     onClick={handleResendOtp}
                                     disabled={resendLoading}
-                                    className="w-1/2 bg-yellow-600 py-3 rounded-xl"
+                                    className="w-1/2 rounded-2xl border border-amber-500/30 bg-amber-500/15 py-3 font-semibold text-amber-300 hover:bg-amber-500/25 disabled:opacity-50"
                                 >
                                     {resendLoading ? <Loader2 className="animate-spin mx-auto" /> : "Resend OTP"}
                                 </button>
@@ -277,8 +321,11 @@ function ForgotPassword() {
                                 <button
                                     type="submit"
                                     disabled={loading || otpExpired}
-                                    className={`w-1/2 py-3 rounded-xl ${otpExpired ? "bg-gray-600" : "bg-purple-600"
-                                        }`}
+                                    className={`w-1/2 rounded-2xl py-3 font-semibold transition ${
+                                        otpExpired
+                                            ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                                            : "bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-400 hover:to-blue-500"
+                                    }`}
                                 >
                                     {loading ? (
                                         <Loader2 className="animate-spin mx-auto" />
@@ -288,7 +335,6 @@ function ForgotPassword() {
                                         "Verify OTP"
                                     )}
                                 </button>
-
                             </div>
                         </form>
                     )}
@@ -296,40 +342,46 @@ function ForgotPassword() {
                     {/* STEP 3 */}
                     {step === 3 && (
                         <form onSubmit={handleResetPassword} className="space-y-5">
-
-                            <input
-                                type="password"
-                                placeholder="New Password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10"
-                            />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                    New Password
+                                </label>
+                                <input
+                                    type="password"
+                                    placeholder="New Password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 outline-none focus:border-cyan-500 transition text-white placeholder:text-gray-500"
+                                    required
+                                />
+                            </div>
 
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-green-600 py-3 rounded-xl"
+                                className="w-full bg-gradient-to-r from-emerald-500 to-cyan-600 hover:from-emerald-400 hover:to-cyan-500 transition-all duration-300 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-emerald-500/20 hover:scale-[1.02] disabled:opacity-50"
                             >
                                 {loading ? <Loader2 className="animate-spin mx-auto" /> : "Reset Password"}
                             </button>
                         </form>
                     )}
 
-                    {/* ERROR */}
                     {errorMessage && (
-                        <p className="text-red-400 text-sm mt-3">
+                        <p className="text-red-400 text-sm mt-4 text-center">
                             {errorMessage}
                         </p>
                     )}
 
-                    {/* BACK */}
-                    <p className="text-center text-sm text-gray-400 mt-4">
+                    <p className="text-center text-gray-500 text-sm mt-8">
                         Back to{" "}
-                        <button onClick={() => navigate("/")} className="text-cyan-400">
+                        <button
+                            type="button"
+                            onClick={() => navigate("/login")}
+                            className="text-cyan-400 hover:text-cyan-300 transition"
+                        >
                             Login
                         </button>
                     </p>
-
                 </div>
             </motion.div>
         </div>

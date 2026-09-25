@@ -468,59 +468,130 @@ function ProductsPage() {
                 <p className="text-cyan-400 mb-4">Loading...</p>
             )}
 
-            {/* PRODUCTS */}
-            <div className="overflow-x-auto rounded-2xl border border-white/10">
-                <table className="w-full min-w-[700px]">
-                    <thead className="bg-sky-400">
-                        <tr>
-                            <th className="text-center p-4 w-12"> Select </th>
-                            <th className="text-left p-4">Product Name</th>
-                            <th className="text-left p-4">Product Expiry Date</th>
-                            <th className="text-center p-4">Quantity</th>
-                            <th className="text-left p-4">Product Type</th>
-                            <th className="text-left p-4">Formula</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {products.map((p, index) => (
-                            <tr
-                                key={index}
-                                className="border-t border-white/10 hover:bg-white/5"
+            {/* PRODUCTS — BOX FORMAT */}
+            {products.length === 0 && !loading ? (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center text-slate-400">
+                    No products found.
+                </div>
+            ) : (
+                <div className="space-y-5">
+                    {products.map((p) => {
+                        const selected = selectedProducts.includes(p.productName);
+                        return (
+                            <div
+                                key={p.productName}
+                                className={`rounded-2xl border bg-white/[0.03] p-5 transition-colors ${
+                                    selected
+                                        ? "border-cyan-400/50 bg-cyan-500/5"
+                                        : "border-white/10 hover:border-white/20"
+                                }`}
                             >
-                                <td className="p-4 text-center w-12">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedProducts.includes(p.productName)}
-                                        onChange={(e) => {
-                                            if (e.target.checked) {
-                                                setSelectedProducts(prev => [...prev, p.productName]);
-                                            } else {
-                                                setSelectedProducts(prev =>
-                                                    prev.filter(name => name !== p.productName)
-                                                );
-                                            }
-                                        }}
-                                        className="h-4 w-4 cursor-pointer"
-                                    />
-                                </td>
-                                <td className="p-4">
-                                    <button onClick={() => navigate(`/purchase-history/${p.productName}`)}
-                                        className="text-cyan-300 hover:text-cyan-400"
-                                    >
-                                        {p.productName}
-                                    </button>
-                                </td>
+                                {/* Header */}
+                                <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                                    <div className="flex items-start gap-3 min-w-0">
+                                        <input
+                                            type="checkbox"
+                                            checked={selected}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setSelectedProducts((prev) => [...prev, p.productName]);
+                                                } else {
+                                                    setSelectedProducts((prev) =>
+                                                        prev.filter((name) => name !== p.productName)
+                                                    );
+                                                }
+                                            }}
+                                            className="mt-1.5 h-4 w-4 cursor-pointer shrink-0"
+                                        />
+                                        <div className="min-w-0">
+                                            <h2 className="text-xl font-bold text-white truncate">
+                                                {p.productName}
+                                            </h2>
+                                            <p className="mt-1 text-sm text-slate-400">
+                                                Category{" "}
+                                                <span className="text-purple-300">{p.category || "—"}</span>
+                                                {" · "}
+                                                Formula{" "}
+                                                <span className="text-yellow-300">{p.formula || "N/A"}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-cyan-300">
+                                        Qty {p.productQuantity}
+                                    </span>
+                                </div>
 
-                                <td className={`p-4 text-left ${getExpiryColor(p.expiryDate)}`} > {formatDate(p.expiryDate)}</td>
-                                <td className="p-4 text-center text-green-400"> {p.productQuantity} </td>
-                                <td className="p-4 text-left text-purple-400"> {p.category} </td>
-                                <td className="p-4 text-left text-yellow-400"> {p.formula || "N/A"} </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                                {/* Info boxes */}
+                                <div className="grid gap-3 sm:grid-cols-3">
+                                    <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-4">
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-violet-300">
+                                            Inventory
+                                        </p>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Stock</span>
+                                                <span className="font-semibold text-green-400">
+                                                    {p.productQuantity}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Type</span>
+                                                <span className="font-medium text-purple-300">
+                                                    {p.category || "—"}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-amber-300">
+                                            Composition
+                                        </p>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Formula</span>
+                                                <span className="font-medium text-yellow-300 text-right">
+                                                    {p.formula || "N/A"}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Product</span>
+                                                <span className="font-medium text-slate-200 text-right truncate max-w-[60%]">
+                                                    {p.productName}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-rose-300">
+                                            Expiry
+                                        </p>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Date</span>
+                                                <span className={`font-semibold ${getExpiryColor(p.expiryDate)}`}>
+                                                    {formatDate(p.expiryDate)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                    <button
+                                        onClick={() => navigate(`/purchase-history/${p.productName}`)}
+                                        className="inline-flex items-center rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500"
+                                    >
+                                        View Purchase History
+                                    </button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {selectedProducts.length > 0 && (
 

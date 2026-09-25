@@ -15,6 +15,11 @@ const cards = [
     icon: Package,
     accent: "cyan",
     cta: "Manage Products",
+    boxes: [
+      { label: "Inventory", value: "Stock & qty" },
+      { label: "Expiry", value: "Date alerts" },
+      { label: "History", value: "Purchases" },
+    ],
   },
   {
     title: "Invoices",
@@ -24,6 +29,11 @@ const cards = [
     icon: FileText,
     accent: "blue",
     cta: "Manage Invoices",
+    boxes: [
+      { label: "Draft", value: "Create bill" },
+      { label: "Items", value: "Map products" },
+      { label: "PDF", value: "Generate" },
+    ],
   },
 ] as const;
 
@@ -32,11 +42,15 @@ const accentStyles = {
     iconWrap: "bg-cyan-500/20 text-cyan-300 ring-cyan-400/30",
     button: "bg-cyan-500 hover:bg-cyan-400 text-black",
     glow: "group-hover:shadow-cyan-500/20",
+    box: "border-cyan-500/20 bg-cyan-500/10",
+    boxLabel: "text-cyan-300",
   },
   blue: {
     iconWrap: "bg-blue-500/20 text-blue-300 ring-blue-400/30",
     button: "bg-blue-500 hover:bg-blue-400 text-white",
     glow: "group-hover:shadow-blue-500/20",
+    box: "border-blue-500/20 bg-blue-500/10",
+    boxLabel: "text-blue-300",
   },
 } as const;
 
@@ -110,9 +124,25 @@ function FuturisticMedicalDashboard() {
                   {card.title}
                 </h2>
 
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-gray-400">
+                <p className="mt-3 text-sm leading-relaxed text-gray-400">
                   {card.description}
                 </p>
+
+                <div className="mt-5 grid grid-cols-3 gap-2">
+                  {card.boxes.map((box) => (
+                    <div
+                      key={box.label}
+                      className={`rounded-xl border p-2.5 ${styles.box}`}
+                    >
+                      <p className={`text-[10px] font-semibold uppercase tracking-wider ${styles.boxLabel}`}>
+                        {box.label}
+                      </p>
+                      <p className="mt-1 text-xs font-medium text-slate-200">
+                        {box.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
 
                 <span
                   className={`mt-6 inline-flex w-fit items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${styles.button}`}

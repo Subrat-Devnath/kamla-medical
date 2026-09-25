@@ -313,74 +313,149 @@ function PurchaseHistoryPage() {
             {error && <p className="text-red-400 mb-4">{error}</p>}
             {loading && <p className="text-cyan-400 mb-4">Processing...</p>}
 
-            {/* TABLE GRID */}
-            <div className="overflow-x-auto rounded-xl border border-slate-700 bg-slate-900">
-                <table className="w-full text-sm">
-                    <thead className="bg-cyan-700 text-white">
-                        <tr>
-                            <th className="text-center p-3 w-12">Select</th>
-                            <th className="px-4 py-3 text-left">Purchase Date</th>
-                            <th className="px-4 py-3 text-left">Expiry Date</th>
-                            <th className="px-4 py-3 text-right">Qty</th>
-                            <th className="px-4 py-3 text-right">Unit List</th>
-                            <th className="px-4 py-3 text-right">Total List</th>
-                            <th className="px-4 py-3 text-right">Unit Buy</th>
-                            <th className="px-4 py-3 text-right">Total Buy</th>
-                            <th className="px-4 py-3 text-right">Discount</th>
-                            <th className="px-4 py-3 text-left">Supplier</th>
-                        </tr>
-                    </thead>
+            {/* PURCHASE HISTORY — BOX FORMAT */}
+            {history.length === 0 && !loading ? (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center text-slate-400">
+                    No purchase history found.
+                </div>
+            ) : (
+                <div className="space-y-5">
+                    {history.map((h, index) => {
+                        const recordId = `${h.supplierName}-${h.purchaseDate}`;
+                        const selected = selectedRecords.includes(recordId);
 
-                    <tbody>
-                        {history.length === 0 ? (
-                            <tr>
-                                <td colSpan={10} className="py-10 text-center text-slate-400">
-                                    No purchase history found.
-                                </td>
-                            </tr>
-                        ) : (
-                            history.map((h, index) => {
-                                // Composite unique identifier combination
-                                const recordId = `${h.supplierName}-${h.purchaseDate}`;
+                        return (
+                            <div
+                                key={index}
+                                className={`rounded-2xl border bg-white/[0.03] p-5 transition-colors ${
+                                    selected
+                                        ? "border-cyan-400/50 bg-cyan-500/5"
+                                        : "border-white/10 hover:border-white/20"
+                                }`}
+                            >
+                                {/* Header */}
+                                <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                                    <div className="flex items-start gap-3 min-w-0">
+                                        <input
+                                            type="checkbox"
+                                            checked={selected}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setSelectedRecords((prev) => [...prev, recordId]);
+                                                } else {
+                                                    setSelectedRecords((prev) =>
+                                                        prev.filter((id) => id !== recordId)
+                                                    );
+                                                }
+                                            }}
+                                            className="mt-1.5 h-4 w-4 cursor-pointer shrink-0"
+                                        />
+                                        <div className="min-w-0">
+                                            <h2 className="text-xl font-bold text-white truncate">
+                                                {h.supplierName || "Unknown Supplier"}
+                                            </h2>
+                                            <p className="mt-1 text-sm text-slate-400">
+                                                Purchased{" "}
+                                                <span className="text-slate-200">
+                                                    {formatDate(h.purchaseDate)}
+                                                </span>
+                                                {" · "}
+                                                Qty{" "}
+                                                <span className="text-cyan-300 font-semibold">
+                                                    {formatValue(h.purchasedQuantity)}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-yellow-300">
+                                            Buy ₹{formatValue(h.totalBuyPrice)}
+                                        </span>
+                                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-cyan-300">
+                                            List ₹{formatValue(h.totalListPrice)}
+                                        </span>
+                                    </div>
+                                </div>
 
-                                return (
-                                    <tr
-                                        key={index}
-                                        className="border-t border-slate-700 hover:bg-slate-800 transition-colors"
-                                    >
-                                        {/* CHECKBOX SELECTION */}
-                                        <td className="p-3 text-center w-12">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedRecords.includes(recordId)}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) {
-                                                        setSelectedRecords(prev => [...prev, recordId]);
-                                                    } else {
-                                                        setSelectedRecords(prev =>
-                                                            prev.filter(id => id !== recordId)
-                                                        );
-                                                    }
-                                                }}
-                                                className="h-4 w-4 cursor-pointer"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3">{formatDate(h.purchaseDate)}</td>
-                                        <td className={`p-4 text-left ${getExpiryColor(h.expiryDate)}`}> {formatDate(h.expiryDate)}</td>
-                                        <td className="px-4 py-3 text-right font-semibold">{formatValue(h.purchasedQuantity)}</td>
-                                        <td className="px-4 py-3 text-right">₹{formatValue(h.unitListPrice)}</td>
-                                        <td className="px-4 py-3 text-right text-cyan-300 font-medium">₹{formatValue(h.totalListPrice)}</td>
-                                        <td className="px-4 py-3 text-right text-green-300 font-medium">₹{formatValue(h.unitBuyPrice)}</td>
-                                        <td className="px-4 py-3 text-right text-yellow-300 font-medium">₹{formatValue(h.totalBuyPrice)}</td>
-                                        <td className="px-4 py-3 text-right text-pink-300">₹{formatValue(h.unitBuyDiscount)}</td>
-                                        <td className="px-4 py-3 text-blue-300">{h.supplierName || "-"}</td>
-                                    </tr>
-                                );
-                            })
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                                {/* Info boxes */}
+                                <div className="grid gap-3 sm:grid-cols-3">
+                                    <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-4">
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-violet-300">
+                                            List Pricing
+                                        </p>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Unit List</span>
+                                                <span className="font-medium text-slate-200">
+                                                    ₹{formatValue(h.unitListPrice)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Total List</span>
+                                                <span className="font-semibold text-cyan-300">
+                                                    ₹{formatValue(h.totalListPrice)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-emerald-300">
+                                            Buy Pricing
+                                        </p>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Unit Buy</span>
+                                                <span className="font-medium text-green-300">
+                                                    ₹{formatValue(h.unitBuyPrice)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Total Buy</span>
+                                                <span className="font-semibold text-yellow-300">
+                                                    ₹{formatValue(h.totalBuyPrice)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Discount</span>
+                                                <span className="font-medium text-pink-300">
+                                                    ₹{formatValue(h.unitBuyDiscount)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
+                                        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-rose-300">
+                                            Dates &amp; Qty
+                                        </p>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Purchase</span>
+                                                <span className="font-medium text-slate-200">
+                                                    {formatDate(h.purchaseDate)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Expiry</span>
+                                                <span className={`font-semibold ${getExpiryColor(h.expiryDate)}`}>
+                                                    {formatDate(h.expiryDate)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between gap-2">
+                                                <span className="text-slate-400">Quantity</span>
+                                                <span className="font-semibold text-slate-100">
+                                                    {formatValue(h.purchasedQuantity)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* DELETE SELECTION CONTAINER */}
             {selectedRecords.length > 0 && (

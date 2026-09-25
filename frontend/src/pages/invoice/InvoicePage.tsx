@@ -319,77 +319,128 @@ function InvoicePage() {
                 <p className="text-cyan-400 mb-4">Loading...</p>
             )}
 
-            {/* TABLE */}
-            <div className="overflow-x-auto rounded-2xl border border-white/10">
+            {/* INVOICES — BOX FORMAT */}
+            {invoices.length === 0 && !loading ? (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center text-slate-400">
+                    No invoices found.
+                </div>
+            ) : (
+                <div className="space-y-5">
+                    {invoices.map((invoice) => (
+                        <div
+                            key={invoice.invoiceNumber}
+                            className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-white/20"
+                        >
+                            {/* Header */}
+                            <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                                <div className="min-w-0">
+                                    <h2 className="text-xl font-bold text-white truncate">
+                                        {invoice.customerName}
+                                    </h2>
+                                    <p className="mt-1 text-sm text-slate-400">
+                                        Invoice{" "}
+                                        <span className="text-cyan-300 font-mono">
+                                            {invoice.invoiceNumber?.slice(0, 10)}
+                                        </span>
+                                        {" · "}
+                                        <span
+                                            className={
+                                                invoice.status === "COMPLETED"
+                                                    ? "text-green-400 font-semibold"
+                                                    : "text-amber-400 font-semibold"
+                                            }
+                                        >
+                                            {invoice.status}
+                                        </span>
+                                    </p>
+                                </div>
+                                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-emerald-300">
+                                    {invoice.totalPrice != null ? `₹ ${invoice.totalPrice}` : "—"}
+                                </span>
+                            </div>
 
-                <table className="w-full">
+                            {/* Info boxes */}
+                            <div className="grid gap-3 sm:grid-cols-3">
+                                <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-4">
+                                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-violet-300">
+                                        Customer
+                                    </p>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between gap-2">
+                                            <span className="text-slate-400">Name</span>
+                                            <span className="font-medium text-slate-100 text-right truncate max-w-[65%]">
+                                                {invoice.customerName}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between gap-2">
+                                            <span className="text-slate-400">Address</span>
+                                            <span className="font-medium text-sky-300 text-right truncate max-w-[65%]">
+                                                {invoice.customerAddress?.trim() || "—"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <thead className="bg-sky-400 text-white">
+                                <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
+                                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-amber-300">
+                                        Invoice
+                                    </p>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between gap-2">
+                                            <span className="text-slate-400">Number</span>
+                                            <span className="font-mono font-medium text-cyan-300">
+                                                {invoice.invoiceNumber?.slice(0, 10)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between gap-2">
+                                            <span className="text-slate-400">Status</span>
+                                            <span
+                                                className={
+                                                    invoice.status === "COMPLETED"
+                                                        ? "font-semibold text-green-400"
+                                                        : "font-semibold text-amber-400"
+                                                }
+                                            >
+                                                {invoice.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <tr>
+                                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-emerald-300">
+                                        Amount
+                                    </p>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between gap-2">
+                                            <span className="text-slate-400">Total</span>
+                                            <span className="font-semibold text-emerald-300">
+                                                {invoice.totalPrice != null
+                                                    ? `₹ ${invoice.totalPrice}`
+                                                    : "—"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <th className="p-4 text-left">Invoice No</th>
-                            <th className="p-4 text-left">Customer</th>
-                            <th className="p-4 text-left">Address</th>
-                            <th className="p-4 text-center">Total</th>
-                            <th className="p-4 text-center">Status</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-                        {invoices.map((invoice) => (
-                            <tr
-                                key={invoice.invoiceNumber}
-                                className="border-t border-white/10 hover:bg-white/5 transition-colors"
-                            >
-                                {/* Invoice Number (Clickable) */}
-                                <td className="p-4">
-                                    <button
-                                        onClick={() =>
-                                            navigate(`/invoice-items/${invoice.invoiceNumber}/${invoice.customerName}`)
-                                        }
-                                        className="font-medium text-cyan-300 hover:text-cyan-200 hover:underline"
-                                    >
-                                        {invoice.invoiceNumber?.slice(0, 10)}
-                                    </button>
-                                </td>
-
-                                {/* Customer Name */}
-                                <td className="p-4 text-slate-100 font-medium">
-                                    {invoice.customerName}
-                                </td>
-
-                                {/* Address */}
-                                <td className="p-4 text-sky-300">
-                                    {invoice.customerAddress?.trim() || "-"}
-                                </td>
-
-                                {/* Amount */}
-                                <td className="p-4 text-center text-emerald-300 font-semibold">
-                                    {invoice.totalPrice != null ? `₹ ${invoice.totalPrice}` : "-"}
-                                </td>
-
-                                {/* Status */}
-                                <td className="p-4 text-center">
-                                    <span
-                                        className={
-                                            invoice.status === "COMPLETED"
-                                                ? "text-green-400 font-semibold"
-                                                : "text-amber-400 font-semibold"
-                                        }
-                                    >
-                                        {invoice.status}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-
-                </table>
-
-            </div>
+                            {/* Actions */}
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                <button
+                                    onClick={() =>
+                                        navigate(
+                                            `/invoice-items/${invoice.invoiceNumber}/${invoice.customerName}`
+                                        )
+                                    }
+                                    className="inline-flex items-center rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500"
+                                >
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* PAGINATION */}
             <div className="flex justify-center gap-4 mt-8">
