@@ -90,16 +90,16 @@ function PurchaseHistoryPage() {
 
         if (diffDays < 0) {
             // Already expired
-            return "text-rose-400";
+            return "text-rose-600 dark:text-rose-400";
         }
 
         if (diffDays <= 20) {
             // Expires within next 20 days
-            return "text-amber-300";
+            return "text-amber-600 dark:text-amber-300";
         }
 
         // More than 20 days remaining
-        return "text-emerald-400";
+        return "text-emerald-600 dark:text-emerald-400";
     };
 
     const formatValue = (value?: number | null) => {
@@ -304,7 +304,7 @@ function PurchaseHistoryPage() {
                 subtitle={
                     <span>
                         Product{" "}
-                        <span className="font-semibold text-cyan-300">
+                        <span className="font-semibold text-cyan-700 dark:text-cyan-300">
                             {productName}
                         </span>
                     </span>
@@ -356,7 +356,8 @@ function PurchaseHistoryPage() {
                                 interactive
                                 className={cn(
                                     "p-4 sm:p-5",
-                                    selected && "border-cyan-400/50 bg-cyan-400/[0.06]",
+                                    selected &&
+                                        "border-cyan-600/50 bg-cyan-500/[0.08] dark:border-cyan-400/50 dark:bg-cyan-400/[0.06]",
                                 )}
                             >
                                 {/* Header */}
@@ -380,7 +381,7 @@ function PurchaseHistoryPage() {
                                     </label>
 
                                     <div className="min-w-0 flex-1">
-                                        <h2 className="flex items-center gap-2 text-base leading-snug font-bold text-white sm:text-lg">
+                                        <h2 className="flex items-center gap-2 text-base leading-snug font-bold text-slate-900 sm:text-lg dark:text-white">
                                             <Truck size={16} className="shrink-0 text-slate-500" />
                                             <span className="min-w-0">
                                                 {h.supplierName || "Unknown Supplier"}
@@ -411,7 +412,7 @@ function PurchaseHistoryPage() {
                                         <InfoRow
                                             label="Total list"
                                             value={`₹${formatValue(h.totalListPrice)}`}
-                                            valueClassName="text-cyan-300 font-semibold"
+                                            valueClassName="text-cyan-700 dark:text-cyan-300 font-semibold"
                                         />
                                     </InfoBox>
 
@@ -419,17 +420,17 @@ function PurchaseHistoryPage() {
                                         <InfoRow
                                             label="Unit buy"
                                             value={`₹${formatValue(h.unitBuyPrice)}`}
-                                            valueClassName="text-emerald-300"
+                                            valueClassName="text-emerald-700 dark:text-emerald-300"
                                         />
                                         <InfoRow
                                             label="Total buy"
                                             value={`₹${formatValue(h.totalBuyPrice)}`}
-                                            valueClassName="text-amber-300 font-semibold"
+                                            valueClassName="text-amber-700 dark:text-amber-300 font-semibold"
                                         />
                                         <InfoRow
                                             label="Discount"
                                             value={`₹${formatValue(h.unitBuyDiscount)}`}
-                                            valueClassName="text-pink-300"
+                                            valueClassName="text-pink-700 dark:text-pink-300"
                                         />
                                     </InfoBox>
 
@@ -491,9 +492,9 @@ function PurchaseHistoryPage() {
                     </div>
                 }
             >
-                <p className="text-sm text-slate-300">
+                <p className="text-sm text-slate-600 dark:text-slate-300">
                     Are you sure you want to delete{" "}
-                    <span className="font-semibold text-rose-300">
+                    <span className="font-semibold text-rose-600 dark:text-rose-300">
                         {selectedRecords.length}
                     </span>{" "}
                     selected history record(s)?

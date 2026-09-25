@@ -82,12 +82,12 @@ function Modal({
             )}
           >
             {/* Grab handle hint — phones only. */}
-            <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-white/20 sm:hidden" />
+            <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-slate-900/15 sm:hidden dark:bg-white/20" />
 
             <div className="flex items-start justify-between gap-3 px-5 py-4 sm:px-6 sm:py-5">
               <div className="flex min-w-0 items-start gap-3">
                 {Icon && (
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-400/15 text-cyan-300 ring-1 ring-cyan-400/25">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-700 ring-1 ring-cyan-500/25 dark:bg-cyan-400/15 dark:text-cyan-300 dark:ring-cyan-400/25">
                     <Icon size={18} />
                   </span>
                 )}
@@ -97,7 +97,7 @@ function Modal({
                     {title}
                   </h2>
                   {description && (
-                    <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+                    <p className="mt-1 text-xs text-slate-500 sm:text-sm dark:text-slate-400">
                       {description}
                     </p>
                   )}
@@ -108,7 +108,7 @@ function Modal({
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-rose-400/40 hover:bg-rose-500/10 hover:text-rose-300"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-900/10 bg-slate-900/5 text-slate-500 transition-colors hover:border-rose-500/40 hover:bg-rose-500/10 hover:text-rose-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:border-rose-400/40 dark:hover:bg-rose-500/10 dark:hover:text-rose-300"
               >
                 <X size={18} />
               </button>

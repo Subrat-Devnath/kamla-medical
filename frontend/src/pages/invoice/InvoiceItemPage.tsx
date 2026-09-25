@@ -11,6 +11,8 @@ import {
   Pencil,
   Plus,
   Tag,
+  Trash2,
+  TriangleAlert,
   Wallet,
   X,
 } from "lucide-react";
@@ -29,6 +31,8 @@ import {
   Panel,
   Pill,
   SearchBar,
+  Toast,
+  type ToastState,
 } from "@/components/hud";
 import { cn } from "@/lib/utils";
 
@@ -89,6 +93,16 @@ function InvoiceItemPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [showProductModal, setShowProductModal] = useState(false);
+    const [toast, setToast] = useState<ToastState>(null);
+    const [deleteTarget, setDeleteTarget] = useState<InvoiceItem | null>(null);
+
+    // Toasts float above everything (including the full-screen product picker
+    // sheet on mobile), so use them for feedback that happens while a modal is
+    // open — the page's ErrorBanner would otherwise be hidden behind it.
+    const showToast = (type: "success" | "error", message: string) => {
+        setToast({ type, message });
+        setTimeout(() => setToast(null), 3500);
+    };
 
     // -----------------------------
     // Inline Editing State
@@ -269,11 +283,10 @@ function InvoiceItemPage() {
     const addInvoiceItem = async (product: Product) => {
         try {
             if (isInvoiceLocked) {
-                setError("This invoice has already been completed and cannot be modified.");
+                showToast("error", "This invoice has already been completed and cannot be modified.");
                 return;
             }
             setLoading(true);
-            setError("");
 
             // 1. STOCK GUARD: Block if backend count is 0 or completely missing
             if (product.productQuantity === undefined || product.productQuantity <= 0) {
@@ -312,13 +325,10 @@ function InvoiceItemPage() {
 
                 // 2. CAPACITY GUARD: Prevent incremental additions from exceeding physical stock counts
                 if (updatedQuantity > product.productQuantity) {
-                    setError(
+                    showToast(
+                        "error",
                         `Cannot add more! Only ${product.productQuantity} units of "${product.productName}" are left in stock.`
                     );
-
-                    setTimeout(() => {
-                        setError("");
-                    }, 5000);
                     return;
                 }
 
@@ -369,11 +379,72 @@ function InvoiceItemPage() {
                 throw new Error("Failed to map item onto current invoice");
             }
 
+            showToast(
+                "success",
+                existingItem
+                    ? `Updated "${product.productName}" — now ${payload.quantity} in the invoice.`
+                    : `Added "${product.productName}" to the invoice.`
+            );
+
             setShowProductModal(false);
             fetchInvoiceItems(null, false);
         } catch (err: any) {
-            // Catches custom out-of-stock errors and updates the error banner
-            setError(err.message);
+            // Catches out-of-stock / capacity errors and shows them as a toast,
+            // since the page's ErrorBanner is hidden behind the picker sheet.
+            showToast("error", err.message || "Failed to add product to invoice.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // -------------------------------------------------------
+    // Delete Invoice Item
+    // -------------------------------------------------------
+    const confirmDeleteItem = async () => {
+        if (!deleteTarget) return;
+
+        if (isInvoiceLocked) {
+            showToast("error", "This invoice has already been completed and cannot be modified.");
+            setDeleteTarget(null);
+            return;
+        }
+
+        const itemToDelete = deleteTarget;
+        const remainingOnPage = invoiceItems.length - 1;
+
+        try {
+            setLoading(true);
+            const token = localStorage.getItem("accessToken");
+
+            const response = await fetch(
+                `${PRODUCT_API}/invoice-items/${invoiceNumber}/${itemToDelete.invoiceItemId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const data = await response.json().catch(() => null);
+
+            if (!response.ok || !data?.success) {
+                throw new Error(data?.message || "Failed to remove item from invoice.");
+            }
+
+            showToast("success", `Removed "${itemToDelete.productName}" from the invoice.`);
+            setDeleteTarget(null);
+
+            // If that was the last item on this page and an earlier page exists,
+            // step back a page instead of showing an empty list.
+            if (remainingOnPage === 0 && pageStateStack.length > 0) {
+                handlePrev();
+            } else {
+                const activePageState = pageStateStack[pageStateStack.length - 1] || null;
+                fetchInvoiceItems(activePageState, false);
+            }
+        } catch (err: any) {
+            showToast("error", err.message || "Failed to remove item from invoice.");
         } finally {
             setLoading(false);
         }
@@ -595,6 +666,9 @@ function InvoiceItemPage() {
     }, []);
 
     return (
+        <>
+            <Toast toast={toast} />
+
         <PageShell>
             <PageHeader
                 eyebrow="Billing"
@@ -641,8 +715,8 @@ function InvoiceItemPage() {
             />
 
             {isInvoiceLocked && (
-                <div className="flex items-start gap-2.5 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-3.5 text-sm text-amber-200 sm:p-4">
-                    <Lock size={15} className="mt-0.5 shrink-0 text-amber-400" />
+                <div className="flex items-start gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-sm text-amber-700 sm:p-4 dark:border-amber-400/25 dark:text-amber-200">
+                    <Lock size={15} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
                     <p>
                         This invoice is completed and locked. Items can no longer be added
                         or edited.
@@ -691,11 +765,12 @@ function InvoiceItemPage() {
                                 interactive
                                 className={cn(
                                     "p-4 sm:p-5",
-                                    isEditing && "border-cyan-400/50 bg-cyan-400/[0.06]",
+                                    isEditing &&
+                                        "border-cyan-600/50 bg-cyan-500/[0.08] dark:border-cyan-400/50 dark:bg-cyan-400/[0.06]",
                                 )}
                             >
                                 <div className="mb-4 min-w-0">
-                                    <h2 className="text-base leading-snug font-bold text-slate-100 sm:text-lg">
+                                    <h2 className="text-base leading-snug font-bold text-slate-900 sm:text-lg dark:text-slate-100">
                                         {item.productName}
                                     </h2>
 
@@ -715,7 +790,7 @@ function InvoiceItemPage() {
                                 <div className="grid gap-3 sm:grid-cols-3">
                                     <InfoBox tone="violet" label="Quantity" icon={Layers}>
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="shrink-0 text-slate-400">Units</span>
+                                            <span className="shrink-0 text-slate-500 dark:text-slate-400">Units</span>
                                             {isEditing ? (
                                                 <input
                                                     type="number"
@@ -740,7 +815,7 @@ function InvoiceItemPage() {
                                                     }}
                                                 />
                                             ) : (
-                                                <span className="font-semibold text-slate-200 tabular">
+                                                <span className="font-semibold text-slate-800 tabular dark:text-slate-200">
                                                     {item.quantity}
                                                 </span>
                                             )}
@@ -754,7 +829,7 @@ function InvoiceItemPage() {
 
                                     <InfoBox tone="amber" label="Pricing" icon={Tag}>
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="shrink-0 text-slate-400">Sell price</span>
+                                            <span className="shrink-0 text-slate-500 dark:text-slate-400">Sell price</span>
                                             {isEditing ? (
                                                 <input
                                                     type="number"
@@ -771,7 +846,7 @@ function InvoiceItemPage() {
                                                     }
                                                 />
                                             ) : (
-                                                <span className="font-medium text-slate-200 tabular">
+                                                <span className="font-medium text-slate-800 tabular dark:text-slate-200">
                                                     ₹{(item.unitSellPrice ?? 0).toLocaleString("en-IN")}
                                                 </span>
                                             )}
@@ -780,12 +855,12 @@ function InvoiceItemPage() {
                                         <InfoRow
                                             label="Discount / item"
                                             value={`₹${liveDiscount.toLocaleString("en-IN")}`}
-                                            valueClassName="text-amber-300"
+                                            valueClassName="text-amber-700 dark:text-amber-300"
                                         />
                                         <InfoRow
                                             label="Total discount"
                                             value={`₹${liveTotalDiscount.toLocaleString("en-IN")}`}
-                                            valueClassName="text-amber-400/90"
+                                            valueClassName="text-amber-700/90 dark:text-amber-400/90"
                                         />
                                     </InfoBox>
 
@@ -793,12 +868,12 @@ function InvoiceItemPage() {
                                         <InfoRow
                                             label="Line total"
                                             value={`₹${liveTotal.toLocaleString("en-IN")}`}
-                                            valueClassName="font-bold text-emerald-400"
+                                            valueClassName="font-bold text-emerald-600 dark:text-emerald-400"
                                         />
                                         <InfoRow
                                             label="Customer saves"
                                             value={`₹${liveTotalDiscount.toLocaleString("en-IN")}`}
-                                            valueClassName="text-amber-300"
+                                            valueClassName="text-amber-700 dark:text-amber-300"
                                         />
                                     </InfoBox>
                                 </div>
@@ -824,14 +899,25 @@ function InvoiceItemPage() {
                                             </NeonButton>
                                         </>
                                     ) : (
-                                        <NeonButton
-                                            size="sm"
-                                            icon={Pencil}
-                                            onClick={() => startInlineEditing(index, item)}
-                                            disabled={isInvoiceLocked}
-                                        >
-                                            Edit item
-                                        </NeonButton>
+                                        <>
+                                            <NeonButton
+                                                size="sm"
+                                                icon={Pencil}
+                                                onClick={() => startInlineEditing(index, item)}
+                                                disabled={isInvoiceLocked}
+                                            >
+                                                Edit item
+                                            </NeonButton>
+                                            <NeonButton
+                                                variant="danger"
+                                                size="sm"
+                                                icon={Trash2}
+                                                onClick={() => setDeleteTarget(item)}
+                                                disabled={isInvoiceLocked}
+                                            >
+                                                Remove
+                                            </NeonButton>
+                                        </>
                                     )}
                                 </div>
                             </Panel>
@@ -877,7 +963,7 @@ function InvoiceItemPage() {
                     />
 
                     {products.length === 0 ? (
-                        <div className="rounded-2xl border border-white/10 p-8 text-center text-sm text-slate-500">
+                        <div className="rounded-2xl border border-slate-900/10 p-8 text-center text-sm text-slate-500 dark:border-white/10">
                             No product matches this search.
                         </div>
                     ) : (
@@ -885,29 +971,30 @@ function InvoiceItemPage() {
                             {products.map((product, idx) => (
                                 <div
                                     key={idx}
-                                    className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-cyan-400/30"
+                                    className="rounded-2xl border border-slate-900/10 bg-slate-900/[0.02] p-4 transition-colors hover:border-cyan-600/30 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-cyan-400/30"
                                 >
                                     <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                                         <div className="min-w-0 flex-1">
-                                            <h3 className="text-sm leading-snug font-bold text-slate-100 sm:text-base">
+                                            <h3 className="text-sm leading-snug font-bold text-slate-900 sm:text-base dark:text-slate-100">
                                                 {product.productName}
                                             </h3>
-                                            <p className="mt-1 text-xs text-slate-400">
+                                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                                 Formula{" "}
-                                                <span className="font-mono text-slate-300">
+                                                <span className="font-mono text-slate-700 dark:text-slate-300">
                                                     {product.formula || "N/A"}
                                                 </span>
                                             </p>
                                         </div>
 
                                         <NeonButton
-                                            variant="success"
+                                            variant={product.productQuantity > 0 ? "success" : "danger"}
                                             size="sm"
-                                            icon={Plus}
+                                            icon={product.productQuantity > 0 ? Plus : TriangleAlert}
                                             onClick={() => addInvoiceItem(product)}
+                                            disabled={product.productQuantity <= 0}
                                             className="w-full sm:w-auto"
                                         >
-                                            Select
+                                            {product.productQuantity > 0 ? "Select" : "Out of Stock"}
                                         </NeonButton>
                                     </div>
 
@@ -937,8 +1024,8 @@ function InvoiceItemPage() {
                                                 value={product.productQuantity}
                                                 valueClassName={
                                                     product.productQuantity > 0
-                                                        ? "font-semibold text-emerald-300"
-                                                        : "font-semibold text-rose-400"
+                                                        ? "font-semibold text-emerald-600 dark:text-emerald-300"
+                                                        : "font-semibold text-rose-600 dark:text-rose-400"
                                                 }
                                             />
                                         </InfoBox>
@@ -949,7 +1036,41 @@ function InvoiceItemPage() {
                     )}
                 </div>
             </Modal>
+
+            {/* ---------------- REMOVE ITEM CONFIRM ---------------- */}
+            <Modal
+                open={!!deleteTarget}
+                onClose={() => setDeleteTarget(null)}
+                title="Remove Item"
+                description="This removes the product line from the current draft invoice."
+                icon={TriangleAlert}
+                size="sm"
+                footer={
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <NeonButton onClick={() => setDeleteTarget(null)}>
+                            Cancel
+                        </NeonButton>
+                        <NeonButton
+                            variant="danger"
+                            icon={Trash2}
+                            onClick={confirmDeleteItem}
+                            loading={loading}
+                        >
+                            Remove
+                        </NeonButton>
+                    </div>
+                }
+            >
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                    Are you sure you want to remove{" "}
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">
+                        {deleteTarget?.productName}
+                    </span>{" "}
+                    from this invoice?
+                </p>
+            </Modal>
         </PageShell>
+        </>
     );
 }
 

@@ -128,4 +128,16 @@ public class InvoiceItemRepositoryImpl implements InvoiceItemRepository {
 
         return invoiceItemEntities.stream().filter(entity -> entity != null && !entity.isDeleted()).map(entity -> ObjectBuilder.buildDtoFromEntity(modelMapper, entity, entity.getInvoiceItemEntityId(), InvoiceItemDTO.class)).collect(Collectors.toList());
     }
+
+    @Override
+    public boolean deleteInvoiceItem(String invoiceNumber, String invoiceItemId) {
+
+        if (!StringUtils.hasText(invoiceNumber) || !StringUtils.hasText(invoiceItemId)) {
+            return false;
+        }
+
+        int updatedRows = invoiceItemDAO.softDeleteInvoiceItem(SecurityUtil.getPrincipal().getOrgId(), invoiceNumber, invoiceItemId);
+
+        return updatedRows > 0;
+    }
 }

@@ -21,7 +21,7 @@ function AuthShell({
   footer,
 }: AuthShellProps) {
   return (
-    <div className="relative flex min-h-dvh items-center justify-center px-4 py-8 text-white sm:px-6 sm:py-12">
+    <div className="relative flex min-h-dvh items-center justify-center px-4 py-8 text-slate-900 sm:px-6 sm:py-12 dark:text-white">
       <AmbientBackground />
 
       <motion.div
@@ -35,7 +35,7 @@ function AuthShell({
             <BrandMark size="lg" className="mb-5" />
 
             {eyebrow && (
-              <p className="hud-label mb-3 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-cyan-300">
+              <p className="hud-label mb-3 rounded-full border border-cyan-600/30 bg-cyan-500/10 px-3 py-1 text-cyan-700 dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-300">
                 {eyebrow}
               </p>
             )}
@@ -45,14 +45,14 @@ function AuthShell({
             </h1>
 
             {subtitle && (
-              <p className="mt-3 text-sm text-slate-400">{subtitle}</p>
+              <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>
             )}
           </div>
 
           {children}
 
-          <div className="mt-7 flex items-center justify-center gap-2 border-t border-white/10 pt-5 text-[0.6875rem] tracking-[0.14em] text-slate-500 uppercase">
-            <ShieldCheck size={13} className="text-emerald-400" />
+          <div className="mt-7 flex items-center justify-center gap-2 border-t border-slate-900/10 pt-5 text-[0.6875rem] tracking-[0.14em] text-slate-500 uppercase dark:border-white/10">
+            <ShieldCheck size={13} className="text-emerald-600 dark:text-emerald-400" />
             Encrypted medical channel
           </div>
 

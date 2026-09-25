@@ -106,16 +106,16 @@ function ProductsPage() {
 
         if (diffDays < 0) {
             // Already expired
-            return "text-rose-400";
+            return "text-rose-600 dark:text-rose-400";
         }
 
         if (diffDays <= 20) {
             // Expires within next 20 days
-            return "text-amber-300";
+            return "text-amber-600 dark:text-amber-300";
         }
 
         // More than 20 days remaining
-        return "text-emerald-400";
+        return "text-emerald-600 dark:text-emerald-400";
     };
 
     const getExpiryStatus = (expiryDate?: number) => {
@@ -554,7 +554,7 @@ function ProductsPage() {
                                     </label>
 
                                     <div className="min-w-0 flex-1">
-                                        <h2 className="text-base leading-snug font-bold text-white sm:text-lg">
+                                        <h2 className="text-base leading-snug font-bold text-slate-900 sm:text-lg dark:text-white">
                                             {p.productName}
                                         </h2>
 
@@ -580,12 +580,12 @@ function ProductsPage() {
                                         <InfoRow
                                             label="Stock"
                                             value={p.productQuantity}
-                                            valueClassName="text-emerald-400 font-semibold"
+                                            valueClassName="text-emerald-600 dark:text-emerald-400 font-semibold"
                                         />
                                         <InfoRow
                                             label="Category"
                                             value={p.category || "—"}
-                                            valueClassName="text-violet-300"
+                                            valueClassName="text-violet-700 dark:text-violet-300"
                                         />
                                     </InfoBox>
 
@@ -593,7 +593,7 @@ function ProductsPage() {
                                         <InfoRow
                                             label="Formula"
                                             value={p.formula || "N/A"}
-                                            valueClassName="text-amber-300"
+                                            valueClassName="text-amber-700 dark:text-amber-300"
                                         />
                                         <InfoRow label="Product" value={p.productName} />
                                     </InfoBox>
@@ -665,9 +665,9 @@ function ProductsPage() {
                     </div>
                 }
             >
-                <p className="text-sm text-slate-300">
+                <p className="text-sm text-slate-600 dark:text-slate-300">
                     Are you sure you want to delete{" "}
-                    <span className="font-semibold text-rose-300">
+                    <span className="font-semibold text-rose-600 dark:text-rose-300">
                         {selectedProducts.length}
                     </span>{" "}
                     selected product(s)? This action cannot be undone.

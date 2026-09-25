@@ -40,7 +40,7 @@ function SearchBar({
       >
         <Search
           size={16}
-          className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-500"
+          className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-slate-400 dark:text-slate-500"
         />
 
         <input
@@ -60,7 +60,7 @@ function SearchBar({
               onChange("");
               onSubmit();
             }}
-            className="absolute top-1/2 right-1 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 transition-colors hover:text-slate-200"
+            className="absolute top-1/2 right-1 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-colors hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200"
           >
             <X size={15} />
           </button>

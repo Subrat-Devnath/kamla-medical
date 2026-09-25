@@ -12,4 +12,6 @@ public interface InvoiceItemRepository {
     DataWithPaginationResponse getInvoiceItemsByOrganization(String organizationId, String invoiceNumber, Integer pageSize, String pageState);
 
     List<InvoiceItemDTO> getItemsByInvoiceId(String invoiceId);
+
+    boolean deleteInvoiceItem(String invoiceNumber, String invoiceItemId);
 }

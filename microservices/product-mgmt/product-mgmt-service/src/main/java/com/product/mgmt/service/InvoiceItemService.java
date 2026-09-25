@@ -13,4 +13,6 @@ public interface InvoiceItemService {
     DataWithPaginationResponse getInvoiceItemsByOrganization(String invoiceNumber, Integer pageSize, String pageState);
 
     List<InvoiceItemDTO> getItemsByInvoiceId(String invoiceId);
+
+    void deleteInvoiceItem(String invoiceNumber, String invoiceItemId);
 }

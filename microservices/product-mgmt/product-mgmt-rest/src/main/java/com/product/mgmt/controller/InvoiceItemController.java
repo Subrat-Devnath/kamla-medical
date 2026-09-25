@@ -1,6 +1,7 @@
 package com.product.mgmt.controller;
 
 import com.common.service.dtos.PaginationCriteria;
+import com.common.service.dtos.ResponseDTO;
 import com.product.mgmt.repository.dto.DataWithPaginationResponse;
 import com.product.mgmt.repository.dto.InvoiceItemDTO;
 import com.product.mgmt.service.InvoiceItemService;
@@ -31,5 +32,15 @@ public class InvoiceItemController {
     @GetMapping("/invoice/{invoiceId}/items")
     public List<InvoiceItemDTO> getItemsByInvoiceId(@PathVariable String invoiceId) {
         return invoiceItemService.getItemsByInvoiceId(invoiceId);
+    }
+
+    @DeleteMapping(path = "/invoice-items/{invoiceNumber}/{invoiceItemId}")
+    public ResponseDTO deleteInvoiceItem(@PathVariable String invoiceNumber, @PathVariable String invoiceItemId) {
+        try {
+            invoiceItemService.deleteInvoiceItem(invoiceNumber, invoiceItemId);
+            return new ResponseDTO(true, null, "Item removed from invoice");
+        } catch (Exception e) {
+            return new ResponseDTO(false, null, e.getMessage());
+        }
     }
 }

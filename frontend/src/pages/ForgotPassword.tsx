@@ -206,7 +206,7 @@ function ForgotPassword() {
             <button
               type="button"
               onClick={() => navigate("/login")}
-              className="font-semibold text-cyan-400 transition-colors hover:text-cyan-300"
+              className="font-semibold text-cyan-600 transition-colors hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300"
             >
               Login
             </button>
@@ -225,12 +225,13 @@ function ForgotPassword() {
                 key={label}
                 className={cn(
                   "flex items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-xs font-semibold transition-colors",
-                  isCurrent && "border-cyan-400/40 bg-cyan-400/15 text-cyan-300",
+                  isCurrent &&
+                    "border-cyan-600/40 bg-cyan-500/15 text-cyan-700 dark:border-cyan-400/40 dark:bg-cyan-400/15 dark:text-cyan-300",
                   isDone &&
-                    "border-emerald-400/30 bg-emerald-400/10 text-emerald-300",
+                    "border-emerald-600/30 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300",
                   !isCurrent &&
                     !isDone &&
-                    "border-white/10 bg-white/[0.03] text-slate-500",
+                    "border-slate-900/10 bg-slate-900/[0.03] text-slate-500 dark:border-white/10 dark:bg-white/[0.03]",
                 )}
               >
                 {isDone && <Check size={13} className="shrink-0" />}
@@ -286,13 +287,15 @@ function ForgotPassword() {
               />
             </Field>
 
-            <div className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
+            <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-900/10 bg-slate-900/[0.03] px-4 py-3 text-sm text-slate-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300">
               <Clock size={15} className="text-slate-500" />
               Expires in
               <span
                 className={cn(
                   "font-semibold tabular",
-                  otpExpired ? "text-rose-400" : "text-emerald-400",
+                  otpExpired
+                    ? "text-rose-600 dark:text-rose-400"
+                    : "text-emerald-600 dark:text-emerald-400",
                 )}
               >
                 {formatTime(timeLeft)}

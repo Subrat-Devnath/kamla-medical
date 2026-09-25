@@ -79,9 +79,13 @@ public class ObjectBuilder {
             return null;
         }
 
-        if (modelMapper == null) {
-            modelMapper = new ModelMapper();
-        }
+        /*
+         * A null mapper is resolved by ObjectMapperUtils, which applies the STRICT
+         * matching strategy. Building a plain ModelMapper here instead would fall back
+         * to STANDARD matching, where entity ids flattened into a DTO become ambiguous
+         * (organizationId vs organization.id, productEntityId.userId vs createdUserId,
+         * and so on) and mapping fails with a ConfigurationException.
+         */
 
         // First map entity -> dto
         D dto = ObjectMapperUtils.map(modelMapper, entity, outClass);

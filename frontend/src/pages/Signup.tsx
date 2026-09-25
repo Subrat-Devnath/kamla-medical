@@ -89,7 +89,7 @@ function Signup() {
           <button
             type="button"
             onClick={() => navigate("/login")}
-            className="font-semibold text-cyan-400 transition-colors hover:text-cyan-300"
+            className="font-semibold text-cyan-600 transition-colors hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300"
           >
             Sign In
           </button>

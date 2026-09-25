@@ -9,6 +9,7 @@ export { default as Pagination } from "./Pagination";
 export { default as Panel } from "./Panel";
 export { default as Pill } from "./Pill";
 export { default as SearchBar } from "./SearchBar";
+export { default as ThemeToggle } from "./ThemeToggle";
 
 export { Field, PasswordInput, TextArea, TextInput } from "./Field";
 export { InfoBox, InfoRow } from "./InfoBox";

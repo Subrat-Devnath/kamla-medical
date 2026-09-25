@@ -49,10 +49,10 @@ type InfoRowProps = {
 function InfoRow({ label, value, valueClassName }: InfoRowProps) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="shrink-0 text-slate-400">{label}</span>
+      <span className="shrink-0 text-slate-500 dark:text-slate-400">{label}</span>
       <span
         className={cn(
-          "min-w-0 text-right font-medium text-slate-200 tabular",
+          "min-w-0 text-right font-medium text-slate-800 tabular dark:text-slate-200",
           valueClassName,
         )}
       >

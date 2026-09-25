@@ -70,7 +70,7 @@ function Login() {
           <button
             type="button"
             onClick={() => navigate("/signup")}
-            className="font-semibold text-cyan-400 transition-colors hover:text-cyan-300"
+            className="font-semibold text-cyan-600 transition-colors hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300"
           >
             Create Account
           </button>
@@ -96,7 +96,7 @@ function Login() {
             <button
               type="button"
               onClick={() => navigate("/forgot-password")}
-              className="text-xs font-medium text-cyan-400 transition-colors hover:text-cyan-300"
+              className="text-xs font-medium text-cyan-600 transition-colors hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300"
             >
               Forgot Password?
             </button>

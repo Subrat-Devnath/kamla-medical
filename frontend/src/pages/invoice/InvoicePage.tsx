@@ -350,7 +350,7 @@ function InvoicePage() {
                         >
                             {/* Header */}
                             <div className="mb-4 min-w-0">
-                                <h2 className="text-base leading-snug font-bold text-white sm:text-lg">
+                                <h2 className="text-base leading-snug font-bold text-slate-900 sm:text-lg dark:text-white">
                                     {invoice.customerName}
                                 </h2>
 
@@ -380,7 +380,7 @@ function InvoicePage() {
                                     <InfoRow
                                         label="Address"
                                         value={invoice.customerAddress?.trim() || "—"}
-                                        valueClassName="text-sky-300"
+                                        valueClassName="text-sky-700 dark:text-sky-300"
                                     />
                                 </InfoBox>
 
@@ -388,21 +388,21 @@ function InvoicePage() {
                                     <InfoRow
                                         label="Number"
                                         value={invoice.invoiceNumber?.slice(0, 10)}
-                                        valueClassName="font-mono text-cyan-300"
+                                        valueClassName="font-mono text-cyan-700 dark:text-cyan-300"
                                     />
                                     <InfoRow
                                         label="Status"
                                         value={invoice.status}
                                         valueClassName={
                                             invoice.status === "COMPLETED"
-                                                ? "font-semibold text-emerald-400"
-                                                : "font-semibold text-amber-300"
+                                                ? "font-semibold text-emerald-600 dark:text-emerald-400"
+                                                : "font-semibold text-amber-600 dark:text-amber-300"
                                         }
                                     />
                                 </InfoBox>
 
                                 <InfoBox tone="emerald" label="Amount" icon={Wallet}>
-                                    <p className="tabular text-2xl font-bold text-emerald-300">
+                                    <p className="tabular text-2xl font-bold text-emerald-700 dark:text-emerald-300">
                                         {invoice.totalPrice != null
                                             ? `₹${invoice.totalPrice.toLocaleString("en-IN")}`
                                             : "—"}

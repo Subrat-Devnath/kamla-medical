@@ -71,7 +71,7 @@ function FuturisticMedicalDashboard() {
         transition={{ duration: 0.45 }}
         className="flex flex-col items-center pt-4 text-center sm:pt-8"
       >
-        <span className="hud-label inline-flex items-center gap-2 rounded-full border border-cyan-400/40 bg-cyan-400/10 px-3.5 py-1.5 text-cyan-300">
+        <span className="hud-label inline-flex items-center gap-2 rounded-full border border-cyan-600/40 bg-cyan-500/10 px-3.5 py-1.5 text-cyan-700 dark:border-cyan-400/40 dark:bg-cyan-400/10 dark:text-cyan-300">
           <Sparkles size={13} />
           Welcome aboard
         </span>
@@ -80,7 +80,7 @@ function FuturisticMedicalDashboard() {
           Kamla Medical Store
         </h1>
 
-        <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-400 sm:mt-5 sm:text-base">
+        <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-500 sm:mt-5 sm:text-base dark:text-slate-400">
           Streamline inventory and billing from a single console. Track stock,
           watch expiry dates and raise invoices in seconds.
         </p>
@@ -136,15 +136,15 @@ function FuturisticMedicalDashboard() {
 
                   <ArrowRight
                     size={18}
-                    className="mt-3 shrink-0 text-slate-600 transition-all duration-300 group-hover:translate-x-1 group-hover:text-cyan-300"
+                    className="mt-3 shrink-0 text-slate-400 transition-all duration-300 group-hover:translate-x-1 group-hover:text-cyan-600 dark:text-slate-600 dark:group-hover:text-cyan-300"
                   />
                 </div>
 
-                <h2 className="mt-4 text-lg font-bold text-white sm:text-xl">
+                <h2 className="mt-4 text-lg font-bold text-slate-900 sm:text-xl dark:text-white">
                   {module.title}
                 </h2>
 
-                <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                   {module.description}
                 </p>
 
@@ -169,7 +169,7 @@ function FuturisticMedicalDashboard() {
                           <BoxIcon size={11} className="shrink-0" />
                           <span className="truncate">{box.label}</span>
                         </p>
-                        <p className="mt-1 text-xs font-medium text-slate-300">
+                        <p className="mt-1 text-xs font-medium text-slate-700 dark:text-slate-300">
                           {box.value}
                         </p>
                       </div>
